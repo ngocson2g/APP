@@ -1,0 +1,21 @@
+``mermaid
+graph TD
+    A[Input Source] --> B[Configuration Parser]
+    A --> C[Live System Auditor]
+    B --> D[Rule Mapping Engine]
+    C --> D
+    D --> E[Compliance Validator]
+    E --> F[Report Generator]
+    E --> G[Remediation Script Generator]
+    F --> H[HTML Dashboard]
+    F --> I[Excel/PDF Report]
+    G --> J[Python/Bash Scripts]
+    G --> K[Ansible Playbooks]
+
+1. input source
+main.py
+rule.py
+parse_csv.py
+parse_json.py
+parse_xml.py
+
