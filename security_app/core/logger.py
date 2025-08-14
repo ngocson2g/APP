@@ -1,5 +1,7 @@
+from __future__ import annotations  # tránh lỗi vòng lặp khi import
 import os, json, csv, re, datetime
 from typing import List, Dict, Any, Optional
+from security_app.models import Rule, CmdResult
 
 def _safe_name(s: str, maxlen: int = 60) -> str:
     if not s:
@@ -46,26 +48,15 @@ class RunLogger:
                     "num_cmds", "num_ok", "num_fail"
                 ])
 
-    def log_rule_result(
-        self,
-        rule_index: int,
-        rule: Dict[str, Any],
-        cmd_results: List[Dict[str, Any]]
-    ):
-        # Lấy thông tin rule (tùy cấu trúc của bạn, đặt mặc định an toàn)
-        rule_id   = str(rule.get("id", rule_index))
-        title     = str(rule.get("title", "")) or str(rule.get("name", ""))
-        severity  = str(rule.get("severity", rule.get("impact", "")))
-        check_raw = str(rule.get("check", ""))
+    def log_rule_result(self, rule_index: int, rule: Rule, cmd_results: List[CmdResult]):
+        rule_id   = rule.id or str(rule_index)
+        title     = rule.title or ""
+        severity  = rule.severity or ""
+        check_raw = rule.check or ""
 
-        # Tên file per-rule
         short = _safe_name(title or rule_id)
-        per_rule_path = os.path.join(
-            self.run_dir,
-            f"rule-{rule_index:03d}_{short}.log"
-        )
+        per_rule_path = os.path.join(self.run_dir, f"rule-{rule_index:03d}_{short}.log")
 
-        # Ghi file chi tiết cho rule
         with open(per_rule_path, "w", encoding="utf-8") as f:
             f.write(f"Rule #{rule_index}\n")
             f.write(f"ID       : {rule_id}\n")
@@ -77,18 +68,17 @@ class RunLogger:
             f.write("-" * 60 + "\n\n")
 
             for i, r in enumerate(cmd_results, 1):
-                f.write(f"[{i}] $ {r['cmd']}\n")
-                f.write(f"Return code : {r['returncode']}\n")
-                f.write(f"Duration(s) : {r['duration_sec']}\n")
+                f.write(f"[{i}] $ {r.cmd}\n")
+                f.write(f"Return code : {r.returncode}\n")
+                f.write(f"Duration(s) : {r.duration_sec}\n")
                 f.write("---- STDOUT ----\n")
-                f.write((r['stdout'] or "").rstrip() + "\n")
+                f.write((r.stdout or "").rstrip() + "\n")
                 f.write("---- STDERR ----\n")
-                f.write((r['stderr'] or "").rstrip() + "\n")
+                f.write((r.stderr or "").rstrip() + "\n")
                 f.write("=" * 60 + "\n\n")
 
-        # Ghi summary JSONL (1 dòng/rule)
         num_cmds = len(cmd_results)
-        num_ok   = sum(1 for r in cmd_results if r.get("ok"))
+        num_ok   = sum(1 for r in cmd_results if r.ok)
         num_fail = num_cmds - num_ok
 
         summary_row = {
@@ -104,9 +94,5 @@ class RunLogger:
         with open(self.summary_jsonl_path, "a", encoding="utf-8") as jf:
             jf.write(json.dumps(summary_row, ensure_ascii=False) + "\n")
 
-        # Ghi summary CSV
         with open(self.summary_csv_path, "a", newline="", encoding="utf-8") as cf:
-            writer = csv.writer(cf)
-            writer.writerow([
-                rule_index, rule_id, title, severity, num_cmds, num_ok, num_fail
-            ])
+            csv.writer(cf).writerow([rule_index, rule_id, title, severity, num_cmds, num_ok, num_fail])

@@ -1,24 +1,42 @@
 import pandas as pd
+from security_app.models import Rule
 
 def parse_csv(file_path):
     df = pd.read_csv(file_path, dtype=str)
-    # Chuẩn hóa tên cột
     df.columns = [c.strip().lower() for c in df.columns]
-    # Tạo map giữa trường chuẩn và trường thực tế trong file
+
     col_map = {
         'id': 'id',
         'description': 'description',
-        'check': 'checktext',        # <-- Map cột "check" về "checktext"
-        'fix': 'fixtext',            # <-- Map cột "fix" về "fixtext"
-        'severity': 'severity'
+        'check': 'checktext',
+        'fix': 'fixtext',
+        'severity': 'severity',
+        # nếu CSV có tiêu đề riêng
+        'title': 'title',
+        'name': 'name',
     }
-    # Kiểm tra tồn tại các trường cần thiết
-    for req, real in col_map.items():
+    # validate cột bắt buộc
+    for req, real in [('id','id'), ('description','description'),
+                      ('check','checktext'), ('fix','fixtext'),
+                      ('severity','severity')]:
         if real not in df.columns:
             raise Exception(f"Missing column: {real} (for field {req})")
-    rules = []
-    for _, row in df.iterrows():
-        rule = {k: str(row[v]) if v in row and pd.notnull(row[v]) else '' for k, v in col_map.items()}
-        rules.append(rule)
-    return rules
 
+    rules: list[Rule] = []
+    for _, row in df.iterrows():
+        get = lambda k: str(row[k]) if k in row and pd.notnull(row[k]) else ""
+        title = ""
+        if 'title' in df.columns and get('title'):
+            title = get('title')
+        elif 'name' in df.columns and get('name'):
+            title = get('name')
+
+        rules.append(Rule(
+            id=get(col_map['id']),
+            description=get(col_map['description']),
+            check=get(col_map['check']),
+            fix=get(col_map['fix']),
+            severity=get(col_map['severity']).lower(),
+            title=title,
+        ))
+    return rules

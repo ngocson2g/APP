@@ -1,8 +1,17 @@
 import shutil
 from collections import defaultdict
+from security_app.models import Rule
 
 def _term_width():
     return shutil.get_terminal_size((120, 20)).columns
+
+def _get(rule, key, default=""):
+    # hỗ trợ cả dataclass Rule và dict cũ
+    if isinstance(rule, Rule):
+        return getattr(rule, key, default)
+    if isinstance(rule, dict):
+        return rule.get(key, default)
+    return default
 
 def _bar(value, total, width=20, ch="█"):
     if total <= 0: return ""
@@ -43,7 +52,7 @@ def compute_stats(run_results):
     by_sev = defaultdict(lambda: {"rules":0,"rules_fail":0,"cmds":0,"ok":0,"fail":0})
     for x in run_results:
         rule = x["rule"]
-        sev = str(rule.get("severity") or rule.get("impact") or "unknown").lower()
+        sev = str(_get(rule, "severity") or _get(rule, "impact") or "unknown").lower()
         by_sev[sev]["rules"] += 1
         by_sev[sev]["cmds"]  += x["num_cmds"]
         by_sev[sev]["ok"]    += x["num_ok"]
@@ -51,10 +60,8 @@ def compute_stats(run_results):
         if x["num_fail"] > 0:
             by_sev[sev]["rules_fail"] += 1
 
-    top_fail = sorted(
-        [x for x in run_results if x["num_fail"] > 0],
-        key=lambda r: (-r["num_fail"], r["rule_index"])
-    )
+    top_fail = sorted([x for x in run_results if x["num_fail"] > 0],
+                      key=lambda r: (-r["num_fail"], r["rule_index"]))
 
     return {
         "totals": {
@@ -68,9 +75,8 @@ def compute_stats(run_results):
         },
         "by_severity": by_sev,
         "top_failing_rules": top_fail,
-        "all_results": run_results  # giữ lại để in danh sách ID
+        "all_results": run_results
     }
-
 
 def print_report(stats, limit_top=10):
     W = _term_width()
@@ -78,6 +84,7 @@ def print_report(stats, limit_top=10):
     print("CHECKLIST EXECUTION SUMMARY".center(W))
     print("=" * W)
 
+    # ----- Totals -----
     t = stats["totals"]
     kv = [
         ("Total rules", t["total_rules"]),
@@ -93,11 +100,14 @@ def print_report(stats, limit_top=10):
         print(f"{k:>{maxk}}: {v}")
     print()
 
-    # By severity
+    # Nếu không có lệnh nào, in thông báo sớm (vẫn tiếp tục in phần dưới cho đủ)
+    if t["total_cmds"] == 0:
+        print("⚠️  Không tìm thấy lệnh nào để thực thi (các dòng check phải bắt đầu bằng '$ ').\n")
+
+    # ----- By severity -----
     print("By severity:")
     order = ["low","medium","moderate","high","critical","unknown"]
-    rows = []
-    seen = set()
+    rows, seen = [], set()
     for key in order:
         if key in stats["by_severity"]:
             v = stats["by_severity"][key]
@@ -111,7 +121,8 @@ def print_report(stats, limit_top=10):
             ])
             seen.add(key)
     for k, v in stats["by_severity"].items():
-        if k in seen: continue
+        if k in seen: 
+            continue
         rows.append([
             k,
             str(v["rules"]),
@@ -123,7 +134,7 @@ def print_report(stats, limit_top=10):
     _table(rows, headers=["Severity","Rules","#Rules OK/Fail","Cmd OK/Cmds","#Cmd Fail","OK bar"])
     print()
 
-    # Top failing rules
+    # ----- Top failing rules -----
     print(f"Top failing rules (max {limit_top}):")
     top = stats["top_failing_rules"][:limit_top]
     tr = []
@@ -131,10 +142,10 @@ def print_report(stats, limit_top=10):
         rule = x["rule"]
         tr.append([
             f"{x['rule_index']}",
-            str(rule.get("id", "")),
-            str(rule.get("severity") or rule.get("impact") or "unknown"),
+            str(_get(rule, "id", "")),
+            str(_get(rule, "severity") or _get(rule, "impact") or "unknown"),
             str(x["num_fail"]),
-            (str(rule.get("title") or rule.get("name") or "") or "(no title)").strip()
+            (str(_get(rule, "title") or _get(rule, "name") or "") or "(no title)").strip()
         ])
     if tr:
         _table(tr, headers=["#","Rule ID","Sev","#CmdFail","Title"])
@@ -142,10 +153,10 @@ def print_report(stats, limit_top=10):
         print("(Không có rule lỗi)")
     print()
 
-    # ==== Thêm phần liệt kê Rule ID ====
-    all_results = stats["all_results"]  # danh sách run_results từ compute_stats
-    fail_ids = [str(r["rule"].get("id", r["rule_index"])) for r in all_results if r["num_fail"] > 0]
-    ok_ids   = [str(r["rule"].get("id", r["rule_index"])) for r in all_results if r["num_fail"] == 0]
+    # ----- Danh sách ID -----
+    all_results = stats["all_results"]
+    fail_ids = [str(_get(r["rule"], "id", r["rule_index"])) for r in all_results if r["num_fail"] > 0]
+    ok_ids   = [str(_get(r["rule"], "id", r["rule_index"])) for r in all_results if r["num_fail"] == 0]
 
     print(f"Failing Rule IDs ({len(fail_ids)}):")
     print(", ".join(fail_ids))
