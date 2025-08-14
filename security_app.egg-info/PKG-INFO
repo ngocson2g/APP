@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: security-app
+Version: 0.1.0
+Summary: CLI chạy STIG/Checklist cho Ubuntu và xuất báo cáo terminal + logs.
+Author: Nông Ngọc Sơn
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown

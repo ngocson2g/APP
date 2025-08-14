@@ -1,6 +1,6 @@
-from utils.run_command import run_command
-from utils.logger import RunLogger
-from utils.extract_all_commands import extract_all_commands
+from security_app.core.command import run_command
+from security_app.core.logger import RunLogger
+from security_app.core.extract import extract_all_commands
 
 def run_all_rules(rules, log_base_dir="logs"):
     """

@@ -19,3 +19,45 @@ parse_csv.py
 parse_json.py
 parse_xml.py
 
+
+
+# 1.1 Tạo cấu trúc mới
+mkdir -p data
+mkdir -p security_app/app
+mkdir -p security_app/parsers
+mkdir -p security_app/core
+mkdir -p security_app/reporting
+
+# 1.2 Di chuyển file dữ liệu vào data/
+mv canonical_ubuntu_24.04_lts.csv data/
+mv canonical_ubuntu_24.04_lts.json data/
+mv U_CAN_Ubuntu_24-04_LTS_STIG_V1R1_Manual-xccdf.xml data/
+
+# 1.3 Di chuyển & đổi tên mã nguồn vào package mới
+# parsers
+mv parse/parse_common.py        security_app/parsers/common.py
+mv parse/parse_csv.py           security_app/parsers/csv_parser.py
+mv parse/parse_json.py          security_app/parsers/json_parser.py
+mv parse/parse_xml.py           security_app/parsers/xml_parser.py
+mv utils/parse_file.py          security_app/parsers/dispatch.py
+
+# core
+mv utils/extract_all_commands.py security_app/core/extract.py
+mv utils/run_command.py          security_app/core/command.py
+mv utils/logger.py               security_app/core/logger.py
+mv utils/runner.py                     security_app/core/runner.py
+
+# reporting
+mv utils/report_terminal.py            security_app/reporting/terminal.py
+
+# CLI (thay cho main.py)
+mkdir -p security_app/app
+mv main.py                       security_app/app/cli.py
+
+# 1.4 Thêm __init__.py
+touch security_app/__init__.py
+touch security_app/app/__init__.py
+touch security_app/parsers/__init__.py
+touch security_app/core/__init__.py
+touch security_app/reporting/__init__.py
+

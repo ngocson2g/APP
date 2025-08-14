@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "security-app"
+version = "0.1.0"
+description = "CLI chạy STIG/Checklist cho Ubuntu và xuất báo cáo terminal + logs."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Nông Ngọc Sơn" }]
+
+[project.scripts]
+security-app = "security_app.app.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["security_app*"]

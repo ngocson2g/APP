@@ -1,0 +1,2 @@
+[console_scripts]
+security-app = security_app.app.cli:main
