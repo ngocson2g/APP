@@ -1,9 +1,8 @@
 import shutil
 from collections import defaultdict
 from security_app.models import Rule
-
-def _term_width():
-    return shutil.get_terminal_size((120, 20)).columns
+from security_app.utils.text import _term_width, _bar, _table
+from security_app.config import TOP_FAIL_LIMIT
 
 def _get(rule, key, default=""):
     # hỗ trợ cả dataclass Rule và dict cũ
@@ -12,33 +11,6 @@ def _get(rule, key, default=""):
     if isinstance(rule, dict):
         return rule.get(key, default)
     return default
-
-def _bar(value, total, width=20, ch="█"):
-    if total <= 0: return ""
-    n = max(0, min(width, int(round(value * width / total))))
-    return ch * n + " " * (width - n)
-
-def _table(rows, headers, max_width=None):
-    if max_width is None:
-        max_width = _term_width()
-    cols = len(headers)
-    widths = [len(h) for h in headers]
-    for r in rows:
-        for i in range(cols):
-            widths[i] = max(widths[i], len(str(r[i])))
-
-    total_width = sum(widths) + 3 * (cols - 1)
-    if total_width > max_width:
-        overflow = total_width - max_width
-        i = cols - 1
-        widths[i] = max(8, widths[i] - overflow)
-
-    def cut(s, w): s = str(s); return (s[:w-1] + "…") if len(s) > w else s
-
-    print(" | ".join(cut(headers[i], widths[i]).ljust(widths[i]) for i in range(cols)))
-    print("-+-".join("-"*widths[i] for i in range(cols)))
-    for r in rows:
-        print(" | ".join(cut(r[i], widths[i]).ljust(widths[i]) for i in range(cols)))
 
 def compute_stats(run_results):
     total_rules = len(run_results)
@@ -78,7 +50,7 @@ def compute_stats(run_results):
         "all_results": run_results
     }
 
-def print_report(stats, limit_top=10):
+def print_report(stats, limit_top=TOP_FAIL_LIMIT):
     W = _term_width()
     print("=" * W)
     print("CHECKLIST EXECUTION SUMMARY".center(W))
@@ -100,7 +72,6 @@ def print_report(stats, limit_top=10):
         print(f"{k:>{maxk}}: {v}")
     print()
 
-    # Nếu không có lệnh nào, in thông báo sớm (vẫn tiếp tục in phần dưới cho đủ)
     if t["total_cmds"] == 0:
         print("⚠️  Không tìm thấy lệnh nào để thực thi (các dòng check phải bắt đầu bằng '$ ').\n")
 
@@ -121,7 +92,7 @@ def print_report(stats, limit_top=10):
             ])
             seen.add(key)
     for k, v in stats["by_severity"].items():
-        if k in seen: 
+        if k in seen:
             continue
         rows.append([
             k,

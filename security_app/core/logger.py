@@ -1,25 +1,20 @@
-from __future__ import annotations  # tránh lỗi vòng lặp khi import
-import os, json, csv, re, datetime
-from typing import List, Dict, Any, Optional
+from __future__ import annotations
+import os, json, csv, datetime
+from typing import List
 from security_app.models import Rule, CmdResult
-
-def _safe_name(s: str, maxlen: int = 60) -> str:
-    if not s:
-        return "rule"
-    s = re.sub(r"[^a-zA-Z0-9._-]+", "_", s.strip())
-    return (s[:maxlen]).strip("_") or "rule"
+from security_app.utils.text import _safe_name
 
 class RunLogger:
     """
     Tạo cấu trúc:
       logs/
-        2025-08-12_14-05-33/
-          rule-001_<name>.log         # log chi tiết của rule
-          summary.jsonl               # mỗi dòng 1 rule (tổng hợp)
-          summary.csv                 # tổng hợp dạng CSV
-          meta.json                   # thông tin phiên chạy
+        YYYY-MM-DD_HH-MM-SS/
+          rule-001_<name>.log
+          summary.jsonl
+          summary.csv
+          meta.json
     """
-    def __init__(self, base_dir: str = "logs", run_name: Optional[str] = None):
+    def __init__(self, base_dir: str = "logs", run_name: str | None = None):
         ts = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         self.run_dir = os.path.join(base_dir, run_name or ts)
         os.makedirs(self.run_dir, exist_ok=True)

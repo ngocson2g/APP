@@ -3,6 +3,7 @@ import os
 from security_app.parsers.dispatch import parse_file
 from security_app.core.runner import run_all_rules
 from security_app.reporting.terminal import compute_stats, print_report
+from security_app.config import DEFAULT_LOGS_DIR, TOP_FAIL_LIMIT
 
 def main():
     parser = argparse.ArgumentParser(
@@ -14,18 +15,22 @@ def main():
         help="Path to checklist file (CSV/JSON/XML)."
     )
     parser.add_argument(
-        "--logs-dir", default="logs",
-        help="Base directory to store run logs (default: logs)"
+        "--logs-dir", default=DEFAULT_LOGS_DIR,
+        help=f"Base directory to store run logs (default: {DEFAULT_LOGS_DIR})"
+    )
+    parser.add_argument(
+        "--top", type=int, default=TOP_FAIL_LIMIT,
+        help=f"Show at most N failing rules in 'Top failing rules' (default: {TOP_FAIL_LIMIT})"
     )
     args = parser.parse_args()
 
     if not os.path.exists(args.input):
         parser.error(f"Input not found: {args.input}")
 
-    rules = parse_file(args.input)  # expect a list[dict] with 'check', 'id', 'title', 'severity'/ 'impact'
+    rules = parse_file(args.input)  # list[Rule]
     run_results = run_all_rules(rules, log_base_dir=args.logs_dir)
     stats = compute_stats(run_results)
-    print_report(stats)
+    print_report(stats, limit_top=args.top)
 
 if __name__ == "__main__":
     main()

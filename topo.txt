@@ -1,63 +1,62 @@
-``mermaid
-graph TD
-    A[Input Source] --> B[Configuration Parser]
-    A --> C[Live System Auditor]
-    B --> D[Rule Mapping Engine]
-    C --> D
-    D --> E[Compliance Validator]
-    E --> F[Report Generator]
-    E --> G[Remediation Script Generator]
-    F --> H[HTML Dashboard]
-    F --> I[Excel/PDF Report]
-    G --> J[Python/Bash Scripts]
-    G --> K[Ansible Playbooks]
+.
+├── README.md
+├── data
+│   ├── U_CAN_Ubuntu_24-04_LTS_STIG_V1R1_Manual-xccdf.xml
+│   ├── canonical_ubuntu_24.04_lts.csv
+│   └── canonical_ubuntu_24.04_lts.json
+├── logs
+├── pyproject.toml
+├── security_app
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-313.pyc
+│   │   ├── config.cpython-313.pyc
+│   │   └── models.cpython-313.pyc
+│   ├── app
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-313.pyc
+│   │   │   └── cli.cpython-313.pyc
+│   │   └── cli.py
+│   ├── core
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-313.pyc
+│   │   │   ├── command.cpython-313.pyc
+│   │   │   ├── extract.cpython-313.pyc
+│   │   │   ├── logger.cpython-313.pyc
+│   │   │   └── runner.cpython-313.pyc
+│   │   ├── command.py
+│   │   ├── extract.py
+│   │   ├── logger.py
+│   │   └── runner.py
+│   ├── models.py
+│   ├── parsers
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-313.pyc
+│   │   │   ├── common.cpython-313.pyc
+│   │   │   ├── csv_parser.cpython-313.pyc
+│   │   │   ├── dispatch.cpython-313.pyc
+│   │   │   ├── json_parser.cpython-313.pyc
+│   │   │   └── xml_parser.cpython-313.pyc
+│   │   ├── common.py
+│   │   ├── csv_parser.py
+│   │   ├── dispatch.py
+│   │   ├── json_parser.py
+│   │   └── xml_parser.py
+│   └── reporting
+│       ├── __init__.py
+│       ├── __pycache__
+│       │   ├── __init__.cpython-313.pyc
+│       │   └── terminal.cpython-313.pyc
+│       └── terminal.py
+├── security_app.egg-info
+│   ├── PKG-INFO
+│   ├── SOURCES.txt
+│   ├── dependency_links.txt
+│   ├── entry_points.txt
+│   └── top_level.txt
+└── topo.txt
 
-1. input source
-main.py
-rule.py
-parse_csv.py
-parse_json.py
-parse_xml.py
-
-
-
-# 1.1 Tạo cấu trúc mới
-mkdir -p data
-mkdir -p security_app/app
-mkdir -p security_app/parsers
-mkdir -p security_app/core
-mkdir -p security_app/reporting
-
-# 1.2 Di chuyển file dữ liệu vào data/
-mv canonical_ubuntu_24.04_lts.csv data/
-mv canonical_ubuntu_24.04_lts.json data/
-mv U_CAN_Ubuntu_24-04_LTS_STIG_V1R1_Manual-xccdf.xml data/
-
-# 1.3 Di chuyển & đổi tên mã nguồn vào package mới
-# parsers
-mv parse/parse_common.py        security_app/parsers/common.py
-mv parse/parse_csv.py           security_app/parsers/csv_parser.py
-mv parse/parse_json.py          security_app/parsers/json_parser.py
-mv parse/parse_xml.py           security_app/parsers/xml_parser.py
-mv utils/parse_file.py          security_app/parsers/dispatch.py
-
-# core
-mv utils/extract_all_commands.py security_app/core/extract.py
-mv utils/run_command.py          security_app/core/command.py
-mv utils/logger.py               security_app/core/logger.py
-mv utils/runner.py                     security_app/core/runner.py
-
-# reporting
-mv utils/report_terminal.py            security_app/reporting/terminal.py
-
-# CLI (thay cho main.py)
-mkdir -p security_app/app
-mv main.py                       security_app/app/cli.py
-
-# 1.4 Thêm __init__.py
-touch security_app/__init__.py
-touch security_app/app/__init__.py
-touch security_app/parsers/__init__.py
-touch security_app/core/__init__.py
-touch security_app/reporting/__init__.py
 

@@ -1,8 +1,8 @@
 from typing import List, Dict, Any
 from security_app.models import Rule, CmdResult
 from security_app.core.command import run_command
+from security_app.core.command_extractor import extract_all_commands
 from security_app.core.logger import RunLogger
-from security_app.core.extract import extract_all_commands
 
 def run_all_rules(rules: List[Rule], log_base_dir: str = "logs"):
     """
