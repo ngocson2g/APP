@@ -12,7 +12,6 @@ class Rule:
     check: str
     fix: str
     severity: str
-    # Một số nguồn có 'title'/'name' — không bắt buộc
     title: str = ""
 
 @dataclass

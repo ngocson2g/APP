@@ -2,11 +2,6 @@
 from security_app.config import CMD_MARKER
 
 def extract_all_commands(checktext: str):
-    """
-    Trích xuất các lệnh shell bắt đầu bằng marker (mặc định "$ ").
-    Hỗ trợ dòng tiếp tục bằng dấu "\".
-    Trả về danh sách lệnh (không kèm tiền tố marker).
-    """
     if not checktext:
         return []
 
