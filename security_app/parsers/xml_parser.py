@@ -1,17 +1,60 @@
 import xml.etree.ElementTree as ET
 from security_app.models import Rule
 
-COL_MAP = {
-    'id': 'id',
-    'description': 'description',
-    'check': 'check-content',
-    'fix': 'fixtext',
-    'severity': 'severity',
-    'title': 'title',
-    'name': 'name',
+# Với XML (XCCDF), có cả attribute và element; ta khai nhiều ứng viên
+XML_ATTR_CANDIDATES = {
+    "id":       ["id", "rule-id"],
+    "severity": ["severity", "impact"],
+    "title":    ["title", "name"],  # attribute (ít gặp), fallback element bên dưới
+    "name":     ["name"],
 }
 
+# Ứng viên element theo tag (trong namespace xccdf)
+XML_ELEM_CANDIDATES = {
+    "title":       ["title"],  # <xccdf:title>
+    "description": ["description", "rationale", "discussion", "front-matter"],
+}
+
+# Ứng viên XPATH để lôi nội dung check / fix
+XML_CHECK_XPATHS = [
+    ".//xccdf:check-content",
+    ".//xccdf:check/xccdf:check-content",
+    ".//xccdf:check-content-ref",
+    ".//xccdf:check/xccdf:check-content-ref",
+]
+XML_FIX_XPATHS = [
+    ".//xccdf:fixtext",
+    ".//xccdf:fix",
+]
+
 REQ_FIELDS = ['id', 'description', 'check', 'fix', 'severity']
+
+def _first_attr(elem, names):
+    for n in names:
+        v = elem.get(n)
+        if v:
+            v = str(v).strip()
+            if v:
+                return v
+    return ""
+
+def _first_elem_text(elem, tag_names, ns):
+    for t in tag_names:
+        v = elem.findtext(f"xccdf:{t}", default="", namespaces=ns)
+        if v:
+            v = str(v).strip()
+            if v:
+                return v
+    return ""
+
+def _first_xpath_text(elem, xpaths, ns):
+    for xp in xpaths:
+        v = elem.findtext(xp, default="", namespaces=ns)
+        if v:
+            v = str(v).strip()
+            if v:
+                return v
+    return ""
 
 def parse_xml(file_path):
     tree = ET.parse(file_path)
@@ -20,16 +63,22 @@ def parse_xml(file_path):
 
     rules: list[Rule] = []
     for rule in root.findall('.//xccdf:Rule', ns):
-        rid   = rule.get(COL_MAP['id'], '')
-        desc  = rule.findtext(f"xccdf:{COL_MAP['description']}", default='', namespaces=ns)
-        check = rule.findtext(f".//xccdf:{COL_MAP['check']}", default='', namespaces=ns)
-        fix   = rule.findtext(f".//xccdf:{COL_MAP['fix']}", default='', namespaces=ns)
-        sev   = (rule.get(COL_MAP['severity'], '') or '').lower()
-        title = rule.get(COL_MAP['title']) or rule.get(COL_MAP['name']) or ''
+        rid   = _first_attr(rule, XML_ATTR_CANDIDATES["id"])
+        desc  = _first_elem_text(rule, XML_ELEM_CANDIDATES["description"], ns)
+        check = _first_xpath_text(rule, XML_CHECK_XPATHS, ns)
+        fix   = _first_xpath_text(rule, XML_FIX_XPATHS, ns)
+        sev   = (_first_attr(rule, XML_ATTR_CANDIDATES["severity"]) or "").lower()
+
+            # title: ưu tiên attr (nếu có), fallback element <title>
+        title_attr  = _first_attr(rule, XML_ATTR_CANDIDATES["title"])
+        title_elem  = _first_elem_text(rule, XML_ELEM_CANDIDATES["title"], ns)
+        title_name  = _first_attr(rule, XML_ATTR_CANDIDATES["name"])
+        title = title_attr or title_elem or title_name or ""
 
         # validate
-        if not all([rid, desc, check, fix, sev]):
-            raise Exception(f"Missing required field in XML rule ID={rid}")
+        missing = [f for f, v in [("id", rid), ("description", desc), ("check", check), ("fix", fix), ("severity", sev)] if not v]
+        if missing:
+            raise Exception(f"Missing required field(s) {missing} in XML rule ID={rid or '(unknown)'}")
         
         rules.append(Rule(id=rid, description=desc, check=check, fix=fix, severity=sev, title=title))
     return rules
