@@ -1,5 +1,6 @@
 APP
 ├─ README.md                          # Hướng dẫn/ghi chú dự án
+├─ topo.txt                           # Sơ đồ dự án 
 ├─ data/                              # Bộ dữ liệu đầu vào (checklist)
 │  ├─ canonical_ubuntu_24.04_lts.csv  # Checklist dạng CSV
 │  ├─ canonical_ubuntu_24.04_lts.json # Checklist dạng JSON
@@ -7,30 +8,24 @@ APP
 ├─ logs/                              # Thư mục chứa log theo từng phiên chạy (mặc định)
 ├─ pyproject.toml                     # Cấu hình packaging/build & khai báo entry-point CLI
 ├─ security_app/                      # Package chính
-│  ├─ __init__.py
-│  ├─ app/
-│  │  ├─ __init__.py
-│  │  └─ cli.py                       # Điểm vào CLI: nhận args → parse_file → run_all_rules → in báo cáo
 │  ├─ config.py                       # Hằng số: dấu lệnh "$ ", số top fail, thư mục logs, timeout mặc định
-│  ├─ core/                           # Lõi thực thi
-│  │  ├─ __init__.py
-│  │  ├─ command.py                   # Chạy 1 lệnh shell, thu stdout/stderr/RC/thời gian → CmdResult
-│  │  ├─ command_extractor.py         # Tách các lệnh từ “check” theo marker, hỗ trợ nối dòng "\"
-│  │  ├─ logger.py                    # Ghi log theo rule + summary.jsonl/csv + meta cho mỗi phiên
-│  │  └─ runner.py                    # Orchestrator: trích lệnh cho từng Rule, chạy, log, gom số liệu
 │  ├─ models.py                       # Dataclass Rule (chuẩn hoá sau parse) và CmdResult (kết quả lệnh)
+│  ├─ app/			      # Main
+│  │  └─ cli.py                       # Điểm vào CLI: nhận args → parse_file → run_all_rules → print_report
 │  ├─ parsers/                        # Bộ phân tích theo định dạng tệp
-│  │  ├─ __init__.py
+│  │  ├─ dispatch.py                  # parse_file(): auto-chọn parser theo loại tệp
 │  │  ├─ common.py                    # detect_file_type theo phần mở rộng
 │  │  ├─ csv_parser.py                # Đọc CSV (pandas), chuẩn hoá cột, map → Rule (title fallback name)
-│  │  ├─ dispatch.py                  # parse_file(): auto-chọn parser theo loại tệp
 │  │  ├─ json_parser.py               # Đọc JSON (stig.findings), validate trường bắt buộc → Rule
 │  │  └─ xml_parser.py                # Đọc XCCDF (namespace), validate thiếu trường → Rule
+│  ├─ core/                           # Lõi thực thi
+│  │  ├─ runner.py                    # Orchestrator: trích lệnh cho từng Rule, chạy, log, gom số liệu
+│  │  ├─ command.py                   # Chạy 1 lệnh shell, thu stdout/stderr/RC/thời gian → CmdResult
+│  │  ├─ command_extractor.py         # Tách các lệnh từ “check” theo marker, hỗ trợ nối dòng "\"
+│  │  └─ logger.py                    # Ghi log theo rule + summary.jsonl/csv + meta cho mỗi phiên
 │  ├─ reporting/                      # Xuất kết quả kiểm ra tra các định dạng khác nhau
-│  │  ├─ __init__.py
 │  │  └─ terminal.py                  # Tính thống kê & in báo cáo: totals, by-severity, top failing rules
 │  └─ utils/                          # Chứa các hàm tiện ích
-│     ├─ __init__.py
 │     └─ text.py                      # _term_width, _safe_name, _bar, _table (in bảng/bar trên terminal)
-├─ security_app.egg-info/             # Metadata do setuptools sinh ra (PKG-INFO, SOURCES, entry_points…)
-└─ topo.txt                           # Sơ đồ dự án 
+└─security_app.egg-info/             # Metadata do setuptools sinh ra (PKG-INFO, SOURCES, entry_points…)
+
