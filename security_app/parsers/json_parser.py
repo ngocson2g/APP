@@ -1,78 +1,83 @@
 import json
 from security_app.models import Rule
+from security_app.parsers.schema import COL_MAP, REQ_FIELDS
 
-# Field chuẩn -> danh sách key có thể có trong từng item JSON (đã lowercase khi so sánh logic)
-COL_MAP = {
-    "id": [
-        "id", "rule_id", "vuln_id", "vulnid", "vuln-id", "control", "control_id", "cci", "ref_id"
-    ],
-    "description": [
-        "description", "desc", "discussion", "rationale", "summary", "details"
-    ],
-    "check": [
-        "checktext", "check_text", "check", "check-content", "check_content",
-        "command", "commands", "audit", "audit_procedure"
-    ],
-    "fix": [
-        "fixtext", "fix_text", "fix", "remediation", "solution", "how_to_fix"
-    ],
-    "severity": [
-        "severity", "impact", "risk", "level", "priority"
-    ],
-    "title": [
-        "title", "rule_title", "short_title", "name"
-    ],
-    "name": [
-        "name", "rule_name"
-    ],
-}
+def _lower_keys(d: dict):
+    return {str(k).strip().lower(): v for k, v in d.items()}
 
-REQ_FIELDS = ['id', 'description', 'check', 'fix', 'severity']
-
-def _get_first(d: dict, candidates: list[str]) -> str:
-    # tìm khóa theo dạng "case-insensitive"
-    # không ép biến thể nested; kỳ vọng item là phẳng như đầu vào STIG JSON của bạn
-    lower_map = {str(k).lower(): k for k in d.keys()}
-    for c in candidates:
-        key = lower_map.get(c.lower())
-        if key is not None:
-            val = d.get(key, "")
-            if val is None:
-                continue
-            sval = str(val).strip()
-            if sval:
-                return sval
+def _get_first(d: dict, aliases):
+    for k in aliases:
+        if k in d and isinstance(d[k], str) and d[k].strip():
+            return d[k].strip()
     return ""
 
-def parse_json(file_path):
-    with open(file_path, 'r', encoding='utf-8') as f:
+def _looks_like_rule(obj: dict) -> bool:
+    if not isinstance(obj, dict):
+        return False
+    keys = set(str(k).strip().lower() for k in obj.keys())
+    def has_any(aliases): return any(a in keys for a in aliases)
+    return has_any(COL_MAP["id"]) and has_any(COL_MAP["severity"]) and (
+        has_any(COL_MAP["check"]) or has_any(COL_MAP["description"])
+    )
+
+def _extract_items(data):
+    """
+    Trả về list các item rule từ nhiều cấu trúc JSON khác nhau:
+    - list trực tiếp
+    - dict với stig.findings (dict hoặc list)
+    - dict với findings/rules/items (dict hoặc list)
+    - dict id->rule (tất cả value là dict có hình dáng rule)
+    """
+    if isinstance(data, list):
+        return data
+
+    if isinstance(data, dict):
+        candidates = []
+        stig = data.get("stig")
+        if isinstance(stig, dict):
+            candidates.append(stig.get("findings"))
+        candidates += [data.get("findings"), data.get("rules"), data.get("items")]
+
+        for c in candidates:
+            if isinstance(c, list):
+                return c
+            if isinstance(c, dict):
+                return list(c.values())
+
+        if data and all(isinstance(v, dict) for v in data.values()):
+            vals = list(data.values())
+            if any(_looks_like_rule(v) for v in vals):
+                return vals
+    return None
+
+def parse_json(path: str):
+    with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    findings = data.get('stig', {}).get('findings', {})
-    if not isinstance(findings, dict):
-        raise Exception("Invalid JSON structure: expected dict at stig.findings")
-    
+    items = _extract_items(data)
+    if items is None:
+        raise Exception("JSON format not supported: couldn't locate list/dict of findings/rules")
+
     rules: list[Rule] = []
-    for _, r in findings.items():
+    for raw in items:
+        if not isinstance(raw, dict):
+            continue
+        r = _lower_keys(raw)
+
         rid   = _get_first(r, COL_MAP["id"])
         desc  = _get_first(r, COL_MAP["description"])
         check = _get_first(r, COL_MAP["check"])
         fix   = _get_first(r, COL_MAP["fix"])
-        sev   = _get_first(r, COL_MAP["severity"]).lower()
-        title = _get_first(r, COL_MAP["title"]) or _get_first(r, COL_MAP["name"])
+        sev   = (_get_first(r, COL_MAP["severity"]) or "").lower()
+        title = _get_first(r, COL_MAP.get("title", [])) or _get_first(r, COL_MAP.get("name", []))
 
-        # validate
-        missing = [f for f, v in [("id", rid), ("description", desc), ("check", check), ("fix", fix), ("severity", sev)] if not v]
+        vals = {"id": rid, "description": desc, "check": check, "fix": fix, "severity": sev}
+        missing = [f for f in REQ_FIELDS if not vals.get(f)]
         if missing:
             tentative = r.get("id") or rid or "(unknown)"
-            raise Exception(f"Missing field(s) {missing} in JSON item ID={tentative}")
+            raise Exception(f"Missing {missing} in JSON item ID={tentative}")
 
         rules.append(Rule(
-            id=rid,
-            description=desc,
-            check=check,
-            fix=fix,
-            severity=sev,
-            title=title or "",
+            id=rid, description=desc, check=check, fix=fix, severity=sev, title=title or ""
         ))
     return rules
