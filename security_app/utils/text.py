@@ -1,6 +1,7 @@
 # security_app/utils/text.py
 import shutil
 import re
+from security_app.config import SECRET_REPLACERS
 
 def _term_width():
     return shutil.get_terminal_size((120, 20)).columns
@@ -37,3 +38,11 @@ def _table(rows, headers, max_width=None):
     print("-+-".join("-"*widths[i] for i in range(cols)))
     for r in rows:
         print(" | ".join(cut(r[i], widths[i]).ljust(widths[i]) for i in range(cols)))
+
+def mask_secrets(text: str) -> str:
+    if not text:
+        return text
+    s = str(text)
+    for pattern, repl in SECRET_REPLACERS:
+        s = re.sub(pattern, repl, s)
+    return s

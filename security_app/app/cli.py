@@ -4,31 +4,43 @@ from security_app.parsers.dispatch import parse_file
 from security_app.core.runner import run_all_rules
 from security_app.reporting.terminal import compute_stats, print_report
 from security_app.config import DEFAULT_LOGS_DIR, TOP_FAIL_LIMIT
+from security_app import config as cfg  # để override runtime
 
 def main():
     parser = argparse.ArgumentParser(
         prog="security-app",
         description="Run STIG/Checklist and report results."
     )
-    parser.add_argument(
-        "input",
-        help="Path to checklist file (CSV/JSON/XML)."
-    )
-    parser.add_argument(
-        "--logs-dir", default=DEFAULT_LOGS_DIR,
-        help=f"Base directory to store run logs (default: {DEFAULT_LOGS_DIR})"
-    )
-    parser.add_argument(
-        "--top", type=int, default=TOP_FAIL_LIMIT,
-        help=f"Show at most N failing rules in 'Top failing rules' (default: {TOP_FAIL_LIMIT})"
-    )
+    parser.add_argument("input", help="Path to checklist file (CSV/JSON/XML).")
+    parser.add_argument("--logs-dir", default=DEFAULT_LOGS_DIR,
+                        help=f"Base directory to store run logs (default: {DEFAULT_LOGS_DIR})")
+    parser.add_argument("--top", type=int, default=TOP_FAIL_LIMIT,
+                        help=f"Show at most N failing rules (default: {TOP_FAIL_LIMIT})")
+
+    # mới: concurrency + timeout/retry
+    parser.add_argument("--workers", type=int, default=None, help="Max concurrent workers (default: CPU count).")
+    parser.add_argument("--proc", action="store_true", help="Use process pool instead of threads.")
+    parser.add_argument("--timeout", type=float, default=None, help="Per-command timeout in seconds (override config).")
+    parser.add_argument("--retries", type=int, default=None, help="Retry attempts (override config).")
+
     args = parser.parse_args()
 
     if not os.path.exists(args.input):
         parser.error(f"Input not found: {args.input}")
 
+    # override cấu hình runtime (nếu truyền)
+    if args.timeout is not None:
+        cfg.DEFAULT_SHELL_TIMEOUT = args.timeout
+    if args.retries is not None:
+        cfg.RETRY_ATTEMPTS = max(0, int(args.retries))
+
     rules = parse_file(args.input)  # list[Rule]
-    run_results = run_all_rules(rules, log_base_dir=args.logs_dir)
+    run_results = run_all_rules(
+        rules,
+        log_base_dir=args.logs_dir,
+        workers=args.workers,
+        use_processes=args.proc,
+    )
     stats = compute_stats(run_results)
     print_report(stats, limit_top=args.top)
 

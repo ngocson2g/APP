@@ -25,7 +25,8 @@ APP
 │  │  └─ logger.py                    # Ghi log theo rule + summary.jsonl/csv + meta cho mỗi phiên
 │  ├─ reporting/                      # Xuất kết quả kiểm ra tra các định dạng khác nhau
 │  │  └─ terminal.py                  # Tính thống kê & in báo cáo: totals, by-severity, top failing rules
-│  └─ utils/                          # Chứa các hàm tiện ích
-│     └─ text.py                      # _term_width, _safe_name, _bar, _table (in bảng/bar trên terminal)
+│  ├─ utils/                          # Chứa các hàm tiện ích
+│  │   └─ text.py                     # _term_width, _safe_name, _bar, _table (in bảng/bar trên terminal)
+│  └─ test/                           # Chứa các hàm test, kiểm tra giai đoạn, đo đạc thời gian, hiệu năng, tài nguyên sử dụng
 └─security_app.egg-info/             # Metadata do setuptools sinh ra (PKG-INFO, SOURCES, entry_points…)
 

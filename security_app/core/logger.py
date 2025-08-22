@@ -2,17 +2,11 @@ from __future__ import annotations
 import os, json, csv, datetime
 from typing import List
 from security_app.models import Rule, CmdResult
-from security_app.utils.text import _safe_name
+from security_app.utils.text import _safe_name, mask_secrets
 
 class RunLogger:
     """
-    Tạo cấu trúc:
-      logs/
-        YYYY-MM-DD_HH-MM-SS/
-          rule-001_<name>.log
-          summary.jsonl
-          summary.csv
-          meta.json
+    Tạo cấu trúc logs/<run>/..., có summary.jsonl/csv
     """
     def __init__(self, base_dir: str = "logs", run_name: str | None = None):
         ts = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -23,24 +17,17 @@ class RunLogger:
         self.summary_csv_path   = os.path.join(self.run_dir, "summary.csv")
         self.meta_path          = os.path.join(self.run_dir, "meta.json")
 
-        # Ghi meta lần đầu
         if not os.path.exists(self.meta_path):
             with open(self.meta_path, "w", encoding="utf-8") as f:
-                json.dump({
-                    "created_at": ts,
-                    "version": 1
-                }, f, ensure_ascii=False, indent=2)
+                json.dump({"created_at": ts, "version": 1}, f, ensure_ascii=False, indent=2)
 
-        # Chuẩn bị CSV header
         self._ensure_csv_header()
 
     def _ensure_csv_header(self):
         if not os.path.exists(self.summary_csv_path):
             with open(self.summary_csv_path, "w", newline="", encoding="utf-8") as f:
-                writer = csv.writer(f)
-                writer.writerow([
-                    "rule_index", "rule_id", "title", "severity",
-                    "num_cmds", "num_ok", "num_fail"
+                csv.writer(f).writerow([
+                    "rule_index","rule_id","title","severity","num_cmds","num_ok","num_fail"
                 ])
 
     def log_rule_result(self, rule_index: int, rule: Rule, cmd_results: List[CmdResult]):
@@ -52,6 +39,9 @@ class RunLogger:
         short = _safe_name(title or rule_id)
         per_rule_path = os.path.join(self.run_dir, f"rule-{rule_index:03d}_{short}.log")
 
+        # Mask check trước khi ghi
+        check_masked = mask_secrets(check_raw)
+
         with open(per_rule_path, "w", encoding="utf-8") as f:
             f.write(f"Rule #{rule_index}\n")
             f.write(f"ID       : {rule_id}\n")
@@ -59,17 +49,17 @@ class RunLogger:
             f.write(f"Severity : {severity}\n")
             f.write("-" * 60 + "\n")
             f.write("Check (raw):\n")
-            f.write(check_raw + "\n")
+            f.write(check_masked + "\n")
             f.write("-" * 60 + "\n\n")
 
             for i, r in enumerate(cmd_results, 1):
-                f.write(f"[{i}] $ {r.cmd}\n")
+                f.write(f"[{i}] $ {mask_secrets(r.cmd)}\n")
                 f.write(f"Return code : {r.returncode}\n")
                 f.write(f"Duration(s) : {r.duration_sec}\n")
                 f.write("---- STDOUT ----\n")
-                f.write((r.stdout or "").rstrip() + "\n")
+                f.write((mask_secrets(r.stdout or "")).rstrip() + "\n")
                 f.write("---- STDERR ----\n")
-                f.write((r.stderr or "").rstrip() + "\n")
+                f.write((mask_secrets(r.stderr or "")).rstrip() + "\n")
                 f.write("=" * 60 + "\n\n")
 
         num_cmds = len(cmd_results)
@@ -77,13 +67,8 @@ class RunLogger:
         num_fail = num_cmds - num_ok
 
         summary_row = {
-            "rule_index": rule_index,
-            "rule_id": rule_id,
-            "title": title,
-            "severity": severity,
-            "num_cmds": num_cmds,
-            "num_ok": num_ok,
-            "num_fail": num_fail,
+            "rule_index": rule_index, "rule_id": rule_id, "title": title, "severity": severity,
+            "num_cmds": num_cmds, "num_ok": num_ok, "num_fail": num_fail,
             "per_rule_log": os.path.basename(per_rule_path)
         }
         with open(self.summary_jsonl_path, "a", encoding="utf-8") as jf:
