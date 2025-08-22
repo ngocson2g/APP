@@ -1,6 +1,6 @@
 APP
 ├─ README.md                          # Hướng dẫn/ghi chú dự án
-├─ topo.txt                           # Sơ đồ dự án 
+├─ topo.txt                           # Sơ đồ dự án
 ├─ data/                              # Bộ dữ liệu đầu vào (checklist)
 │  ├─ canonical_ubuntu_24.04_lts.csv  # Checklist dạng CSV
 │  ├─ canonical_ubuntu_24.04_lts.json # Checklist dạng JSON
@@ -8,29 +8,35 @@ APP
 ├─ logs/                              # Thư mục chứa log theo từng phiên chạy (mặc định)
 ├─ pyproject.toml                     # Cấu hình packaging/build & khai báo entry-point CLI
 ├─ security_app/                      # Package chính
-│  ├─ config.py                       # Hằng số: dấu lệnh "$ ", số top fail, thư mục logs, timeout mặc định
-│  ├─ models.py                       # Dataclass Rule (chuẩn hoá sau parse) và CmdResult (kết quả lệnh)
-│  ├─ app/			      # Main
+│  ├─ __init__.py
+│  ├─ app/
 │  │  └─ cli.py                       # Điểm vào CLI: nhận args → parse_file → run_all_rules → print_report
-│  ├─ policy/
-│  │  ├─ safety.py
-│  │  └─ secrets.py                       
-│  ├─ parsers/                        # Bộ phân tích theo định dạng tệp
-│  │  ├─ schema.py
-│  │  ├─ dispatch.py                  # parse_file(): auto-chọn parser theo loại tệp
+│  ├─ config.py                       # Hằng số: marker, timeout, retries, denylist, top fail, logs dir
+│  ├─ models.py                       # Dataclass Rule, CmdResult
+│  ├─ core/
+│  │  ├─ command.py                   # Chạy 1 lệnh shell → CmdResult (retry/backoff/timeout/denylist)
+│  │  ├─ command_extractor.py         # Tách lệnh từ “check” theo marker, hỗ trợ nối dòng "\\"
+│  │  ├─ logger.py                    # Ghi log per-rule (KHÔNG ghi summary JSON/CSV nếu theo patch)
+│  │  └─ runner/
+│  │     ├─ __init__.py               # Orchestration: run_all_rules()
+│  │     ├─ extract.py                # _pre_extract_rules(): lọc denylist, gom allowed/denied
+│  │     ├─ plan.py                   # _prepare_tasks(): chia task per-command/per-chunk
+│  │     ├─ workers.py                # _worker(): thực thi chunk lệnh
+│  │     └─ merge.py                  # _merge_and_log(): gộp kết quả, gọi logger
+│  ├─ parsers/
+│  │  ├─ __init__.py
 │  │  ├─ common.py                    # detect_file_type theo phần mở rộng
-│  │  ├─ csv_parser.py                # Đọc CSV (pandas), chuẩn hoá cột, map → Rule (title fallback name)
-│  │  ├─ json_parser.py               # Đọc JSON (stig.findings), validate trường bắt buộc → Rule
-│  │  └─ xml_parser.py                # Đọc XCCDF (namespace), validate thiếu trường → Rule
-│  ├─ core/                           # Lõi thực thi
-│  │  ├─ runner.py                    # Orchestrator: trích lệnh cho từng Rule, chạy, log, gom số liệu
-│  │  ├─ command.py                   # Chạy 1 lệnh shell, thu stdout/stderr/RC/thời gian → CmdResult
-│  │  ├─ command_extractor.py         # Tách các lệnh từ “check” theo marker, hỗ trợ nối dòng "\"
-│  │  └─ logger.py                    # Ghi log theo rule + summary.jsonl/csv + meta cho mỗi phiên
-│  ├─ reporting/                      # Xuất kết quả kiểm ra tra các định dạng khác nhau
-│  │  └─ terminal.py                  # Tính thống kê & in báo cáo: totals, by-severity, top failing rules
-│  ├─ utils/                          # Chứa các hàm tiện ích
-│  │   └─ text.py                     # _term_width, _safe_name, _bar, _table (in bảng/bar trên terminal)
-│  └─ test/                           # Chứa các hàm test, kiểm tra giai đoạn, đo đạc thời gian, hiệu năng, tài nguyên sử dụng
-└─security_app.egg-info/             # Metadata do setuptools sinh ra (PKG-INFO, SOURCES, entry_points…)
-
+│  │  ├─ schema.py                    # COL_MAP/REQ_FIELDS dùng chung
+│  │  ├─ dispatch.py                  # parse_file(): auto-chọn parser theo loại tệp
+│  │  ├─ csv_parser.py                # CSV→Rule (chuẩn hoá cột + title fallback name)
+│  │  ├─ json_parser.py               # JSON→Rule (stig.findings)
+│  │  └─ xml_parser.py                # XCCDF→Rule (namespace)
+│  ├─ policy/
+│  │  ├─ safety.py                    # deny_reason(): central denylist
+│  │  └─ secrets.py                   # mask_secrets(): compile regex một lần
+│  ├─ reporting/
+│  │  ├─ stats.py                     # compute_stats(): tổng hợp số liệu
+│  │  └─ terminal.py                  # print_report(): render terminal (bảng, bar)
+│  └─ utils/
+│     └─ text.py                      # _term_width, _safe_name, _bar, _table
+└─ security_app.egg-info/             # Metadata do setuptools sinh ra (nếu đã build/install)
