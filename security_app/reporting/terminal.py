@@ -1,17 +1,13 @@
-import shutil
-from collections import defaultdict
 from security_app.models import Rule
 from security_app.utils.text import _term_width, _bar, _table
 from security_app.config import TOP_FAIL_LIMIT
 
 def _get(rule, key, default=""):
-    # hỗ trợ cả dataclass Rule và dict cũ
     if isinstance(rule, Rule):
         return getattr(rule, key, default)
     if isinstance(rule, dict):
         return rule.get(key, default)
     return default
-
 
 def print_report(stats, limit_top=TOP_FAIL_LIMIT):
     W = _term_width()
@@ -30,59 +26,47 @@ def print_report(stats, limit_top=TOP_FAIL_LIMIT):
         ("Commands OK", t["total_ok"]),
         ("Commands failed", t["total_fail"]),
     ]
-    maxk = max(len(k) for k,_ in kv) + 2
+    width_key = max(len(k) for k, _ in kv) + 2
     for k, v in kv:
-        print(f"{k:>{maxk}}: {v}")
+        print(f"{k.rjust(width_key)}: {v}")
     print()
-
-    if t["total_cmds"] == 0:
-        print("⚠️  Không tìm thấy lệnh nào để thực thi (các dòng check phải bắt đầu bằng '$ ').\n")
 
     # ----- By severity -----
     print("By severity:")
-    order = ["low","medium","moderate","high","critical","unknown"]
-    rows, seen = [], set()
-    for key in order:
-        if key in stats["by_severity"]:
-            v = stats["by_severity"][key]
-            rows.append([
-                key,
-                str(v["rules"]),
-                f"{v['rules']-v['rules_fail']} ok / {v['rules_fail']} fail",
-                f"{v['ok']}/{v['cmds']}",
-                str(v["fail"]),
-                _bar(v["ok"], max(1, v["cmds"]))
-            ])
-            seen.add(key)
-    for k, v in stats["by_severity"].items():
-        if k in seen:
+    headers = ["Severity", "Rules", "#Rules OK/Fail", "Cmd OK/Cmds", "#Cmd Fail", "OK bar"]
+    sev_order = ["low","medium","high","critical","unknown"]
+    rows = []
+    by_sev = stats["by_severity"]
+    for sev in sev_order + sorted([s for s in by_sev.keys() if s not in sev_order]):
+        if sev not in by_sev:
             continue
+        d = by_sev[sev]
+        ok_rules = d.get("rules",0) - d.get("rules_fail",0)
+        fail_rules = d.get("rules_fail",0)
+        cmds = d.get("cmds",0)
+        ok = d.get("ok",0)
+        fail = d.get("fail",0)
         rows.append([
-            k,
-            str(v["rules"]),
-            f"{v['rules']-v['rules_fail']} ok / {v['rules_fail']} fail",
-            f"{v['ok']}/{v['cmds']}",
-            str(v["fail"]),
-            _bar(v["ok"], max(1, v["cmds"]))
+            sev,
+            d.get("rules",0),
+            f"{ok_rules} ok / {fail_rules} fail",
+            f"{ok}/{cmds}",
+            fail,
+            _bar(ok, cmds, 20),
         ])
-    _table(rows, headers=["Severity","Rules","#Rules OK/Fail","Cmd OK/Cmds","#Cmd Fail","OK bar"])
+    _table(rows, headers)
     print()
 
     # ----- Top failing rules -----
     print(f"Top failing rules (max {limit_top}):")
-    top = stats["top_failing_rules"][:limit_top]
-    tr = []
-    for x in top:
-        rule = x["rule"]
-        tr.append([
-            f"{x['rule_index']}",
-            str(_get(rule, "id", "")),
-            str(_get(rule, "severity") or _get(rule, "impact") or "unknown"),
-            str(x["num_fail"]),
-            (str(_get(rule, "title") or _get(rule, "name") or "") or "(no title)").strip()
-        ])
-    if tr:
-        _table(tr, headers=["#","Rule ID","Sev","#CmdFail","Title"])
+    top = stats.get("top_failing_rules", [])
+    if top:
+        headers = ["#", "Rule ID", "Sev", "#CmdFail", "Title"]
+        rows = []
+        for i, entry in enumerate(top[:limit_top], start=1):
+            idx, rid, sev, num_fail, title = entry  # tuple from compute_stats()
+            rows.append([i, str(rid), str(sev), str(num_fail), str(title)])
+        _table(rows, headers, max_width=W)
     else:
         print("(Không có rule lỗi)")
     print()

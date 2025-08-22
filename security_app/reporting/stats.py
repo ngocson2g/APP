@@ -1,3 +1,8 @@
+from collections import defaultdict
+
+def _get(obj, attr, default=""):
+    return getattr(obj, attr, default) if obj is not None else default
+
 def compute_stats(run_results):
     total_rules = len(run_results)
     total_cmds  = sum(x["num_cmds"] for x in run_results)
@@ -18,8 +23,14 @@ def compute_stats(run_results):
         if x["num_fail"] > 0:
             by_sev[sev]["rules_fail"] += 1
 
-    top_fail = sorted([x for x in run_results if x["num_fail"] > 0],
-                      key=lambda r: (-r["num_fail"], r["rule_index"]))
+    top_fail = sorted(
+        [
+            (x["rule_index"], _get(x["rule"], "id") or str(x["rule_index"]),
+             _get(x["rule"], "severity") or "", x["num_fail"], _get(x["rule"], "title") or "")
+            for x in run_results if x["num_fail"] > 0
+        ],
+        key=lambda t: (-t[3], t[0])
+    )
 
     return {
         "totals": {
