@@ -43,7 +43,7 @@ def run_command(cmd: str) -> CmdResult:
             time.sleep(RETRY_DELAY_SEC)
         except subprocess.TimeoutExpired as te:
             last_exc = te
-            if not RETRY_ON_TIMEOUT or attempts >= max_attemptem:
+            if not RETRY_ON_TIMEOUT or attempts >= max_attempts:
                 return CmdResult(
                     cmd=cmd, returncode=None, stdout=te.stdout or "",
                     stderr=f"TIMEOUT after {timeout}s",
