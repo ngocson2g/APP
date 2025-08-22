@@ -2,7 +2,8 @@ from __future__ import annotations
 import os, json, csv, datetime
 from typing import List
 from security_app.models import Rule, CmdResult
-from security_app.utils.text import _safe_name, mask_secrets
+from security_app.utils.text import _safe_name
+from security_app.policy.secrets import mask_secrets
 
 class RunLogger:
     """

@@ -2,7 +2,8 @@ import argparse
 import os
 from security_app.parsers.dispatch import parse_file
 from security_app.core.runner import run_all_rules
-from security_app.reporting.terminal import compute_stats, print_report
+from security_app.reporting.stats import compute_stats
+from security_app.reporting.terminal import print_report
 from security_app.config import DEFAULT_LOGS_DIR, TOP_FAIL_LIMIT
 from security_app import config as cfg  # để override runtime
 

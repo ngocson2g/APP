@@ -1,0 +1,45 @@
+File,Hàm/Lớp,Tham số,Trả về,Ghi chú
+cli.py,main,,—,
+command.py,_run_once,"cmd, timeout",subprocess.CompletedProcess,"Chạy 1 lần, trả về CompletedProcess; để Exception (TimeoutExpired, ...) nổi lên cho caller xử lý."
+command.py,_to_result,"cmd, rc, stdout, stderr, started_all",CmdResult,"Đóng gói về CmdResult, duration là tổng thời gian từ lần đầu tới lúc kết thúc (kể cả retry)."
+command.py,run_command,cmd,CmdResult,Giữ vòng lặp retry & backoff. Dùng _run_once và _to_result.
+command_extractor.py,extract_all_commands,checktext,—,
+common.py,detect_file_type,file_path,—,
+config.py,— (module),—,—,Cấu hình/hằng số dùng chung toàn dự án.
+csv_parser.py,_normalize_columns,cols,—,
+csv_parser.py,_pick_first,"row, aliases",—,
+csv_parser.py,parse_csv,path,—,
+dispatch.py,parse_file,file_path,—,
+json_parser.py,_extract_items,data,—,Trả về list các item rule từ nhiều cấu trúc JSON khác nhau:
+json_parser.py,_get_first,"d, aliases",—,
+json_parser.py,_looks_like_rule,obj,bool,
+json_parser.py,_lower_keys,d,—,
+json_parser.py,parse_json,path,—,
+logger.py,RunLogger.__init__,"base_dir='logs', run_name=None",—,
+logger.py,RunLogger._ensure_csv_header,,—,
+logger.py,RunLogger.log_rule_result,"rule_index, rule, cmd_results",—,
+logger.py,class RunLogger,—,—,"Tạo cấu trúc logs/<run>/..., có summary.jsonl/csv"
+models.py,class CmdResult,—,—,Kết quả thực thi 1 lệnh shell.
+models.py,class Rule,—,—,Mô hình 1 rule đã chuẩn hoá sau khi parse.
+runner.py,_merge_and_log,"idx, rule, denied, ran, logger","Dict[str, Any]","Gộp kết quả deny + đã chạy, ghi log 1 lần, trả về summary cho reporting."
+runner.py,_mk_denied,"cmd, reason",CmdResult,
+runner.py,_pre_extract_rules,"rules, marker","List[Tuple[int, Rule, List[str], List[CmdResult]]]","Trả về: [(rule_index, rule, allowed_cmds, denied_cmd_results), ...]"
+runner.py,_prepare_tasks,"pre, per_command=True","Tuple[List[Tuple[int, Rule, List[str]]], Dict[int, Dict[str, Any]], Dict[int, int]]",Từ pre-extract tạo:
+runner.py,_worker,payload,"Tuple[int, List[CmdResult]]","Worker: nhận (idx, rule, allowed_cmds_chunk) và trả về (idx, [CmdResult])."
+runner.py,run_all_rules,"rules, log_base_dir=DEFAULT_LOGS_DIR, workers=None, use_processes=False, per_command=True","List[Dict[str, Any]]",Thực thi toàn bộ rule với concurrency; chỉ main thread ghi log (single-writer).
+safety.py,deny_reason,cmd,Optional[str],Trả về lý do bị chặn nếu 'cmd' match denylist; ngược lại None.
+safety.py,— (module),—,—,Safety policy (denylist): compile một lần & dùng chung cho runner/command.
+schema.py,— (module),—,—,Schema alias dùng chung cho CSV/JSON.
+secrets.py,mask_secrets,text,str,
+secrets.py,— (module),—,—,"Secret masker: compile SECRET_REPLACERS một lần, mask nhanh hơn."
+terminal.py,_get,"rule, key, default=''",—,
+terminal.py,compute_stats,run_results,—,
+terminal.py,print_report,"stats, limit_top=TOP_FAIL_LIMIT",—,
+text.py,_bar,"value, total, width=20, ch='█'",—,
+text.py,_safe_name,"s, maxlen=60",str,
+text.py,_table,"rows, headers, max_width=None",—,
+text.py,_term_width,,—,
+xml_parser.py,_first_attr,"elem, names",—,
+xml_parser.py,_first_elem_text,"elem, tag_names, ns",—,
+xml_parser.py,_first_xpath_text,"elem, xpaths, ns",—,
+xml_parser.py,parse_xml,file_path,—,
