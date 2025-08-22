@@ -12,7 +12,11 @@ APP
 │  ├─ models.py                       # Dataclass Rule (chuẩn hoá sau parse) và CmdResult (kết quả lệnh)
 │  ├─ app/			      # Main
 │  │  └─ cli.py                       # Điểm vào CLI: nhận args → parse_file → run_all_rules → print_report
+│  ├─ policy/
+│  │  ├─ safety.py
+│  │  └─ secrets.py                       
 │  ├─ parsers/                        # Bộ phân tích theo định dạng tệp
+│  │  ├─ schema.py
 │  │  ├─ dispatch.py                  # parse_file(): auto-chọn parser theo loại tệp
 │  │  ├─ common.py                    # detect_file_type theo phần mở rộng
 │  │  ├─ csv_parser.py                # Đọc CSV (pandas), chuẩn hoá cột, map → Rule (title fallback name)
