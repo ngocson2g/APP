@@ -39,4 +39,5 @@ APP
 │  │  └─ terminal.py                  # print_report(): render terminal (bảng, bar)
 │  └─ utils/
 │     └─ text.py                      # _term_width, _safe_name, _bar, _table
-└─ security_app.egg-info/             # Metadata do setuptools sinh ra (nếu đã build/install)
+├─ security_app.egg-info/             # Metadata do setuptools sinh ra (nếu đã build/install)
+└─ reportAPP			      # chứa các file app reactjs
