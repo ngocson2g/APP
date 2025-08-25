@@ -10,7 +10,7 @@ from security_app.core.logger import RunLogger
 
 from .extract import _pre_extract_rules
 from .plan import _prepare_tasks
-from .workers import _worker
+from .workers import _workers
 from .merge import _merge_and_log
 
 def run_all_rules(
@@ -44,7 +44,7 @@ def run_all_rules(
             fut2idx = {}
             for task in tasks:
                 idx, rule, chunk = task
-                fut = ex.submit(_worker, (idx, rule, chunk))
+                fut = ex.submit(_workers, (idx, rule, chunk))
                 fut2idx[fut] = idx
 
             for fut in as_completed(fut2idx):
