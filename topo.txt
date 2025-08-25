@@ -13,6 +13,7 @@ APP
 │  │  └─ cli.py                       # Điểm vào command-line interface
 │  ├─ config.py                       # Cấu hình và hằng số toàn cục
 │  ├─ models.py                       # Định nghĩa các data model (Rule, CmdResult)
+│  ├─ setting.py
 │  ├─ core/
 │  │  ├─ command.py                   # Xử lý thực thi lệnh shell với retry/timeout
 │  │  ├─ command_extractor.py         # Trích xuất lệnh từ text với marker
@@ -22,6 +23,7 @@ APP
 │  │     ├─ extract.py                # Trích xuất và phân loại lệnh allowed/denied
 │  │     ├─ plan.py                   # Lập kế hoạch chia task cho concurrent execution
 │  │     ├─ workers.py                # Worker function để thực thi lệnh
+│  │     ├─ tuner.py
 │  │     └─ merge.py                  # Gộp kết quả và ghi log
 │  ├─ parsers/                        # Module xử lý parsing các định dạng file
 │  │  ├─ __init__.py

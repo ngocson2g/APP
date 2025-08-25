@@ -8,11 +8,48 @@ from security_app.models import Rule, CmdResult
 from security_app.config import CMD_MARKER, DEFAULT_LOGS_DIR
 from security_app.core.logger import RunLogger
 from security_app.settings import Settings
-
+from security_app.core.command import run_command  # <-- dùng cho pilot run
 from .extract import _pre_extract_rules
 from .plan import _prepare_tasks
 from .workers import _workers
 from .merge import _merge_and_log
+from .tuner import auto_guess_workers  # <-- mới
+
+def _pilot_execute(
+    tasks: List[Tuple[int, Rule, List[str]]],
+    agg: Dict[int, Dict[str, Any]],
+    pending: Dict[int, int],
+    settings: Settings,
+    logger: RunLogger,
+    budget: int
+) -> Tuple[List[Tuple[int, Rule, List[str]]], List[float], List[Dict[str, Any]]]:
+    """
+    Chạy tuần tự 'budget' task đầu để lấy mẫu duration.
+    Trả về (tasks_còn_lại, sample_durations, results_đã_hoàn_tất_rule).
+    """
+    if budget <= 0 or not tasks:
+        return tasks, [], []
+
+    take = min(budget, len(tasks))
+    sample = tasks[:take]
+    rest = tasks[take:]
+    sample_durs: List[float] = []
+    completed: List[Dict[str, Any]] = []
+
+    for (idx, _rule, chunk) in sample:
+        # chunk là list các cmd (per_command=True thì độ dài 1)
+        ran = [run_command(c, settings) for c in chunk]
+        sample_durs.extend([r.duration_sec for r in ran if r is not None])
+
+        state = agg[idx]
+        state["ran"].extend(ran)
+        pending[idx] -= 1
+        if pending[idx] == 0:
+            completed.append(_merge_and_log(idx, state["rule"], state["denied"], state["ran"], logger))
+            del agg[idx]
+            del pending[idx]
+
+    return rest, sample_durs, completed
 
 def run_all_rules(
     rules: List[Rule],
@@ -32,13 +69,24 @@ def run_all_rules(
 
     results: List[Dict[str, Any]] = []
 
-    # Rule không có allowed-cmd (chỉ deny hoặc trống) -> log ngay
+    # Log ngay những rule không có allowed-cmd
     for idx, state in list(agg.items()):
         if pending.get(idx, 0) == 0:
             results.append(_merge_and_log(idx, state["rule"], state["denied"], state["ran"], logger))
             pending.pop(idx, None)
 
-    # 2) Chạy song song phần allowed
+    # 2) Pilot run + tự chọn số worker nếu chưa chỉ định
+    sample_durs: List[float] = []
+    if tasks and workers is None:
+        # ngân sách pilot:  max(8, 2*CPU) nhưng không quá 24 task
+        cpu = os.cpu_count() or 4
+        budget = min(24, max(8, 2 * cpu))
+        tasks, sample_durs, completed = _pilot_execute(tasks, agg, pending, settings, logger, budget)
+        results.extend(completed)
+        # Sau pilot, chọn số worker dựa trên độ dài task còn lại
+        workers = auto_guess_workers(len(tasks), use_processes, sample_durs)
+
+    # 3) Chạy song song phần còn lại
     if tasks:
         Executor = ProcessPoolExecutor if use_processes else ThreadPoolExecutor
         max_workers = workers or os.cpu_count() or 4
@@ -46,7 +94,6 @@ def run_all_rules(
             fut2idx = {}
             for task in tasks:
                 idx, rule, chunk = task
-                # truyền kèm settings xuống worker
                 fut = ex.submit(_workers, (idx, rule, chunk, settings))
                 fut2idx[fut] = idx
 
@@ -65,6 +112,6 @@ def run_all_rules(
                     del agg[idx]
                     del pending[idx]
 
-    # 3) Ổn định thứ tự theo index rule
+    # 4) Ổn định thứ tự theo index rule
     results.sort(key=lambda x: x["rule_index"])
     return results
