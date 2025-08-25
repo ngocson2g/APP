@@ -1,3 +1,4 @@
+#security_app/parser/dispatch.py
 from security_app.parsers.common import detect_file_type
 from security_app.parsers.csv_parser import parse_csv
 from security_app.parsers.json_parser import parse_json

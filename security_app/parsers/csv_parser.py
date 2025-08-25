@@ -1,3 +1,4 @@
+#security_app/parser/csv_parser.py
 import pandas as pd
 from security_app.models import Rule
 from security_app.parsers.schema import COL_MAP, REQ_FIELDS

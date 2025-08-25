@@ -1,3 +1,4 @@
+#security_app/reporting/terminal.py
 from security_app.models import Rule
 from security_app.utils.text import _term_width, _bar, _table
 from security_app.config import TOP_FAIL_LIMIT

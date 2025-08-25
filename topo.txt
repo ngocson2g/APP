@@ -40,4 +40,15 @@ APP
 │  └─ utils/
 │     └─ text.py                      # _term_width, _safe_name, _bar, _table
 ├─ security_app.egg-info/             # Metadata do setuptools sinh ra (nếu đã build/install)
-└─ reportAPP			      # chứa các file app reactjs
+└─ reportAPP			      # //
+
+
+cli.main
+  └─ parse_file -> [parse_csv | parse_json | parse_xml]
+  └─ run_all_rules
+       ├─ _pre_extract_rules ─┬─ extract_all_commands
+       │                       └─ deny_reason
+       ├─ _prepare_tasks
+       ├─ Executor.submit(_worker) ── run_command ── [_run_once, _to_result, deny_reason]
+       └─ _merge_and_log ── RunLogger.log_rule_result ── mask_secrets
+  └─ compute_stats ── print_report

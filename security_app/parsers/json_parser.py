@@ -1,3 +1,4 @@
+#security_app/parser/json_parser.py
 import json
 from security_app.models import Rule
 from security_app.parsers.schema import COL_MAP, REQ_FIELDS

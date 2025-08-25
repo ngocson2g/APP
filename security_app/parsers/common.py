@@ -1,3 +1,4 @@
+#security_app/parser/common.py
 import os
 
 def detect_file_type(file_path):

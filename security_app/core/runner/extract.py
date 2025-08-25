@@ -1,3 +1,4 @@
+#security_app/core/runner/extract.py
 from __future__ import annotations
 from typing import List, Tuple
 from security_app.models import Rule, CmdResult
