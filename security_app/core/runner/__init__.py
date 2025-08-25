@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_compl
 from security_app.models import Rule, CmdResult
 from security_app.config import CMD_MARKER, DEFAULT_LOGS_DIR
 from security_app.core.logger import RunLogger
+from security_app.settings import Settings
 
 from .extract import _pre_extract_rules
 from .plan import _prepare_tasks
@@ -18,6 +19,7 @@ def run_all_rules(
     log_base_dir: str = DEFAULT_LOGS_DIR,
     workers: int | None = None,
     use_processes: bool = False,
+    settings: Settings = None,
     per_command: bool = True,
 ) -> List[Dict[str, Any]]:
     """Thực thi toàn bộ rule với concurrency; chỉ main thread ghi log (single-writer)."""
@@ -44,7 +46,8 @@ def run_all_rules(
             fut2idx = {}
             for task in tasks:
                 idx, rule, chunk = task
-                fut = ex.submit(_workers, (idx, rule, chunk))
+                # truyền kèm settings xuống worker
+                fut = ex.submit(_workers, (idx, rule, chunk, settings))
                 fut2idx[fut] = idx
 
             for fut in as_completed(fut2idx):
