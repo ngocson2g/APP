@@ -1,62 +1,40 @@
-//apps/dashboard/frontend/App.jsx
-import React, { useEffect, useState } from 'react'
-import { api } from './services/api'
-import Overview from './components/Overview'
-import BySeverityBar from './components/BySeverityBar'
-import TopFailingTable from './components/TopFailingTable'
+// apps/dashboard/frontend/src/App.jsx
+import React from 'react'
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom'
+import Home from './pages/Home'
+import Reporting from './pages/Reporting'
+import Checking from './pages/Checking'
 
-export default function App() {
-  const [runs, setRuns] = useState([])
-  const [selectedRun, setSelectedRun] = useState('')
-  const [summary, setSummary] = useState(null)
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    api.listRuns().then((rs) => {
-      setRuns(rs)
-      if (rs.length) setSelectedRun(rs[0].id)
-    })
-  }, [])
-
-  useEffect(() => {
-    if (!selectedRun) return
-    setLoading(true)
-    api.getSummary(selectedRun).then((s) => {
-      setSummary(s)
-      setLoading(false)
-    }).catch(() => setLoading(false))
-  }, [selectedRun])
+function Shell() {
+  const { pathname } = useLocation()
+  const isActive = (p) => pathname === p || pathname.startsWith(p + '/')
 
   return (
     <div className="container">
-      <h1 style={{ margin: 0 }}>security_app Dashboard</h1>
-      <p className="muted">Read-only analytics over your logs folder.</p>
+      <header style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+        <h1 style={{ margin: 0 }}>security_app Dashboard</h1>
+        <nav style={{ display:'flex', gap:12 }}>
+          <Link to="/home" className={isActive('/home') ? 'active' : ''}>Home</Link>
+          <Link to="/reporting" className={isActive('/reporting') ? 'active' : ''}>Reporting</Link>
+          <Link to="/checking" className={isActive('/checking') ? 'active' : ''}>Checking</Link>
+        </nav>
+      </header>
 
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center', margin: '8px 0 20px' }}>
-        <label htmlFor="run">Run:</label>
-        <select id="run" value={selectedRun} onChange={(e) => setSelectedRun(e.target.value)}>
-          {runs.map(r => (
-            <option key={r.id} value={r.id}>
-              {r.title} — {new Date(r.mtime * 1000).toLocaleString()} ({r.files} files)
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {loading && <p>Loading…</p>}
-      {!loading && summary && (
-        <>
-          <Overview summary={summary} />
-          <div className="card">
-            <h3 style={{ marginTop: 0 }}>By severity</h3>
-            <BySeverityBar bySeverity={summary.by_severity} />
-          </div>
-          <div className="card">
-            <h3 style={{ marginTop: 0 }}>Top failing rules</h3>
-            <TopFailingTable items={summary.top_failing_rules} />
-          </div>
-        </>
-      )}
+      <Routes>
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/reporting" element={<Reporting />} />
+        <Route path="/checking" element={<Checking />} />
+        <Route path="*" element={<Navigate to="/home" replace />} />
+      </Routes>
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Shell />
+    </BrowserRouter>
   )
 }

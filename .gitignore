@@ -1,10 +1,82 @@
+# ---------- Python (core + backend) ----------
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+.cache/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.pytype/
+.dmypy.json
+.ipynb_checkpoints
+
+# Virtual envs
 .venv/
 venv/
-.env
-.vscode/
-.idea/
+venvs/
+env/
+ENV/
+
+# ---------- App outputs & logs ----------
+# Toàn bộ run logs sinh ra khi chạy security-app
 logs/
-*.diff
+# Bất kỳ file .log rơi vãi
+*.log
+
+# ---------- Config / secrets ----------
+.env
+.env.*
+!.env.example           # giữ file mẫu
+*.pem
+*.key
+*.crt
+# nếu có file cấu hình local hoá
+**/*.local.*
+**/secrets*.*
+
+# ---------- Data ----------
+# Mặc định bỏ qua data thô/nhạy cảm
+data/
+# nhưng vẫn giữ tài liệu/samples cần thiết
+!data/README.md
+!data/samples/**
+# nếu muốn commit file CSV mẫu tiêu chuẩn, giữ dòng dưới; không muốn thì xóa dòng này
+!data/canonical_ubuntu_24.04_lts.csv
+
+# ---------- FastAPI backend ----------
+apps/dashboard/backend/**/__pycache__/
+apps/dashboard/backend/.pytest_cache/
+apps/dashboard/backend/.mypy_cache/
+
+# ---------- Frontend (Vite/React) ----------
+apps/dashboard/frontend/node_modules/
+apps/dashboard/frontend/dist/
+apps/dashboard/frontend/.vite/
+apps/dashboard/frontend/.eslintcache
+apps/dashboard/frontend/coverage/
+apps/dashboard/frontend/*.local
+apps/dashboard/frontend/*.log
+
+# KHÔNG bỏ qua lockfiles (để build reproducible)
+!apps/dashboard/frontend/package-lock.json
+!apps/dashboard/frontend/pnpm-lock.yaml
+!apps/dashboard/frontend/yarn.lock
+
+# ---------- IDE / OS junk ----------
+.vscode/
+!.vscode/extensions.json     # nếu muốn chia sẻ đề xuất extension
+# !.vscode/settings.json     # bật dòng này nếu muốn chia sẻ settings cho team
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
