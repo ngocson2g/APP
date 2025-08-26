@@ -89,7 +89,9 @@ def run_all_rules(
     # 3) Chạy song song phần còn lại
     if tasks:
         Executor = ProcessPoolExecutor if use_processes else ThreadPoolExecutor
-        max_workers = workers or os.cpu_count() or 4
+        sample = [max(1, len(t[2]))*0.1 for t in tasks[:50]]  # giả định 0.1s/lệnh nếu chưa có thống kê thật
+        guessed = auto_guess_workers(len(tasks), use_processes, sample)
+        max_workers = workers or guessed
         with Executor(max_workers=max_workers) as ex:
             fut2idx = {}
             for task in tasks:
