@@ -3,6 +3,7 @@ pyproject.toml
 security_app/__init__.py
 security_app/config.py
 security_app/models.py
+security_app/settings.py
 security_app.egg-info/PKG-INFO
 security_app.egg-info/SOURCES.txt
 security_app.egg-info/dependency_links.txt
