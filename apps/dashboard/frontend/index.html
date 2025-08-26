@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>security_app Dashboard</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial; margin: 0; }
+      .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+      .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+      .card { border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.08); background: var(--card-bg, #fff0); border: 1px solid rgba(127,127,127,.2); }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 8px 10px; border-bottom: 1px solid rgba(127,127,127,.2); text-align: left; }
+      .muted { opacity: .75; font-size: .9em; }
+      select { padding: 8px 10px; border-radius: 8px; }
+      .chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .75rem; border: 1px solid rgba(127,127,127,.25); }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
