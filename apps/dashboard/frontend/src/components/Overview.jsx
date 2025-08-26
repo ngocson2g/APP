@@ -1,3 +1,4 @@
+//apps/dashboard/frontend/Overview.jsx
 import React from 'react'
 
 function Stat({ label, value }) {

@@ -1,3 +1,4 @@
+//apps/dashboard/frontend/TopFailingTable.jsx
 import React from 'react'
 
 export default function TopFailingTable({ items }) {

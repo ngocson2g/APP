@@ -1,3 +1,4 @@
+//apps/dashboard/frontend/App.jsx
 import React, { useEffect, useState } from 'react'
 import { api } from './services/api'
 import Overview from './components/Overview'

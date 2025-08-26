@@ -1,3 +1,4 @@
+//apps/dashboard/frontend/BySeverityBar.jsx
 import React from 'react'
 import {
   ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar

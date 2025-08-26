@@ -42,7 +42,32 @@ APP
 │  └─ utils/
 │     └─ text.py                      # Utilities xử lý text và formatting
 ├─ security_app.egg-info/             # Metadata được sinh bởi setuptools
-└─ reportAPP                          # Thư mục chứa báo cáo (có thể được sinh ra)
+├─ apps/                              # Web dashboard (frontend + backend)
+│  └─ dashboard/
+│     ├─ backend/
+│     │  ├─ main.py                   # FastAPI app (chạy uvicorn)
+│     │  ├─ reader.py                 # Đọc/chuẩn hoá dữ liệu log/report
+│     │  ├─ requirements.txt
+│     │  └─ .env.example
+│     └─ frontend/
+│        ├─ package.json
+│        ├─ index.html
+│        ├─ vite.config.js
+│        ├─ .env.example
+│        └─ src/
+│           ├─ main.jsx
+│           ├─ App.jsx
+│           ├─ components/
+│           │  ├─ Overview.jsx        # Thẻ số liệu tổng quan
+│           │  ├─ BySeverityBar.jsx   # Biểu đồ bar theo severity (Recharts)
+│           │  └─ TopFailingTable.jsx # Bảng top rule fail
+│           └─ services/
+│              └─ api.js              # Gọi API backend
+└─ reportAPP                          # Tài liệu báo cáo sinh ra (nếu có)
+
+CLI (entry-point): security-app
+  Ví dụ:
+    security-app data/canonical_ubuntu_24.04_lts.csv 
 
 cli.main
   └─ parse_file -> [parse_csv | parse_json | parse_xml]
@@ -59,5 +84,5 @@ Luồng xử lý chính:
 2. Parse rules từ file → extract commands từ check text
 3. Kiểm tra safety policy → phân loại allowed/denied commands
 4. Chạy concurrent execution của allowed commands
-5. Gộp kết quả → ghi log → tính toán thống kê
+5. Gộp kết quả → ghi log (rotation, 20 file) → tính toán thống kê
 6. Hiển thị báo cáo trên terminal
