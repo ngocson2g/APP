@@ -26,3 +26,17 @@ def with_overrides(base: "Settings",
         retry_delay_sec=base.retry_delay_sec,
         retry_on_timeout=base.retry_on_timeout,
     )
+
+# --- SUDO default policy ---
+def require_sudo_by_default() -> bool:
+    """
+    Trả về True nếu mặc định yêu cầu sudo khi chạy CLI.
+    - Ưu tiên ENV SECURITY_APP_REQUIRE_SUDO (1/true/yes vs 0/false/no)
+    - Nếu không đặt ENV -> mặc định True (bật).
+    """
+    import os
+    val = os.getenv("SECURITY_APP_REQUIRE_SUDO")
+    if val is None:
+        return True
+    v = val.strip().lower()
+    return v not in ("0", "false", "no", "off")

@@ -8,8 +8,13 @@ from security_app.reporting.stats import compute_stats
 from security_app.reporting.terminal import print_report
 from security_app.config import DEFAULT_LOGS_DIR, TOP_FAIL_LIMIT
 from security_app.settings import default_settings, with_overrides
+from security_app.runtime.sudo import ensure_root
+from security_app.settings import require_sudo_by_default
+
 
 def main():
+    if require_sudo_by_default():
+        ensure_root(required=True)
     parser = argparse.ArgumentParser(
         prog="security-app",
         description="Run STIG/Checklist and report results."
