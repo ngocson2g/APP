@@ -1,4 +1,3 @@
-# security_app/config.py
 """
 Cấu hình/hằng số dùng chung toàn dự án.
 Có thể mở rộng thêm khi cần (timeout, allowlist, marker, ...).
@@ -12,6 +11,9 @@ TOP_FAIL_LIMIT = 10
 
 # Thư mục mặc định chứa logs theo phiên chạy
 DEFAULT_LOGS_DIR = "logs"
+
+# Số thư mục run gần nhất cần giữ lại trong DEFAULT_LOGS_DIR
+LOG_ROTATE_KEEP = 20
 
 # Timeout mặc định khi chạy lệnh shell (giây). 0 = không timeout.
 DEFAULT_SHELL_TIMEOUT = 10
@@ -36,7 +38,6 @@ CMD_DENYLIST = [
 ]
 
 # Mẫu secret để mask trong log (regex → replacement)
-# Lưu ý: pattern có nhóm chứa giá trị nhạy cảm; replacement thay bằng ******.
 SECRET_REPLACERS = [
     (r"(?i)\b(password|passwd)\s*[:=]\s*([^\s'\"\\]+)", r"\1=******"),
     (r"(?i)\b(token|apikey|api_key|secret)\s*[:=]\s*([A-Za-z0-9._-]{6,})", r"\1=******"),
