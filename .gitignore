@@ -32,6 +32,8 @@ logs/
 # Bất kỳ file .log rơi vãi
 *.log
 
+tests/
+
 # ---------- Config / secrets ----------
 .env
 .env.*
