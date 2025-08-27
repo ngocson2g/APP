@@ -24,3 +24,4 @@ def _pre_extract_rules(rules: List[Rule], marker: str) -> List[Tuple[int, Rule, 
                 allowed.append(c)
         pre.append((idx, rule, allowed, denied))
     return pre
+

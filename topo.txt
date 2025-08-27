@@ -1,28 +1,29 @@
 APP
 ├─ README.md                          # Tài liệu hướng dẫn sử dụng và mô tả dự án
 ├─ topo.txt                           # Sơ đồ cấu trúc thư mục và luồng xử lý của ứng dụng (file này)
+├─ .gitignore                         # Khuyến nghị: bỏ .venv/, __pycache__/, logs/, node_modules/, dist/, .env, *.log, *.sqlite
 ├─ data/                              # Thư mục chứa dữ liệu đầu vào mẫu
 │  ├─ canonical_ubuntu_24.04_lts.csv  # File checklist định dạng CSV
 │  ├─ canonical_ubuntu_24.04_lts.json # File checklist định dạng JSON
 │  └─ U_CAN_Ubuntu_24-04...xccdf.xml  # File checklist định dạng XCCDF/XML
 ├─ logs/                              # Thư mục output chứa log các phiên chạy (được log rotation)
-├─ pyproject.toml                     # Cấu hình build và dependencies cho project Python
+├─ pyproject.toml                     # Cấu hình build và dependencies cho project Python (entry-point: security-app)
 ├─ security_app/                      # Package chính của ứng dụng
 │  ├─ __init__.py
 │  ├─ app/
-│  │  └─ cli.py                       # Điểm vào command-line (entry: `security-app`)
+│  │  └─ cli.py                       # Điểm vào command-line (entry: `security-app`), bật sudo mặc định
 │  ├─ config.py                       # Hằng số/dấu hiệu chung (CMD_MARKER, LOG_ROTATE_KEEP, …)
 │  ├─ settings.py                     # Settings bất biến + helpers (default_settings, with_overrides, require_sudo_by_default)
 │  ├─ runtime/
 │  │  ├─ __init__.py                  # (tuỳ chọn)
-│  │  └─ sudo.py                      # ensure_root(): tự re-exec với sudo nếu cần
-│  ├─ models.py                       # Data model: Rule, CmdResult
+│  │  └─ sudo.py                      # ensure_root(): tự re-exec với sudo (giữ PATH/LOGS_DIR)
+│  ├─ models.py                       # Data model: Rule, CmdResult, RuleLogRecord
 │  ├─ core/
 │  │  ├─ command.py                   # Thực thi lệnh shell (retry/timeout) + deny-check
 │  │  ├─ command_extractor.py         # Trích lệnh từ check text theo marker ($ )
 │  │  ├─ logger.py                    # RunLogger (ghi 1 file/1 rule + xoay vòng thư mục run)
 │  │  └─ runner/
-│  │     ├─ __init__.py               # run_all_rules(): điều phối end-to-end
+│  │     ├─ __init__.py               # run_all_rules(): điều phối end-to-end (pilot + auto workers)
 │  │     ├─ extract.py                # _pre_extract_rules(): allowed/denied theo safety policy
 │  │     ├─ plan.py                   # _prepare_tasks(): chia task (per-command/per-rule)
 │  │     ├─ workers.py                # _workers(): chạy chunk lệnh (thread/process pool)
@@ -41,7 +42,7 @@ APP
 │  │  └─ secrets.py                   # mask_secrets() → che token/password trong log
 │  ├─ reporting/
 │  │  ├─ stats.py                     # compute_stats(): totals/by_severity/top_failing
-│  │  └─ terminal.py                  # print_report(): in báo cáo terminal (không sinh JSON/CSV)
+│  │  └─ terminal.py                  # print_report(): in báo cáo terminal (không sinh JSON/CSV, chữ đơn sắc)
 │  └─ utils/
 │     ├─ __init__.py                  # (tuỳ chọn)
 │     └─ text.py                      # _term_width/_bar/_table/_safe_name, v.v.
@@ -59,18 +60,20 @@ APP
 │        ├─ vite.config.js
 │        ├─ .env.example              # VITE_API_BASE_URL=http://localhost:8000
 │        └─ src/
-│           ├─ main.jsx
+│           ├─ main.jsx               # import './theme.css'
 │           ├─ App.jsx
+│           ├─ theme.css              # stylesheet cho UI (biến CSS: --primary, --danger, ...)
 │           ├─ pages/
 │           │  ├─ Home.jsx            # Trang giới thiệu, link tới Reporting/Checking
-│           │  ├─ Reporting.jsx       # Dropdown chọn run + thẻ overview + biểu đồ + bảng
+│           │  ├─ Reporting.jsx       # Dropdown chọn run + Trends + Overview + BySeverity + TopFailing
 │           │  └─ Checking.jsx        # Placeholder chức năng kiểm tra
 │           ├─ components/
 │           │  ├─ Overview.jsx        # Thẻ số liệu tổng quan
 │           │  ├─ BySeverityBar.jsx   # Biểu đồ bar theo severity (Recharts)
-│           │  └─ TopFailingTable.jsx # Bảng top rule fail
+│           │  ├─ RunTrend.jsx        # Biểu đồ Pass rate & rules fail theo thời gian
+│           │  └─ TopFailingTable.jsx # Bảng top rule fail (id/severity/title/cmd_ok/cmd_fail/status)
 │           └─ services/
-│              └─ api.js              # Gọi API backend (/api/runs, /summary, /rules)
+│              └─ api.js              # Gọi API backend (/api/runs, /summary, /rules, /timeseries)
 └─ reportAPP                          # (tuỳ chọn) tài liệu báo cáo sinh ra
 
 # ------------------------------------------------------------
@@ -79,6 +82,7 @@ APP
 # Chính sách sudo mặc định:
 #   - Mặc định YÊU CẦU quyền root và sẽ tự re-exec với sudo nếu cần.
 #   - Có thể tắt bằng ENV SECURITY_APP_REQUIRE_SUDO=0|false|no|off.
+#   - Khi re-exec, giữ lại PATH và LOGS_DIR (sudo --preserve-env).
 #
 # Ví dụ nhanh:
 #   security-app data/canonical_ubuntu_24.04_lts.csv \
@@ -101,7 +105,8 @@ APP
 # Log & rotation:
 #   - Mỗi rule → 1 file: logs/<run>/rule-XXX_<safe_title>.log
 #   - Tự xoay vòng thư mục run, chỉ giữ lại N run mới nhất (LOG_ROTATE_KEEP=20).
-
+#   - Logger chỉ ghi per-rule (KHÔNG sinh summary JSON/CSV).
+#
 # ------------------------------------------------------------
 # Dashboard Backend (FastAPI)
 # ------------------------------------------------------------
@@ -117,7 +122,11 @@ APP
 #   GET /api/runs                     → danh sách run (id, title, mtime, files)
 #   GET /api/runs/{run_id}/summary    → tổng hợp cho UI (overview/by_severity/top_failing)
 #   GET /api/runs/{run_id}/rules      → danh sách rule (để hiển thị bảng chi tiết)
-
+#   GET /api/runs/timeseries?limit=N  → chuỗi thời gian các run gần nhất (vẽ Trends)
+#
+# (Ghi chú) Dự kiến bổ sung:
+#   GET /api/runs/{run_id}/rule/{idx} → trả về nội dung file log của 1 rule (phục vụ viewer chi tiết)
+#
 # ------------------------------------------------------------
 # Dashboard Frontend (Vite + React)
 # ------------------------------------------------------------
@@ -134,11 +143,13 @@ APP
 #   - http://localhost:5173/reporting  (trang báo cáo)
 #   - http://localhost:5173/checking   (placeholder)
 #
-# UI sections:
+# UI sections (/reporting):
+#   - Run picker + nút “Latest” (chọn run mới nhất)
+#   - Trends (last 20 runs): Line pass_rate (kèm MA5), Bar rules fail
 #   - Overview (cards): total_rules, all_ok, with_failures, pass_rate, total_commands, cmd_ok, cmd_fail
 #   - By severity (BarChart): rules, rules_ok, cmd_ok, cmd_fail theo severity
 #   - Top failing table: id, severity, title, cmd_ok, cmd_fail, status
-
+#
 # ------------------------------------------------------------
 # Luồng xử lý chính (CLI)
 # ------------------------------------------------------------
@@ -154,22 +165,29 @@ APP
 # 6) Chạy song song phần còn lại:
 #    - ThreadPool/ProcessPoolExecutor.submit(_workers)
 #    - Thu kết quả từng phần, khi rule đủ chunk → _merge_and_log() + RunLogger.log_rule_result()
-# 7) Hoàn tất → compute_stats() → print_report() trên terminal
+# 7) Hoàn tất → compute_stats() → print_report() trên terminal (đơn sắc)
 #
 # Bảo mật & riêng tư log:
 #   - secrets.mask_secrets(): che thông tin nhạy cảm (password/token/Bearer …)
 #   - logger chỉ ghi per-rule (không sinh summary JSON/CSV), phù hợp yêu cầu hiện tại.
-
+#
 # ------------------------------------------------------------
-# Giá trị cấu hình quan trọng (config.py)
+# .gitignore khuyến nghị (rút gọn)
 # ------------------------------------------------------------
-# CMD_MARKER        = "$ "
-# TOP_FAIL_LIMIT    = 10
-# DEFAULT_LOGS_DIR  = "logs"
-# LOG_ROTATE_KEEP   = 20
-# DEFAULT_SHELL_TIMEOUT = 10
-# RETRY_ATTEMPTS    = 1
-# RETRY_DELAY_SEC   = 0.5
-# RETRY_ON_TIMEOUT  = True
-# CMD_DENYLIST      = [rm -rf /, fork-bomb, shutdown/reboot, mkfs, dd of=/dev, chown -R root, passwd, mount, nohup &, curl|sh, wget|sh, ...]
-# SECRET_REPLACERS  = [(password|token|Bearer|sshpass|--password …) → ******]
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+# Logs & outputs
+logs/
+*.log
+reportAPP/
+# Node
+apps/dashboard/frontend/node_modules/
+apps/dashboard/frontend/dist/
+# Secrets
+.env
+apps/dashboard/backend/.env
+apps/dashboard/frontend/.env

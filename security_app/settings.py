@@ -40,3 +40,4 @@ def require_sudo_by_default() -> bool:
         return True
     v = val.strip().lower()
     return v not in ("0", "false", "no", "off")
+

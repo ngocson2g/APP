@@ -25,3 +25,4 @@ def _merge_and_log(
         "num_ok": ok,
         "num_fail": n - ok,
     }
+

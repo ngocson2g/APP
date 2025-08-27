@@ -31,3 +31,4 @@ def _prepare_tasks(
             tasks.append((idx, rule, list(allowed)))
             pending[idx] = 1
     return tasks, agg, pending
+
