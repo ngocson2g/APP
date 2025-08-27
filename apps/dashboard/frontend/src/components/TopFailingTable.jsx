@@ -1,26 +1,22 @@
 import React, { useMemo } from 'react'
 
 const ORDER = { critical:5, high:4, medium:3, low:2, unknown:1, '':0 }
-
-function sevClass(sev){
-  const s = (sev||'unknown').toLowerCase()
-  return `badge ${['critical','high','medium','low'].includes(s) ? s : 'unknown'}`
-}
+const sevClass = s => `badge ${['critical','high','medium','low'].includes((s||'').toLowerCase()) ? s.toLowerCase() : 'unknown'}`
 
 export default function TopFailingTable({ items }) {
-  // Chỉ lấy rule thật sự fail
   const data = useMemo(() => {
-    const arr = (items || []).filter(r => (r?.status || '').toLowerCase() === 'fail' || (r?.cmd_fail ?? 0) > 0)
-    // Sort: severity desc → cmd_fail desc → rule_id asc
-    arr.sort((a,b) => {
-      const sa = ORDER[(a.severity||'unknown').toLowerCase()] ?? 0
-      const sb = ORDER[(b.severity||'unknown').toLowerCase()] ?? 0
-      if (sb !== sa) return sb - sa
-      if ((b.cmd_fail ?? 0) !== (a.cmd_fail ?? 0)) return (b.cmd_fail ?? 0) - (a.cmd_fail ?? 0)
-      return String(a.rule_id).localeCompare(String(b.rule_id))
+    const arr = (items||[])
+      .filter(r => (r?.status||'').toLowerCase()==='fail' || (r?.cmd_fail??0)>0)
+      .map(r => ({ ...r, severity: (r.severity||'unknown').toLowerCase() }))
+    arr.sort((a,b)=>{
+      const sv = (ORDER[b.severity]??0) - (ORDER[a.severity]??0)
+      if (sv) return sv
+      return (b.cmd_fail??0) - (a.cmd_fail??0)
     })
     return arr
   }, [items])
+
+  if (!data.length) return <p className="muted">No failing rules.</p>
 
   return (
     <div className="card">
@@ -39,11 +35,11 @@ export default function TopFailingTable({ items }) {
             </tr>
           </thead>
           <tbody>
-            {data.map((r, idx) => (
-              <tr key={`${r.rule_id}-${idx}`}>
-                <td>{idx+1}</td>
-                <td>{r.rule_id ?? '—'}</td>
-                <td><span className={sevClass(r.severity)}>{(r.severity||'unknown').toLowerCase()}</span></td>
+            {data.map((r,i)=>(
+              <tr key={`${r.id}-${i}`}>
+                <td>{i+1}</td>
+                <td><code>{r.id || '—'}</code></td>
+                <td><span className={sevClass(r.severity)}>{r.severity||'unknown'}</span></td>
                 <td>{r.title || '—'}</td>
                 <td>{r.cmd_ok ?? 0}</td>
                 <td>{r.cmd_fail ?? 0}</td>
@@ -53,7 +49,7 @@ export default function TopFailingTable({ items }) {
           </tbody>
         </table>
       </div>
-      <p style={{color:'var(--muted)', marginTop:8}}>Hiển thị khung ~10 dòng, kéo để xem thêm. Sắp xếp: severity ↓, cmd_fail ↓.</p>
+      <p className="muted" style={{marginTop:8}}>Sắp xếp: severity ↓, cmd_fail ↓. Khung ~10 dòng, kéo để xem thêm.</p>
     </div>
   )
 }

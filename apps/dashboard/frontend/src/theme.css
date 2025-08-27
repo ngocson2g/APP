@@ -33,3 +33,13 @@ h1,h2,h3{ color:var(--text); margin:0 0 8px; }
 .badge.medium  { background:#78350f; color:#fde68a; }
 .badge.low     { background:#064e3b; color:#bbf7d0; }
 .badge.unknown { background:#374151; color:#e5e7eb; }
+
+select, button {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+button:hover { filter: brightness(1.05); }
+button:active { transform: translateY(1px); }

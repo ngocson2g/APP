@@ -31,27 +31,59 @@ export default function Reporting() {
 
   return (
     <>
-      {/* ... phần chọn run + summary giữ nguyên ... */}
-
-      {loading && <p>Loading…</p>}
-      {!loading && summary && (
+      {/* RUN PICKER luôn hiện khi đã có runs */}
+    <div className="card" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+      <h3 style={{ margin: 0, marginRight: 8 }}>Select run</h3>
+      {runs.length ? (
         <>
-          <div className="card">
-            <h3 style={{ marginTop: 0 }}>Trends (last 20 runs)</h3>
-            <RunTrend data={series} />
-          </div>
-
-          <Overview summary={summary} />
-          <div className="card">
-            <h3 style={{ marginTop: 0 }}>By severity</h3>
-            <BySeverityBar bySeverity={summary.by_severity} />
-          </div>
-          <div className="card">
-            <h3 style={{ marginTop: 0 }}>Top failing rules</h3>
-            <TopFailingTable items={summary.top_failing_rules} />
-          </div>
+          <select
+            value={selectedRun || ''}
+            onChange={(e) => setSelectedRun(e.target.value)}
+            style={{
+              background: 'var(--bg)', color: 'var(--text)',
+              border: '1px solid var(--border)', padding: '8px 12px', borderRadius: 8
+            }}
+          >
+            {runs.map((r) => (
+              <option key={r.id} value={r.id}>
+                {new Date(r.mtime * 1000).toLocaleString()} — {r.id}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => runs.length && setSelectedRun(runs[0].id)} // runs[0] = mới nhất (backend sort DESC)
+            style={{
+              background: 'var(--primary)', color: '#fff',
+              border: '1px solid var(--primary)', padding: '8px 12px', borderRadius: 8
+            }}
+          >
+            Latest
+          </button>
         </>
+      ) : (
+        <span className="muted">No logs found.</span>
       )}
+    </div>
+
+    {/* TIMESERIES luôn hiện (nếu có dữ liệu) */}
+    <div className="card">
+      <h3 style={{ marginTop: 0 }}>Trends (last 20 runs)</h3>
+      <RunTrend data={series} />
+    </div>
+
+    {/* SUMMARY của run đã chọn */}
+    {loading && <p>Loading…</p>}
+    {!loading && summary && (
+      <>
+        <Overview summary={summary} />
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>By severity</h3>
+          <BySeverityBar bySeverity={summary.by_severity} />
+        </div>
+
+        <TopFailingTable items={summary.top_failing_rules} />
+      </>
+    )}
     </>
   )
 }
