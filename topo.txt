@@ -1,88 +1,175 @@
 APP
 ├─ README.md                          # Tài liệu hướng dẫn sử dụng và mô tả dự án
-├─ topo.txt                           # Sơ đồ cấu trúc thư mục và luồng xử lý của ứng dụng
+├─ topo.txt                           # Sơ đồ cấu trúc thư mục và luồng xử lý của ứng dụng (file này)
 ├─ data/                              # Thư mục chứa dữ liệu đầu vào mẫu
 │  ├─ canonical_ubuntu_24.04_lts.csv  # File checklist định dạng CSV
 │  ├─ canonical_ubuntu_24.04_lts.json # File checklist định dạng JSON
 │  └─ U_CAN_Ubuntu_24-04...xccdf.xml  # File checklist định dạng XCCDF/XML
-├─ logs/                              # Thư mục output chứa log các phiên chạy
+├─ logs/                              # Thư mục output chứa log các phiên chạy (được log rotation)
 ├─ pyproject.toml                     # Cấu hình build và dependencies cho project Python
 ├─ security_app/                      # Package chính của ứng dụng
-│  ├─ __init__.py                     # Khởi tạo package
+│  ├─ __init__.py
 │  ├─ app/
-│  │  └─ cli.py                       # Điểm vào command-line interface
-│  ├─ config.py                       # Cấu hình và hằng số toàn cục
-│  ├─ models.py                       # Định nghĩa các data model (Rule, CmdResult)
-│  ├─ setting.py
+│  │  └─ cli.py                       # Điểm vào command-line (entry: `security-app`)
+│  ├─ config.py                       # Hằng số/dấu hiệu chung (CMD_MARKER, LOG_ROTATE_KEEP, …)
+│  ├─ settings.py                     # Settings bất biến + helpers (default_settings, with_overrides, require_sudo_by_default)
+│  ├─ runtime/
+│  │  ├─ __init__.py                  # (tuỳ chọn)
+│  │  └─ sudo.py                      # ensure_root(): tự re-exec với sudo nếu cần
+│  ├─ models.py                       # Data model: Rule, CmdResult
 │  ├─ core/
-│  │  ├─ command.py                   # Xử lý thực thi lệnh shell với retry/timeout
-│  │  ├─ command_extractor.py         # Trích xuất lệnh từ text với marker
-│  │  ├─ logger.py                    # Ghi log kết quả thực thi theo rule
-│  │  └─ runner/                      # Module điều phối thực thi concurrent
-│  │     ├─ __init__.py               # API chính để chạy rules
-│  │     ├─ extract.py                # Trích xuất và phân loại lệnh allowed/denied
-│  │     ├─ plan.py                   # Lập kế hoạch chia task cho concurrent execution
-│  │     ├─ workers.py                # Worker function để thực thi lệnh
-│  │     ├─ tuner.py
-│  │     └─ merge.py                  # Gộp kết quả và ghi log
-│  ├─ parsers/                        # Module xử lý parsing các định dạng file
+│  │  ├─ command.py                   # Thực thi lệnh shell (retry/timeout) + deny-check
+│  │  ├─ command_extractor.py         # Trích lệnh từ check text theo marker ($ )
+│  │  ├─ logger.py                    # RunLogger (ghi 1 file/1 rule + xoay vòng thư mục run)
+│  │  └─ runner/
+│  │     ├─ __init__.py               # run_all_rules(): điều phối end-to-end
+│  │     ├─ extract.py                # _pre_extract_rules(): allowed/denied theo safety policy
+│  │     ├─ plan.py                   # _prepare_tasks(): chia task (per-command/per-rule)
+│  │     ├─ workers.py                # _workers(): chạy chunk lệnh (thread/process pool)
+│  │     ├─ merge.py                  # _merge_and_log(): gộp kết quả & ghi log (single-writer)
+│  │     └─ tuner.py                  # auto_guess_workers(): tự suy số worker từ sample durations
+│  ├─ parsers/                        # Module parsing nhiều định dạng
 │  │  ├─ __init__.py
-│  │  ├─ common.py                    # Utility phát hiện loại file
-│  │  ├─ schema.py                    # Định nghĩa schema mapping cho parsers
-│  │  ├─ dispatch.py                  # Điều phối parser dựa trên loại file
-│  │  ├─ csv_parser.py                # Parser cho định dạng CSV
-│  │  ├─ json_parser.py               # Parser cho định dạng JSON
-│  │  └─ xml_parser.py                # Parser cho định dạng XML/XCCDF
-│  ├─ policy/                         # Module chính sách bảo mật
-│  │  ├─ safety.py                    # Kiểm tra lệnh nguy hiểm theo denylist
-│  │  └─ secrets.py                   # Mask thông tin nhạy cảm trong log
-│  ├─ reporting/                      # Module báo cáo kết quả
-│  │  ├─ stats.py                     # Tính toán thống kê kết quả thực thi
-│  │  └─ terminal.py                  # Hiển thị báo cáo trên terminal
+│  │  ├─ common.py                    # detect_file_type()
+│  │  ├─ schema.py                    # COL_MAP/REQ_FIELDS alias chuẩn hoá
+│  │  ├─ dispatch.py                  # parse_file() → điều phối CSV/JSON/XML
+│  │  ├─ csv_parser.py                # Parser CSV (normalize header, validate REQ_FIELDS)
+│  │  ├─ json_parser.py               # Parser JSON (đa hình cấu trúc findings/rules/items)
+│  │  └─ xml_parser.py                # Parser XCCDF/XML (namespaces + xpath check/fix)
+│  ├─ policy/
+│  │  ├─ safety.py                    # denylist: deny_reason(cmd) → lý do chặn
+│  │  └─ secrets.py                   # mask_secrets() → che token/password trong log
+│  ├─ reporting/
+│  │  ├─ stats.py                     # compute_stats(): totals/by_severity/top_failing
+│  │  └─ terminal.py                  # print_report(): in báo cáo terminal (không sinh JSON/CSV)
 │  └─ utils/
-│     └─ text.py                      # Utilities xử lý text và formatting
-├─ security_app.egg-info/             # Metadata được sinh bởi setuptools
+│     ├─ __init__.py                  # (tuỳ chọn)
+│     └─ text.py                      # _term_width/_bar/_table/_safe_name, v.v.
+├─ security_app.egg-info/             # Metadata do setuptools sinh
 ├─ apps/                              # Web dashboard (frontend + backend)
 │  └─ dashboard/
 │     ├─ backend/
-│     │  ├─ main.py                   # FastAPI app (chạy uvicorn)
-│     │  ├─ reader.py                 # Đọc/chuẩn hoá dữ liệu log/report
+│     │  ├─ main.py                   # FastAPI app (uvicorn)
+│     │  ├─ reader.py                 # Đọc/chuẩn hoá log per-rule → summary cho UI
 │     │  ├─ requirements.txt
-│     │  └─ .env.example
+│     │  └─ .env.example              # LOGS_DIR=../../../../logs (có thể chỉnh)
 │     └─ frontend/
 │        ├─ package.json
 │        ├─ index.html
 │        ├─ vite.config.js
-│        ├─ .env.example
+│        ├─ .env.example              # VITE_API_BASE_URL=http://localhost:8000
 │        └─ src/
 │           ├─ main.jsx
 │           ├─ App.jsx
+│           ├─ pages/
+│           │  ├─ Home.jsx            # Trang giới thiệu, link tới Reporting/Checking
+│           │  ├─ Reporting.jsx       # Dropdown chọn run + thẻ overview + biểu đồ + bảng
+│           │  └─ Checking.jsx        # Placeholder chức năng kiểm tra
 │           ├─ components/
 │           │  ├─ Overview.jsx        # Thẻ số liệu tổng quan
 │           │  ├─ BySeverityBar.jsx   # Biểu đồ bar theo severity (Recharts)
 │           │  └─ TopFailingTable.jsx # Bảng top rule fail
 │           └─ services/
-│              └─ api.js              # Gọi API backend
-└─ reportAPP                          # Tài liệu báo cáo sinh ra (nếu có)
+│              └─ api.js              # Gọi API backend (/api/runs, /summary, /rules)
+└─ reportAPP                          # (tuỳ chọn) tài liệu báo cáo sinh ra
 
-CLI (entry-point): security-app
-  Ví dụ:
-    security-app data/canonical_ubuntu_24.04_lts.csv 
+# ------------------------------------------------------------
+# CLI (entry-point): security-app
+# ------------------------------------------------------------
+# Chính sách sudo mặc định:
+#   - Mặc định YÊU CẦU quyền root và sẽ tự re-exec với sudo nếu cần.
+#   - Có thể tắt bằng ENV SECURITY_APP_REQUIRE_SUDO=0|false|no|off.
+#
+# Ví dụ nhanh:
+#   security-app data/canonical_ubuntu_24.04_lts.csv \
+#     --logs-dir logs \
+#     --workers 8 \
+#     --proc \
+#     --timeout 15 \
+#     --retries 1 \
+#     --top 10
+#
+# Tham số:
+#   input                : Đường dẫn file checklist (CSV/JSON/XML)
+#   --logs-dir           : Thư mục gốc chứa run logs (mặc định: logs)
+#   --workers            : Số worker tối đa (mặc định: tự chọn)
+#   --proc               : Dùng ProcessPool (mặc định: ThreadPool)
+#   --timeout            : Timeout mỗi lệnh (giây; 0/None = không giới hạn)
+#   --retries            : Số lần thử lại (không tính lần chạy đầu)
+#   --top                : Số item tối đa ở "Top failing rules" (mặc định 10)
+#
+# Log & rotation:
+#   - Mỗi rule → 1 file: logs/<run>/rule-XXX_<safe_title>.log
+#   - Tự xoay vòng thư mục run, chỉ giữ lại N run mới nhất (LOG_ROTATE_KEEP=20).
 
-cli.main
-  └─ parse_file -> [parse_csv | parse_json | parse_xml]
-  └─ run_all_rules
-       ├─ _pre_extract_rules ─┬─ extract_all_commands
-       │                       └─ deny_reason
-       ├─ _prepare_tasks
-       ├─ Executor.submit(_worker) ── run_command ── [_run_once, _to_result, deny_reason]
-       └─ _merge_and_log ── RunLogger.log_rule_result ── mask_secrets
-  └─ compute_stats ── print_report
+# ------------------------------------------------------------
+# Dashboard Backend (FastAPI)
+# ------------------------------------------------------------
+# Biến môi trường:
+#   LOGS_DIR : Trỏ tới thư mục logs gốc (mặc định: ./logs). Có thể đặt bằng:
+#              - export LOGS_DIR=/path/to/logs
+#              - hoặc tạo file .env (copy .env.example) trong ./apps/dashboard/backend
+#
+# Chạy từ root dự án:
+#   uvicorn apps.dashboard.backend.main:app --reload --host 0.0.0.0 --port 8000
+#
+# Endpoints:
+#   GET /api/runs                     → danh sách run (id, title, mtime, files)
+#   GET /api/runs/{run_id}/summary    → tổng hợp cho UI (overview/by_severity/top_failing)
+#   GET /api/runs/{run_id}/rules      → danh sách rule (để hiển thị bảng chi tiết)
 
-Luồng xử lý chính:
-1. CLI nhận input → detect file type → chọn parser phù hợp
-2. Parse rules từ file → extract commands từ check text
-3. Kiểm tra safety policy → phân loại allowed/denied commands
-4. Chạy concurrent execution của allowed commands
-5. Gộp kết quả → ghi log (rotation, 20 file) → tính toán thống kê
-6. Hiển thị báo cáo trên terminal
+# ------------------------------------------------------------
+# Dashboard Frontend (Vite + React)
+# ------------------------------------------------------------
+# Cấu hình:
+#   - copy apps/dashboard/frontend/.env.example → .env
+#   - đặt VITE_API_BASE_URL=http://localhost:8000 (hoặc URL backend thực tế)
+#
+# Chạy dev:
+#   cd apps/dashboard/frontend
+#   npm install
+#   npm run dev
+# Truy cập:
+#   - http://localhost:5173/home
+#   - http://localhost:5173/reporting  (trang báo cáo)
+#   - http://localhost:5173/checking   (placeholder)
+#
+# UI sections:
+#   - Overview (cards): total_rules, all_ok, with_failures, pass_rate, total_commands, cmd_ok, cmd_fail
+#   - By severity (BarChart): rules, rules_ok, cmd_ok, cmd_fail theo severity
+#   - Top failing table: id, severity, title, cmd_ok, cmd_fail, status
+
+# ------------------------------------------------------------
+# Luồng xử lý chính (CLI)
+# ------------------------------------------------------------
+# 1) CLI nhận input → detect file type → chọn parser (CSV/JSON/XML)
+# 2) Parse rules → extract commands từ check text (marker mặc định: "$ ")
+# 3) Safety policy: phân loại allowed / denied (deny_reason)
+# 4) Lập kế hoạch task:
+#    - _pre_extract_rules()   → [(idx, rule, allowed[], denied[])]
+#    - _prepare_tasks()       → tasks (per_command/per_rule), agg, pending
+# 5) Pilot run + auto-tune workers:
+#    - _pilot_execute()       → chạy tuần tự N task mẫu → sample durations
+#    - auto_guess_workers()   → chọn số worker phù hợp (thread/process)
+# 6) Chạy song song phần còn lại:
+#    - ThreadPool/ProcessPoolExecutor.submit(_workers)
+#    - Thu kết quả từng phần, khi rule đủ chunk → _merge_and_log() + RunLogger.log_rule_result()
+# 7) Hoàn tất → compute_stats() → print_report() trên terminal
+#
+# Bảo mật & riêng tư log:
+#   - secrets.mask_secrets(): che thông tin nhạy cảm (password/token/Bearer …)
+#   - logger chỉ ghi per-rule (không sinh summary JSON/CSV), phù hợp yêu cầu hiện tại.
+
+# ------------------------------------------------------------
+# Giá trị cấu hình quan trọng (config.py)
+# ------------------------------------------------------------
+# CMD_MARKER        = "$ "
+# TOP_FAIL_LIMIT    = 10
+# DEFAULT_LOGS_DIR  = "logs"
+# LOG_ROTATE_KEEP   = 20
+# DEFAULT_SHELL_TIMEOUT = 10
+# RETRY_ATTEMPTS    = 1
+# RETRY_DELAY_SEC   = 0.5
+# RETRY_ON_TIMEOUT  = True
+# CMD_DENYLIST      = [rm -rf /, fork-bomb, shutdown/reboot, mkfs, dd of=/dev, chown -R root, passwd, mount, nohup &, curl|sh, wget|sh, ...]
+# SECRET_REPLACERS  = [(password|token|Bearer|sshpass|--password …) → ******]
