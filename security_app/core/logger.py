@@ -1,10 +1,34 @@
 from __future__ import annotations
 import os, datetime, shutil
 from typing import List
-from security_app.models import Rule, CmdResult
+from security_app.models import Rule, CmdResult, RuleLogRecord
 from security_app.utils.text import _safe_name
 from security_app.policy.secrets import mask_secrets
 import security_app.config as cfg
+
+def _format_rule_log(rec: RuleLogRecord) -> str:
+    """Định dạng bản ghi log theo đúng format hiện có (để backend parse được)."""
+    lines: List[str] = []
+    lines.append(f"Rule #{rec.index}")
+    lines.append(f"ID     : {rec.rule_id}")
+    lines.append(f"Title  : {rec.title}")
+    lines.append(f"Severity: {rec.severity}")
+    lines.append("---- Check ----")
+    lines.append(rec.check_masked)
+    lines.append("")  # dòng trống
+    lines.append("---- Command Results ----")
+    for r in rec.cmds:
+        lines.append(f"$ {r.cmd}")
+        lines.append(f"RC={r.returncode} | OK={r.ok} | {r.duration_sec:.3f}s")
+        if r.stdout:
+            lines.append("-- stdout --")
+            lines.append(str(r.stdout).rstrip())
+        if r.stderr:
+            lines.append("-- stderr --")
+            lines.append(str(r.stderr).rstrip())
+        lines.append("")  # ngăn cách mỗi command
+    return "\n".join(lines) + "\n"
+
 
 class RunLogger:
     """
@@ -20,7 +44,6 @@ class RunLogger:
         self.run_dir = os.path.join(base_dir, run_name or ts)
         os.makedirs(self.run_dir, exist_ok=True)
 
-        # enforce log rotation (giữ lại N run gần nhất)
         keep = cfg.LOG_ROTATE_KEEP if keep_runs is None else int(keep_runs)
         self._rotate_old_runs(keep)
 
@@ -64,34 +87,25 @@ class RunLogger:
             # an toàn: không để rotation làm gãy chương trình chính
             pass
 
+    
     def log_rule_result(self, rule_index: int, rule: Rule, cmd_results: List[CmdResult]):
         rule_id   = rule.id or str(rule_index)
         title     = rule.title or ""
         severity  = rule.severity or ""
         check_raw = rule.check or ""
 
+        # Mask trước khi ghi
+        rec = RuleLogRecord(
+            index=rule_index,
+            rule_id=rule_id,
+            title=title,
+            severity=severity,
+            check_masked=mask_secrets(check_raw),
+            cmds=list(cmd_results),
+        )
+
         short = _safe_name(title or rule_id)
         per_rule_path = os.path.join(self.run_dir, f"rule-{rule_index:03d}_{short}.log")
 
-        # Mask check trước khi ghi
-        check_masked = mask_secrets(check_raw)
-
         with open(per_rule_path, "w", encoding="utf-8") as f:
-            f.write(f"Rule #{rule_index}\n")
-            f.write(f"ID     : {rule_id}\n")
-            f.write(f"Title  : {title}\n")
-            f.write(f"Severity: {severity}\n")
-            f.write("---- Check ----\n")
-            f.write(check_masked + "\n\n")
-            f.write("---- Command Results ----\n")
-
-            for r in cmd_results:
-                f.write(f"$ {r.cmd}\n")
-                f.write(f"RC={r.returncode} | OK={r.ok} | {r.duration_sec:.3f}s\n")
-                if r.stdout:
-                    f.write("-- stdout --\n")
-                    f.write(str(r.stdout).rstrip() + "\n")
-                if r.stderr:
-                    f.write("-- stderr --\n")
-                    f.write(str(r.stderr).rstrip() + "\n")
-                f.write("\n")
+            f.write(_format_rule_log(rec))

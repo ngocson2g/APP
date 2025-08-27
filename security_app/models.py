@@ -1,6 +1,6 @@
 # security_app/models.py
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List
 
 @dataclass(frozen=True)
 class Rule:
@@ -25,3 +25,16 @@ class CmdResult:
     stderr: str
     duration_sec: float
     ok: bool
+
+@dataclass(frozen=True)
+class RuleLogRecord:
+    """
+    Bản ghi log cho 1 rule (đã mask secret).
+    Dùng để định dạng/ghi ra file per-rule.
+    """
+    index: int
+    rule_id: str
+    title: str
+    severity: str
+    check_masked: str
+    cmds: List[CmdResult]
