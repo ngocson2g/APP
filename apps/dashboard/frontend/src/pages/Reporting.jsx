@@ -1,21 +1,24 @@
-// apps/dashboard/frontend/src/pages/Reporting.jsx
 import React, { useEffect, useState } from 'react'
 import { api } from '../services/api'
 import Overview from '../components/Overview'
 import BySeverityBar from '../components/BySeverityBar'
 import TopFailingTable from '../components/TopFailingTable'
+import RunTrend from '../components/RunTrend'   // <-- thêm
 
 export default function Reporting() {
   const [runs, setRuns] = useState([])
   const [selectedRun, setSelectedRun] = useState('')
   const [summary, setSummary] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [series, setSeries] = useState([])      // <-- thêm
 
+  const CountRuntren = 20
   useEffect(() => {
     api.listRuns().then((rs) => {
       setRuns(rs)
       if (rs.length) setSelectedRun(rs[0].id)
     })
+    api.getRunTimeseries(CountRuntren).then(setSeries).catch(() => {})   // <-- tải timeseries
   }, [])
 
   useEffect(() => {
@@ -28,20 +31,16 @@ export default function Reporting() {
 
   return (
     <>
-      <div style={{ display:'flex', gap:12, alignItems:'center', margin:'0 0 20px' }}>
-        <label htmlFor="run">Run:</label>
-        <select id="run" value={selectedRun} onChange={(e) => setSelectedRun(e.target.value)}>
-          {runs.map(r => (
-            <option key={r.id} value={r.id}>
-              {r.title} — {new Date(r.mtime * 1000).toLocaleString()} ({r.files} files)
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* ... phần chọn run + summary giữ nguyên ... */}
 
       {loading && <p>Loading…</p>}
       {!loading && summary && (
         <>
+          <div className="card">
+            <h3 style={{ marginTop: 0 }}>Trends (last 20 runs)</h3>
+            <RunTrend data={series} />
+          </div>
+
           <Overview summary={summary} />
           <div className="card">
             <h3 style={{ marginTop: 0 }}>By severity</h3>

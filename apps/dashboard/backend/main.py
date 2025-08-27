@@ -5,9 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Cho phép chạy kiểu package và kiểu "uvicorn main:app"
 try:
-    from .reader import list_runs, get_summary, list_rules  # chạy từ root: uvicorn apps.dashboard.backend.main:app
+    from .reader import list_runs, get_summary, list_rules, get_timeseries
 except ImportError:
-    from reader import list_runs, get_summary, list_rules    # chạy trong thư mục backend: uvicorn main:app
+    from reader import list_runs, get_summary, list_rules, get_timeseries
 
 app = FastAPI(title="security_app dashboard API")
 
@@ -36,3 +36,8 @@ def api_rules(run_id: str):
         return list_rules(run_id)
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Run not found")
+
+# thêm endpoint:
+@app.get("/api/runs/timeseries")
+def api_runs_timeseries(limit: int = 20):
+    return get_timeseries(limit=limit)

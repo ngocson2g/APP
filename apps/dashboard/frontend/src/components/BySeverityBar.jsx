@@ -25,10 +25,10 @@ export default function BySeverityBar({ bySeverity }) {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="rules" />
-          <Bar dataKey="rules_ok" />
-          <Bar dataKey="cmd_ok" />
-          <Bar dataKey="cmd_fail" />
+          <Bar dataKey="rules"     name="rules"    fill="var(--primary)" />
+          <Bar dataKey="rules_ok"  name="rules_ok" fill="var(--accent)" />
+          <Bar dataKey="cmd_ok"    name="cmd_ok"   fill="#22c55e" />
+          <Bar dataKey="cmd_fail"  name="cmd_fail" fill="var(--danger)" />
         </BarChart>
       </ResponsiveContainer>
     </div>

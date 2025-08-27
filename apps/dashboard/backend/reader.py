@@ -3,6 +3,7 @@
 import os, re, glob, json, time
 from dataclasses import dataclass
 from typing import List, Dict, Any
+from security_app.reporting.stats import compute_stats
 
 # dùng lại compute_stats của CLI để đảm bảo cùng một công thức
 from security_app.reporting.stats import compute_stats  # totals/by_severity/top_failing/all_results
@@ -147,3 +148,30 @@ def list_rules(run_id: str) -> List[Dict[str, Any]]:
             "status": "ok" if r["num_fail"] == 0 else "fail",
         })
     return out
+
+def get_timeseries(limit: int = 20) -> List[Dict[str, Any]]:
+    """
+    Trả về chuỗi thời gian của các lần run gần nhất (tối đa 'limit'),
+    mỗi điểm gồm pass_rate và các số đếm tổng quan để vẽ biểu đồ.
+    """
+    # list_runs hiện sort theo mtime DESC (mới nhất trước) → ta đảo lại để vẽ trái→phải theo thời gian.
+    runs = _list_run_dirs(LOGS_BASE)[: max(1, int(limit))]
+    items: List[Dict[str, Any]] = []
+    for r in runs:
+        rs = _read_run_results(r["id"])
+        stats = compute_stats(rs)
+        t = stats["totals"]
+        items.append({
+            "id": r["id"],
+            "mtime": r["mtime"],
+            "files": r["files"],
+            "total_rules":    t["total_rules"],
+            "all_ok":         t["rules_all_ok"],
+            "with_failures":  t["rules_with_fail"],
+            "pass_rate":      round(float(t["pass_rate"]), 2),
+            "total_commands": t["total_cmds"],
+            "commands_ok":    t["total_ok"],
+            "commands_failed":t["total_fail"],
+        })
+    items.sort(key=lambda x: x["mtime"])  # thời gian tăng dần cho trục X
+    return items
