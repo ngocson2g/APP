@@ -18,15 +18,6 @@ htmlcov/
 .pytype/
 .dmypy.json
 .ipynb_checkpoints
-.tox/
-.nox/
-.hypothesis/
-.pyre/
-.pyright/
-.benchmarks/
-.python-version
-.tool-versions
-
 
 # Virtual envs
 .venv/
