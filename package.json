@@ -1,0 +1,12 @@
+{
+  "name": "app-root",
+  "private": true,
+  "scripts": {
+    "frontend:dev": "npm -C apps/dashboard/frontend run dev",
+    "backend:dev": "uvicorn apps.dashboard.backend.main:app --reload --host 0.0.0.0 --port 8000",
+    "dev": "concurrently -k -s first -n FRONT,BACK -c auto \"npm:frontend:dev\" \"npm:backend:dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
