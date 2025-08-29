@@ -38,3 +38,4 @@ class RuleLogRecord:
     severity: str
     check_masked: str
     cmds: List[CmdResult]
+

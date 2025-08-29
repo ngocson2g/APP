@@ -21,3 +21,4 @@ def deny_reason(cmd: str) -> Optional[str]:
         if rx.search(s):
             return f"DENIED by safety policy: matched /{rx.pattern}/"
     return None
+

@@ -36,3 +36,4 @@ def parse_csv(path: str):
             id=rid, description=desc, check=check, fix=fix, severity=sev, title=title or ""
         ))
     return rules
+

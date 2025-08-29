@@ -75,3 +75,4 @@ def run_command(cmd: str, settings: Settings) -> CmdResult:
 
     # Phòng hờ (không nên tới đây)
     return _to_result(cmd, None, "", str(last_exc or "Unknown error"), started_all)
+

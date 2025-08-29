@@ -23,3 +23,4 @@ def reexec_with_sudo(argv: list[str] | None = None) -> "NoReturn":  # type: igno
 def ensure_root(required: bool = True) -> None:
     if required and _needs_root():
         reexec_with_sudo()
+

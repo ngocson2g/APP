@@ -10,3 +10,4 @@ def _workers(payload: Tuple[int, Rule, List[str], Settings]) -> Tuple[int, List[
     idx, _rule, allowed_cmds, settings = payload
     results: List[CmdResult] = [run_command(cmd, settings) for cmd in allowed_cmds]
     return idx, results
+

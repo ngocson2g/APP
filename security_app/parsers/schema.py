@@ -30,3 +30,4 @@ COL_MAP = {
 
 # Trường bắt buộc phải có dữ liệu
 REQ_FIELDS = ["id", "description", "check", "fix", "severity"]
+

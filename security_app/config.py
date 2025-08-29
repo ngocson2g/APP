@@ -45,3 +45,4 @@ SECRET_REPLACERS = [
     (r"(?i)sshpass\s+-p\s+(\S+)", "sshpass -p ******"),
     (r"(?i)--password\s+(\S+)", "--password ******"),
 ]
+

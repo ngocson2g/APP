@@ -83,3 +83,4 @@ def print_report(stats, limit_top=TOP_FAIL_LIMIT):
     print(f"OK Rule IDs ({len(ok_ids)}):")
     print(", ".join(ok_ids))
     print()
+

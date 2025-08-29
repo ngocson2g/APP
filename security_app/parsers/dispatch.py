@@ -15,3 +15,4 @@ def parse_file(file_path):
         return parse_xml(file_path)
     else:
         raise ValueError('Unsupported file type')
+

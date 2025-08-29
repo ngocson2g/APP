@@ -47,3 +47,4 @@ def extract_all_commands(checktext: str):
         cmds.append(current.strip())
 
     return cmds
+

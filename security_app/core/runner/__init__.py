@@ -117,3 +117,4 @@ def run_all_rules(
     # 4) Ổn định thứ tự theo index rule
     results.sort(key=lambda x: x["rule_index"])
     return results
+

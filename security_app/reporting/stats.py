@@ -51,3 +51,4 @@ def compute_stats(run_results):
         "top_failing_rules": top_fail,
         "all_results": run_results
     }
+

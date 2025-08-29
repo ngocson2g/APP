@@ -11,3 +11,4 @@ def detect_file_type(file_path):
         return 'xml'
     else:
         raise ValueError('Unknown file type: ' + ext)
+

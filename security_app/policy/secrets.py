@@ -19,3 +19,4 @@ def mask_secrets(text: str) -> str:
     for rx, repl in _COMPILED:
         s = rx.sub(repl, s)
     return s
+

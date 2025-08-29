@@ -109,3 +109,4 @@ class RunLogger:
 
         with open(per_rule_path, "w", encoding="utf-8") as f:
             f.write(_format_rule_log(rec))
+

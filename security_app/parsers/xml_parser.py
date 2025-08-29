@@ -83,3 +83,4 @@ def parse_xml(file_path):
         
         rules.append(Rule(id=rid, description=desc, check=check, fix=fix, severity=sev, title=title))
     return rules
+

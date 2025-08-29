@@ -44,3 +44,4 @@ def auto_guess_workers(n_tasks: int, use_processes: bool, sample_durs: Sequence[
             workers = 2 * (os.cpu_count() or 4)
 
     return max(1, min(int(workers), cap))
+
