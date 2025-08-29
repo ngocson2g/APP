@@ -13,7 +13,7 @@ TOP_FAIL_LIMIT = 10
 DEFAULT_LOGS_DIR = "logs"
 
 # Số thư mục run gần nhất cần giữ lại trong DEFAULT_LOGS_DIR
-LOG_ROTATE_KEEP = 20
+LOG_ROTATE_KEEP = 50
 
 # Timeout mặc định khi chạy lệnh shell (giây). 0 = không timeout.
 DEFAULT_SHELL_TIMEOUT = 10

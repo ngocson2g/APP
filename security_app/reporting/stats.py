@@ -2,7 +2,11 @@
 from collections import defaultdict
 
 def _get(obj, attr, default=""):
-    return getattr(obj, attr, default) if obj is not None else default
+    if obj is None:
+        return default
+    if isinstance(obj, dict):
+        return obj.get(attr, default)
+    return getattr(obj, attr, default)
 
 def compute_stats(run_results):
     total_rules = len(run_results)
