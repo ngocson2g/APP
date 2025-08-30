@@ -1,4 +1,4 @@
-//apps/dashboard/frontend/services/api.js
+//apps/dashboard/frontend/src/services/api.js
 const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 export const api = {

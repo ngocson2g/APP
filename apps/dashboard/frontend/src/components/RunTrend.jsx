@@ -1,3 +1,4 @@
+//apps/dashboard/frontend/src/components/RunTrend.jsx
 import React from 'react'
 import {
   ResponsiveContainer, ComposedChart, Line, Bar,

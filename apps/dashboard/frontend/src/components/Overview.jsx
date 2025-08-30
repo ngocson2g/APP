@@ -1,4 +1,4 @@
-//apps/dashboard/frontend/Overview.jsx
+//apps/dashboard/frontend/src/Overview.jsx
 import React from 'react'
 
 function Stat({ label, value }) {

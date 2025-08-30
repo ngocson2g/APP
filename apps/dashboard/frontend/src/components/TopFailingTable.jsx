@@ -1,3 +1,4 @@
+//apps/dashboard/frontend/src/components/TopFallingTable.jsx
 import React, { useMemo } from 'react'
 
 const ORDER = { critical:5, high:4, medium:3, low:2, unknown:1, '':0 }

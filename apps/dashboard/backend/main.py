@@ -41,3 +41,4 @@ def api_rules(run_id: str):
 @app.get("/api/runs/timeseries")
 def api_runs_timeseries(limit: int = 20):
     return get_timeseries(limit=limit)
+
