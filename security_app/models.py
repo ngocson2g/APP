@@ -12,7 +12,7 @@ class Rule:
     check: str
     fix: str
     severity: str
-    title: str = ""
+    title: str = "" 
 
 @dataclass
 class CmdResult:
@@ -39,3 +39,9 @@ class RuleLogRecord:
     check_masked: str
     cmds: List[CmdResult]
 
+@dataclass(frozen=True)
+class Settings:
+    shell_timeout: float | None
+    retry_attempts: int
+    retry_delay_sec: float
+    retry_on_timeout: bool

@@ -1,12 +1,6 @@
 # security_app/settings.py
-from dataclasses import dataclass
 
-@dataclass(frozen=True)
-class Settings:
-    shell_timeout: float | None
-    retry_attempts: int
-    retry_delay_sec: float
-    retry_on_timeout: bool
+from security_app.models import Settings
 
 def default_settings() -> "Settings":
     import security_app.config as cfg
