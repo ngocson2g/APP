@@ -1,5 +1,6 @@
 # security_app/core/command_extractor.py
 from security_app.config import CMD_MARKER
+from security_app.utils.normalize import normalize_command
 
 def extract_all_commands(checktext: str):
     if not checktext:
@@ -19,7 +20,7 @@ def extract_all_commands(checktext: str):
         if line.startswith(marker):
             # flush cái trước (nếu có)
             if current:
-                cmds.append(current.strip())
+                cmds.append(normalize_command(current.strip()))
                 current = None
 
             # bắt đầu mới (strip marker)
@@ -44,7 +45,7 @@ def extract_all_commands(checktext: str):
         i += 1
 
     if current:
-        cmds.append(current.strip())
+        cmds.append(normalize_command(current.strip()))
 
     return cmds
 
