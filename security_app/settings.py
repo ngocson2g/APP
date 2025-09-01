@@ -9,16 +9,24 @@ def default_settings() -> "Settings":
         retry_attempts=int(cfg.RETRY_ATTEMPTS),
         retry_delay_sec=float(cfg.RETRY_DELAY_SEC),
         retry_on_timeout=bool(cfg.RETRY_ON_TIMEOUT),
+        # NEW defaults:
+        exec_cwd="/",
+        clean_env=True,
     )
 
 def with_overrides(base: "Settings",
                    shell_timeout: float | None = None,
-                   retry_attempts: int | None = None) -> "Settings":
+                   retry_attempts: int | None = None,
+                   # NEW:
+                   exec_cwd: str | None = None,
+                   clean_env: bool | None = None) -> "Settings":
     return Settings(
         shell_timeout=base.shell_timeout if shell_timeout is None else (float(shell_timeout) if shell_timeout else None),
         retry_attempts=base.retry_attempts if retry_attempts is None else max(0, int(retry_attempts)),
         retry_delay_sec=base.retry_delay_sec,
         retry_on_timeout=base.retry_on_timeout,
+        exec_cwd=base.exec_cwd if exec_cwd is None else exec_cwd or "/",
+        clean_env=base.clean_env if clean_env is None else bool(clean_env),
     )
 
 # --- SUDO default policy ---

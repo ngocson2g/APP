@@ -45,3 +45,5 @@ class Settings:
     retry_attempts: int
     retry_delay_sec: float
     retry_on_timeout: bool
+    exec_cwd: str | None = None          # CWD cho subprocess; None -> dùng "/"
+    clean_env: bool = True               # bật môi trường sạch tối thiểu cho subprocess

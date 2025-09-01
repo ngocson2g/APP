@@ -1,21 +1,47 @@
 # security_app/core/command.py
-import subprocess
-import time
-from typing import Optional
+import subprocess, time, os
+from typing import Optional, Mapping
 from security_app.models import CmdResult
 from security_app.policy.safety import deny_reason
 from security_app.settings import Settings
 
-def _run_once(cmd: str, timeout: Optional[float]) -> subprocess.CompletedProcess:
-    """
-    Chạy 1 lần, trả về CompletedProcess; để Exception (TimeoutExpired, ...) nổi lên cho caller xử lý.
-    """
+_SAFE_ENV_BASE = {
+    "PATH": "/usr/sbin:/usr/bin:/sbin:/bin",
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "HOME": "/nonexistent",
+    "TZ": "UTC",
+}
+
+
+# Các prefix/key env nên loại bỏ để tránh can thiệp runtime/lib/toolchain/agent
+_BAD_ENV_PREFIXES = ("LD_", "DYLD_", "PYTHON", "GEM_", "BUNDLE_", "NODE_", "RUBY", "PERL", "JAVA_TOOL_OPTIONS")
+_BAD_ENV_KEYS = {
+    "SSH_AUTH_SOCK", "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY", "FTP_PROXY", "ALL_PROXY",
+    "TMPDIR", "TMP", "TEMP",
+}
+def _build_clean_env(parent: Mapping[str, str] | None) -> dict[str, str]:
+    # Bắt đầu từ base cố định; KHÔNG copy toàn bộ os.environ
+    env = dict(_SAFE_ENV_BASE)
+    # Nếu muốn giữ lại một vài biến whitelisted từ parent, có thể bổ sung tại đây (tuỳ policy)
+    # Ví dụ: không giữ gì thêm để "sạch" đúng nghĩa.
+    return env
+
+def _run_once(cmd: str, timeout: Optional[float], settings: Settings) -> subprocess.CompletedProcess:
+    cwd = settings.exec_cwd or "/"
+    # env: sạch tối thiểu (mặc định). Nếu tắt clean_env -> thừa kế nguyên os.environ.
+    env = _build_clean_env(os.environ) if settings.clean_env else dict(os.environ)
+
     return subprocess.run(
         cmd,
         shell=True,
         text=True,
         capture_output=True,
         timeout=timeout if timeout and timeout > 0 else None,
+        cwd=cwd,
+        env=env,
+        close_fds=True,
+        start_new_session=True,  # tách session; tương tự setsid()
     )
 
 def _to_result(
@@ -56,7 +82,7 @@ def run_command(cmd: str, settings: Settings) -> CmdResult:
     while attempts < max_attempts:
         attempts += 1
         try:
-            res = _run_once(cmd, timeout)
+            res = _run_once(cmd, timeout, settings)
             # Thành công hoặc hết lượt retry -> trả kết quả luôn
             if res.returncode == 0 or attempts >= max_attempts:
                 return _to_result(cmd, res.returncode, res.stdout, res.stderr, started_all)
