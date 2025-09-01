@@ -12,18 +12,19 @@ APP
 │  ├─ __init__.py
 │  ├─ app/
 │  │  └─ cli.py                       # Điểm vào command-line (entry: `security-app`), bật sudo mặc định
-│  ├─ config.py                       # Hằng số/dấu hiệu chung (CMD_MARKER, LOG_ROTATE_KEEP, …)
-│  ├─ settings.py                     # Settings bất biến + helpers (default_settings, with_overrides, require_sudo_by_default)
+│  ├─ config.py                       # Hằng số/dấu hiệu chung (CMD_MARKER, LOG_ROTATE_KEEP=50, …)
+│  ├─ settings.py                     # Settings & helpers (default_settings, with_overrides, require_sudo_by_default)
 │  ├─ runtime/
 │  │  ├─ __init__.py                  # (tuỳ chọn)
 │  │  └─ sudo.py                      # ensure_root(): tự re-exec với sudo (giữ PATH/LOGS_DIR)
 │  ├─ models.py                       # Data model: Rule, CmdResult, RuleLogRecord
 │  ├─ core/
 │  │  ├─ command.py                   # Thực thi lệnh shell (retry/timeout) + deny-check
-│  │  ├─ command_extractor.py         # Trích lệnh từ check text theo marker ($ )
+│  │  ├─ command_extractor.py         # Trích lệnh từ check text theo marker ($ ) + normalize_command()
 │  │  ├─ logger.py                    # RunLogger (ghi 1 file/1 rule + xoay vòng thư mục run)
+│  │  ├─ estimator.py                 # Ước lượng pre-run: đếm lệnh, ước thời gian, gợi ý workers
 │  │  └─ runner/
-│  │     ├─ __init__.py               # run_all_rules(): điều phối end-to-end (pilot + auto workers)
+│  │     ├─ __init__.py               # run_all_rules(): pilot + auto workers + thực thi concurrent
 │  │     ├─ extract.py                # _pre_extract_rules(): allowed/denied theo safety policy
 │  │     ├─ plan.py                   # _prepare_tasks(): chia task (per-command/per-rule)
 │  │     ├─ workers.py                # _workers(): chạy chunk lệnh (thread/process pool)
@@ -45,7 +46,8 @@ APP
 │  │  └─ terminal.py                  # print_report(): in báo cáo terminal (không sinh JSON/CSV, chữ đơn sắc)
 │  └─ utils/
 │     ├─ __init__.py                  # (tuỳ chọn)
-│     └─ text.py                      # _term_width/_bar/_table/_safe_name, v.v.
+│     ├─ text.py                      # _term_width/_bar/_table/_safe_name, v.v.
+│     └─ normalize.py                 # Cắt comment ngoài quote, gộp whitespace, bỏ ;/&&/|| thừa
 ├─ security_app.egg-info/             # Metadata do setuptools sinh
 ├─ apps/                              # Web dashboard (frontend + backend)
 │  └─ dashboard/
@@ -82,7 +84,6 @@ APP
 # Chính sách sudo mặc định:
 #   - Mặc định YÊU CẦU quyền root và sẽ tự re-exec với sudo nếu cần.
 #   - Có thể tắt bằng ENV SECURITY_APP_REQUIRE_SUDO=0|false|no|off.
-#   - Khi re-exec, giữ lại PATH và LOGS_DIR (sudo --preserve-env).
 #
 # Ví dụ nhanh:
 #   security-app data/canonical_ubuntu_24.04_lts.csv \
@@ -91,20 +92,27 @@ APP
 #     --proc \
 #     --timeout 15 \
 #     --retries 1 \
-#     --top 10
+#     --top 10 \
+#     --estimate
 #
 # Tham số:
 #   input                : Đường dẫn file checklist (CSV/JSON/XML)
 #   --logs-dir           : Thư mục gốc chứa run logs (mặc định: logs)
+#   --top                : Số item tối đa ở "Top failing rules" (mặc định 10)
 #   --workers            : Số worker tối đa (mặc định: tự chọn)
 #   --proc               : Dùng ProcessPool (mặc định: ThreadPool)
 #   --timeout            : Timeout mỗi lệnh (giây; 0/None = không giới hạn)
 #   --retries            : Số lần thử lại (không tính lần chạy đầu)
-#   --top                : Số item tối đa ở "Top failing rules" (mặc định 10)
+#   --estimate           : In bảng ước lượng pre-run trước khi thực thi
+#   --plan-only          : Chỉ in ước lượng rồi thoát (không chạy checklist)
+#
+# Pre-run estimate:
+#   - estimate_plan(): đếm lệnh hợp lệ, ước duration theo heuristic + history logs,
+#     gợi ý số workers, dự báo wall-clock & phân hạng độ phức tạp; print_estimate() để in bảng.
 #
 # Log & rotation:
 #   - Mỗi rule → 1 file: logs/<run>/rule-XXX_<safe_title>.log
-#   - Tự xoay vòng thư mục run, chỉ giữ lại N run mới nhất (LOG_ROTATE_KEEP=20).
+#   - Tự xoay vòng thư mục run, chỉ giữ lại N run mới nhất (LOG_ROTATE_KEEP=50).
 #   - Logger chỉ ghi per-rule (KHÔNG sinh summary JSON/CSV).
 #
 # ------------------------------------------------------------
@@ -153,8 +161,10 @@ APP
 # ------------------------------------------------------------
 # Luồng xử lý chính (CLI)
 # ------------------------------------------------------------
+# 0) Tuỳ chọn: Ước lượng pre-run (estimate_plan/print_estimate) → gợi ý workers & thời gian
 # 1) CLI nhận input → detect file type → chọn parser (CSV/JSON/XML)
 # 2) Parse rules → extract commands từ check text (marker mặc định: "$ ")
+#    - normalize_command(): cắt comment ngoài quote, gộp whitespace, bỏ ;/&&/||
 # 3) Safety policy: phân loại allowed / denied (deny_reason)
 # 4) Lập kế hoạch task:
 #    - _pre_extract_rules()   → [(idx, rule, allowed[], denied[])]
