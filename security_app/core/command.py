@@ -3,6 +3,7 @@ import subprocess, time, os
 from typing import Optional, Mapping
 from security_app.models import CmdResult
 from security_app.policy.safety import deny_reason
+from security_app.policy.risk import compute_risk
 from security_app.settings import Settings
 
 _SAFE_ENV_BASE = {
@@ -68,9 +69,11 @@ def run_command(cmd: str, settings: Settings) -> CmdResult:
     Giữ vòng lặp retry & backoff dựa trên Settings (không đọc/mutate globals).
     """
     # Chặn lệnh nguy hiểm (nguồn sự thật)
-    reason = deny_reason(cmd)
+    reason = deny_reason(cmd)          # nguồn sự thật cho block
+    risk = compute_risk(cmd)           # vẫn chấm để log Risk
     if reason:
-        return _to_result(cmd, None, "", reason, time.time())
+        return _to_result(cmd, None, "", f"{reason} | RISK={risk.level}({risk.score}) {','.join(risk.factors)}",
+                          time.time())
 
     max_attempts = 1 + max(0, int(settings.retry_attempts))
     timeout = float(settings.shell_timeout) if settings.shell_timeout else None
