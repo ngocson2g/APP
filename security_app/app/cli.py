@@ -14,6 +14,12 @@ from security_app.settings import require_sudo_by_default
 from security_app.core.estimator import estimate_plan, print_estimate 
 
 def main():
+    # Cho phép: security-app query ...
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "query":
+        from security_app.app.query import main as query_main
+        return query_main(sys.argv[2:])
+    
     if require_sudo_by_default():
         ensure_root(required=True)
     parser = argparse.ArgumentParser(
