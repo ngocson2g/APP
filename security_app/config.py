@@ -1,3 +1,4 @@
+# security_app/config.py
 """
 Cấu hình/hằng số dùng chung toàn dự án.
 Có thể mở rộng thêm khi cần (timeout, allowlist, marker, ...).
