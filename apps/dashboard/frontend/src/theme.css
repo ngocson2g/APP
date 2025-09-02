@@ -44,3 +44,11 @@ select, button {
 }
 button:hover { filter: brightness(1.05); }
 button:active { transform: translateY(1px); }
+
+.modal { position: fixed; inset: 0; z-index: 50; }
+.modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
+.modal-card {
+  position: absolute; inset: 8% 10%;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px; overflow: auto; max-height: 84vh;
+}

@@ -5,6 +5,7 @@ import Overview from '../components/Overview'
 import BySeverityBar from '../components/BySeverityBar'
 import TopFailingTable from '../components/TopFailingTable'
 import RunTrend from '../components/RunTrend'   // <-- thêm
+import RuleDialog from '../components/RuleDialog'
 
 export default function Reporting() {
   const [runs, setRuns] = useState([])
@@ -12,7 +13,7 @@ export default function Reporting() {
   const [summary, setSummary] = useState(null)
   const [loading, setLoading] = useState(false)
   const [series, setSeries] = useState([])      // <-- thêm
-
+  const [openIdx, setOpenIdx] = useState(null)
   const CountRuntren = 20
   useEffect(() => {
     api.listRuns().then((rs) => {
@@ -82,7 +83,19 @@ export default function Reporting() {
           <BySeverityBar bySeverity={summary.by_severity} />
         </div>
 
-        <TopFailingTable items={summary.top_failing_rules} />
+        <TopFailingTable
+        items={summary?.top_failing_rules || []}
+        onSelect={(idx) => {
+          console.log('[Reporting] onSelect idx =', idx)
+          setOpenIdx(idx)
+        }}
+        />
+        <RuleDialog
+          open={openIdx !== null}
+          runId={selectedRun}
+          index={openIdx}
+          onClose={() => setOpenIdx(null)}
+        />
       </>
     )}
     </>

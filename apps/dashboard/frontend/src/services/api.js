@@ -21,5 +21,10 @@ export const api = {
     const r = await fetch(`${BASE}/api/runs/timeseries?limit=${limit}`)
     if (!r.ok) throw new Error('Failed to get run timeseries')
     return r.json()
+  },
+  async getRuleDetail(runId, index) {
+    const r = await fetch(`${BASE}/api/runs/${encodeURIComponent(runId)}/rule/${index}`)
+    if (!r.ok) throw new Error('Failed to get rule detail')
+    return r.json()
   }
 }

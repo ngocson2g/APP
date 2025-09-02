@@ -4,7 +4,7 @@ import React, { useMemo } from 'react'
 const ORDER = { critical:5, high:4, medium:3, low:2, unknown:1, '':0 }
 const sevClass = s => `badge ${['critical','high','medium','low'].includes((s||'').toLowerCase()) ? s.toLowerCase() : 'unknown'}`
 
-export default function TopFailingTable({ items }) {
+export default function TopFailingTable({ items = [], onSelect = () => {} }) {
   const data = useMemo(() => {
     const arr = (items||[])
       .filter(r => (r?.status||'').toLowerCase()==='fail' || (r?.cmd_fail??0)>0)
@@ -16,7 +16,7 @@ export default function TopFailingTable({ items }) {
     })
     return arr
   }, [items])
-
+  const pickIndex = (r, i) => (r.rule_index ?? r.index ?? r.idx ?? i)
   if (!data.length) return <p className="muted">No failing rules.</p>
 
   return (
@@ -36,21 +36,33 @@ export default function TopFailingTable({ items }) {
             </tr>
           </thead>
           <tbody>
-            {data.map((r,i)=>(
+            {data.map((r, i) => (
               <tr key={`${r.id}-${i}`}>
                 <td>{i+1}</td>
                 <td><code>{r.id || '—'}</code></td>
-                <td><span className={sevClass(r.severity)}>{r.severity||'unknown'}</span></td>
+                <td><span className={`badge ${r.severity||'unknown'}`}>{r.severity||'unknown'}</span></td>
                 <td>{r.title || '—'}</td>
                 <td>{r.cmd_ok ?? 0}</td>
                 <td>{r.cmd_fail ?? 0}</td>
                 <td style={{textTransform:'capitalize'}}>{r.status || 'fail'}</td>
+                <td>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      const idx = pickIndex(r, i)
+                      console.log('View clicked, index =', idx, 'row=', r)
+                      onSelect?.(idx)
+                    }}
+                  >
+                    View
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="muted" style={{marginTop:8}}>Sắp xếp: severity ↓, cmd_fail ↓. Khung ~10 dòng, kéo để xem thêm.</p>
+      <p className="muted" style={{marginTop:8}}>Bấm “View” để mở log chi tiết.</p>
     </div>
   )
 }

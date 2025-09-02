@@ -121,6 +121,7 @@ def get_summary(run_id: str) -> Dict[str, Any]:
     for idx, rid, sev, num_fail, title in stats["top_failing_rules"]:
         rr = idx2agg.get(idx, {})
         tops.append({
+            "rule_index": idx,
             "id": rid,
             "severity": sev or "unknown",
             "title": title or "",
@@ -134,12 +135,12 @@ def get_summary(run_id: str) -> Dict[str, Any]:
     return summary
 
 def list_rules(run_id: str) -> List[Dict[str, Any]]:
-    """Trả về toàn bộ rule cho trang bảng chi tiết (nếu cần)."""
     rs = _read_run_results(run_id)
     out = []
     for r in rs:
         rule = r["rule"]
         out.append({
+            "rule_index": r["rule_index"],
             "id": rule.get("id") or str(r["rule_index"]),
             "severity": (rule.get("severity") or "unknown"),
             "title": rule.get("title") or "",
@@ -175,3 +176,91 @@ def get_timeseries(limit: int = 20) -> List[Dict[str, Any]]:
         })
     items.sort(key=lambda x: x["mtime"])  # thời gian tăng dần cho trục X
     return items
+
+def _read_rule_file(run_id: str, rule_index: int) -> str:
+    run_dir = os.path.join(LOGS_BASE, run_id)
+    # ưu tiên rule-XXX_*.log (3 chữ số); fallback rule-X_*.log
+    patt1 = os.path.join(run_dir, f"rule-{rule_index:03d}_*.log")
+    patt2 = os.path.join(run_dir, f"rule-{rule_index}_*.log")
+    matches = glob.glob(patt1) or glob.glob(patt2)
+    if not matches:
+        # thêm fallback: quét toàn bộ rồi lọc prefix
+        all_logs = sorted(glob.glob(os.path.join(run_dir, "rule-*.log")))
+        pref = f"rule-{rule_index:03d}_"
+        pref2 = f"rule-{rule_index}_"
+        for p in all_logs:
+            b = os.path.basename(p)
+            if b.startswith(pref) or b.startswith(pref2):
+                matches = [p]; break
+    if not matches:
+        raise FileNotFoundError(f"Rule file not found for idx={rule_index}")
+    return matches[0]
+
+def get_rule_detail(run_id: str, rule_index: int) -> Dict[str, Any]:
+    run_dir = os.path.join(LOGS_BASE, run_id)
+    patt1 = os.path.join(run_dir, f"rule-{rule_index:03d}_*.log")
+    patt2 = os.path.join(run_dir, f"rule-{rule_index}_*.log")
+    matches = glob.glob(patt1) or glob.glob(patt2)
+    if not matches:
+        raise FileNotFoundError(f"Rule file not found for idx={rule_index}")
+    path = matches[0]
+
+    rid = title = sev = ""
+    check_lines, commands = [], []
+    in_check = in_cmds = False
+    cur = None
+
+    with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        for raw in f:
+            line = raw.rstrip("\n")
+            # headers
+            m = _ID_LINE.match(line);     
+            if m: rid = m.group(1).strip();           continue
+            m = _TITLE_LINE.match(line);  
+            if m: title = (m.group(1) or "").strip(); continue
+            m = _SEV_LINE.match(line);    
+            if m: sev = (m.group(1) or "").strip().lower(); continue
+
+            # sections
+            if line.strip() == "---- Check ----":
+                in_check, in_cmds = True, False;  continue
+            if line.strip() == "---- Command Results ----":
+                in_check, in_cmds = False, True;  continue
+
+            if in_check:
+                check_lines.append(line);          continue
+
+            if in_cmds:
+                if line.startswith("$ "):
+                    if cur: commands.append(cur);  cur = None
+                    cur = {"cmd": line[2:].strip(), "returncode": None, "ok": False,
+                           "duration_sec": 0.0, "stdout": "", "stderr": "", "_mode": "stdout"}
+                    continue
+                m = _RC_OK_LINE.match(line)
+                if m and cur:
+                    rc = m.group("rc")
+                    cur["returncode"] = (None if rc == "None" else int(rc))
+                    cur["ok"] = (m.group("ok") == "True")
+                    md = re.search(r"([0-9.]+)s$", line)
+                    if md:
+                        try: cur["duration_sec"] = float(md.group(1))
+                        except Exception: pass
+                    continue
+                if line.strip() == "-- stdout --":
+                    if cur: cur["_mode"] = "stdout";  continue
+                if line.strip() == "-- stderr --":
+                    if cur: cur["_mode"] = "stderr";  continue
+                if cur:
+                    if cur.get("_mode") == "stderr":
+                        cur["stderr"] += (line + "\n")
+                    else:
+                        cur["stdout"] += (line + "\n")
+
+    if cur: commands.append(cur)
+    return {
+        "rule_index": rule_index,
+        "rule": {"id": rid, "title": title, "severity": sev},
+        "check": "\n".join(check_lines).rstrip("\n"),
+        "commands": [{k: v for k, v in c.items() if not k.startswith("_")} for c in commands],
+        "path": os.path.basename(path),
+    }

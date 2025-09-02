@@ -5,9 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Cho phép chạy kiểu package và kiểu "uvicorn main:app"
 try:
-    from .reader import list_runs, get_summary, list_rules, get_timeseries
+    from .reader import list_runs, get_summary, list_rules, get_timeseries, get_rule_detail
 except ImportError:
-    from reader import list_runs, get_summary, list_rules, get_timeseries
+    from reader import list_runs, get_summary, list_rules, get_timeseries, get_rule_detail
 
 app = FastAPI(title="security_app dashboard API")
 
@@ -42,3 +42,9 @@ def api_rules(run_id: str):
 def api_runs_timeseries(limit: int = 20):
     return get_timeseries(limit=limit)
 
+@app.get("/api/runs/{run_id}/rule/{index}")
+def api_rule_detail(run_id: str, index: int):
+    try:
+        return get_rule_detail(run_id, index)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Rule not found")
