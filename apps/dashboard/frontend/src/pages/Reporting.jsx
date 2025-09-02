@@ -34,6 +34,7 @@ export default function Reporting() {
 
   return (
     <>
+
       {/* RUN PICKER luôn hiện khi đã có runs */}
     <div className="card" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
       <h3 style={{ margin: 0, marginRight: 8 }}>Select run</h3>
@@ -62,7 +63,14 @@ export default function Reporting() {
           >
             Latest
           </button>
+          <button onClick={() => window.open(`${BASE}/api/runs/${selectedRun}/export/pdf`)}>
+            Export PDF
+          </button>
+          <button onClick={() => window.open(`${BASE}/api/runs/${selectedRun}/export/excel`)}>
+            Export Excel
+          </button> 
         </>
+        
       ) : (
         <span className="muted">No logs found.</span>
       )}
