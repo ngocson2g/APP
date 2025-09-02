@@ -72,6 +72,24 @@ def print_report(stats, limit_top=TOP_FAIL_LIMIT):
         print("(Không có rule lỗi)")
     print()
 
+     # ----- Denied by safety policy -----
+    all_results = stats["all_results"]
+    denied_rows = []
+    for x in all_results:
+        cmds = x.get("cmd_results") or []
+        nd = sum(1 for r in cmds if "DENIED" in (getattr(r, "stderr", "") or "").upper())
+        if nd > 0:
+            rid = _get(x["rule"], "id", x["rule_index"])
+            sev = _get(x["rule"], "severity", "")
+            title = _get(x["rule"], "title", "")
+            denied_rows.append([rid, sev, nd, title])
+
+    if denied_rows:
+        print("Denied by safety policy:")
+        _table(denied_rows, headers=["Rule ID","Sev","#Denied","Title"])
+        print()
+
+
     # ----- Danh sách ID -----
     all_results = stats["all_results"]
     fail_ids = [str(_get(r["rule"], "id", r["rule_index"])) for r in all_results if r["num_fail"] > 0]

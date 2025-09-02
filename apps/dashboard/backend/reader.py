@@ -15,6 +15,9 @@ _ID_LINE     = re.compile(r"^ID\s*: (.+)$")
 _TITLE_LINE  = re.compile(r"^Title\s*: (.*)$")
 _SEV_LINE    = re.compile(r"^Severity\s*: (.*)$")
 
+_DENIED_MARK = re.compile(r"\bDENIED\b", re.IGNORECASE)
+_CMD_LINE    = re.compile(r"^\$ (.+)$")
+
 @dataclass
 class RuleFile:
     index: int
@@ -50,34 +53,54 @@ def _parse_rule_log(path: str) -> Dict[str, Any]:
 
     rid = title = sev = ""
     num_ok = num_fail = 0
+    num_denied = 0
+    denied_cmds = []
+    current_cmd = None
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         for line in f:
             line = line.rstrip("\n")
-            m = _ID_LINE.match(line)
-            if m: 
-                rid = m.group(1).strip()
-                continue
-            m = _TITLE_LINE.match(line)
+
+            # Bắt command hiện tại
+            m = _CMD_LINE.match(line)
             if m:
-                title = m.group(1).strip()
+                current_cmd = m.group(1).strip()
                 continue
-            m = _SEV_LINE.match(line)
-            if m:
-                sev = (m.group(1) or "").strip().lower()
-                continue
+
+            # Đếm OK/Fail như cũ
             m = _RC_OK_LINE.match(line)
             if m:
                 ok = m.group("ok") == "True"
                 if ok: num_ok += 1
                 else:  num_fail += 1
+                continue
+
+            # Phát hiện DENIED trong stderr
+            if _DENIED_MARK.search(line):
+                num_denied += 1
+                if current_cmd:
+                    denied_cmds.append(current_cmd)
+                continue
+
+            # Thông tin rule
+            m = _ID_LINE.match(line)
+            if m:
+                rid = m.group(1).strip(); continue
+            m = _TITLE_LINE.match(line)
+            if m:
+                title = m.group(1).strip(); continue
+            m = _SEV_LINE.match(line)
+            if m:
+                sev = (m.group(1) or "").strip().lower(); continue
 
     return {
         "rule_index": idx,
         "rule": {"id": rid, "title": title, "severity": sev},
-        "cmd_results": None,                    # không cần cho stats
+        "cmd_results": None,
         "num_cmds": num_ok + num_fail,
         "num_ok": num_ok,
         "num_fail": num_fail,
+        "num_denied": num_denied,
+        "denied_cmds": denied_cmds[:3],  # lấy tối đa 3 ví dụ
     }
 
 def _read_run_results(run_id: str) -> List[Dict[str, Any]]:
@@ -132,6 +155,30 @@ def get_summary(run_id: str) -> Dict[str, Any]:
 
     summary["by_severity"] = by_sev
     summary["top_failing_rules"] = tops
+
+    # --- denied summary ---
+    denied_rules = []
+    total_denied_cmds = 0
+    order = {"critical":5,"high":4,"medium":3,"low":2,"unknown":1}
+    for r in run_results:
+        nd = int(r.get("num_denied", 0) or 0)
+        if nd > 0:
+            total_denied_cmds += nd
+            rule = r["rule"] or {}
+            denied_rules.append({
+                "id": rule.get("id") or str(r["rule_index"]),
+                "severity": (rule.get("severity") or "unknown").lower(),
+                "title": rule.get("title") or "",
+                "denied": nd,
+                "examples": r.get("denied_cmds", []),
+            })
+    denied_rules.sort(key=lambda x: ((-order.get(x["severity"],0)), -x["denied"]))
+
+    summary["denied"] = {
+        "rules_with_denied": len(denied_rules),
+        "total_denied_cmds": total_denied_cmds,
+    }
+    summary["denied_rules"] = denied_rules
     return summary
 
 def list_rules(run_id: str) -> List[Dict[str, Any]]:

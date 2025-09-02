@@ -6,6 +6,7 @@ import BySeverityBar from '../components/BySeverityBar'
 import TopFailingTable from '../components/TopFailingTable'
 import RunTrend from '../components/RunTrend'   // <-- thêm
 import RuleDialog from '../components/RuleDialog'
+import DeniedTable from '../components/DeniedTable'
 
 export default function Reporting() {
   const [runs, setRuns] = useState([])
@@ -96,6 +97,7 @@ export default function Reporting() {
           index={openIdx}
           onClose={() => setOpenIdx(null)}
         />
+        <DeniedTable items={summary.denied_rules} />
       </>
     )}
     </>
