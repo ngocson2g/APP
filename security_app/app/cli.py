@@ -10,8 +10,8 @@ from security_app.config import DEFAULT_LOGS_DIR, TOP_FAIL_LIMIT
 from security_app.settings import default_settings, with_overrides
 from security_app.runtime.sudo import ensure_root
 from security_app.settings import require_sudo_by_default
-
 from security_app.core.estimator import estimate_plan, print_estimate 
+from security_app.reporting.exporters import dump_stats_json, write_stats_csv_bundle
 
 def main():
     # Cho phép: security-app query ...
@@ -41,7 +41,15 @@ def main():
                         help="Print pre-run estimate before executing.")
     parser.add_argument("--plan-only", action="store_true",
                         help="Only print pre-run estimate and exit.")
-    
+    parser.add_argument("--json-out", default=None,
+                        help="Đường dẫn file JSON (hoặc '-' để in ra stdout) chứa số liệu tổng hợp.")
+    parser.add_argument("--csv-out-dir", default=None,
+                        help="Thư mục để ghi các file CSV (summary.csv, by_severity.csv, top_failing.csv, rules.csv).")
+    parser.add_argument("--save-report", action="store_true",
+                        help="Lưu JSON/CSV/Excel vào APP/reportAPP/<timestamp>/ và cập nhật symlink 'latest'.")
+    parser.add_argument("--out-dir", default=None,
+                        help="Ghi đè thư mục gốc (mặc định APP/reportAPP hoặc ENV SECAPP_REPORT_DIR).")
+
     args = parser.parse_args()
 
     if not os.path.exists(args.input):
@@ -89,6 +97,14 @@ def main():
     )
     stats = compute_stats(run_results)             #3
     print_report(stats, limit_top=args.top)        #4
+
+    # --- xuất JSON/CSV nếu được yêu cầu ---
+    if args.json_out:
+        dump_stats_json(stats, args.json_out)
+
+    if args.csv_out_dir:
+        write_stats_csv_bundle(stats, out_dir=args.csv_out_dir)
+    
 
 if __name__ == "__main__":
     main()
