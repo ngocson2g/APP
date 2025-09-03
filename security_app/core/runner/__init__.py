@@ -1,4 +1,7 @@
 # security_app/core/runner/__init__.py
+"""
+Main runner module - Điều phối parallel execution với auto-tuning
+"""
 from __future__ import annotations
 
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed

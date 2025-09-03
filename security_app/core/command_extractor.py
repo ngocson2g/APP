@@ -1,4 +1,7 @@
 # security_app/core/command_extractor.py
+"""
+Trích xuất commands từ check text với hỗ trợ multi-line commands
+"""
 from security_app.config import CMD_MARKER
 from security_app.utils.normalize import normalize_command
 

@@ -1,4 +1,11 @@
 # security_app/models.py
+"""
+Data models cho ứng dụng
+- Rule: Biểu diễn một security rule
+- CmdResult: Kết quả thực thi command
+- RuleLogRecord: Record log cho rule
+- Settings: Cấu hình runtime
+"""
 from dataclasses import dataclass
 
 

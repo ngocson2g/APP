@@ -1,5 +1,7 @@
 # security_app/settings.py
-
+"""
+Quản lý application settings và overrides
+"""
 from security_app.models import Settings
 
 

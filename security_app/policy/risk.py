@@ -1,4 +1,7 @@
 # security_app/policy/risk.py
+"""
+Đánh giá risk level của commands
+"""
 from dataclasses import dataclass
 import re
 

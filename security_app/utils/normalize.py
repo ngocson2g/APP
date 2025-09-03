@@ -1,5 +1,12 @@
 # security_app/utils/normalize.py
+"""
+Chuẩn hóa commands với:
+- Comment stripping
+- Whitespace normalization
+- Security sanitization
+"""
 from __future__ import annotations
+
 
 def _strip_comments_outside_quotes(s: str) -> str:
     """
@@ -23,21 +30,21 @@ def _strip_comments_outside_quotes(s: str) -> str:
         if ch == '"' and not in_s and not in_bt:
             in_d = not in_d
             out.append(ch); i += 1; continue
-        if ch == '`' and not in_s and not in_d:
+        if ch == "`" and not in_s and not in_d:
             in_bt = not in_bt
             out.append(ch); i += 1; continue
 
         # '#' ngoài mọi quote & không phải \#
-        if ch == '#' and not (in_s or in_d or in_bt):
-            prev = s[i-1] if i > 0 else ''
-            if prev != '\\':
+        if ch == "#" and not (in_s or in_d or in_bt):
+            prev = s[i-1] if i > 0 else ""
+            if prev != "\\":
                 # bỏ tới hết dòng (giữ lại newline nếu có)
-                j = s.find('\n', i)
+                j = s.find("\n", i)
                 if j == -1:
                     break
                 # tiêu thụ tới newline, thêm đúng 1 newline
                 i = j
-                out.append('\n')
+                out.append("\n")
                 continue
 
         out.append(ch)
@@ -64,20 +71,19 @@ def _collapse_ws_outside_quotes(s: str) -> str:
         if ch == '"' and not in_s and not in_bt:
             in_d = not in_d
             out.append(ch); ws_run = False; continue
-        if ch == '`' and not in_s and not in_d:
+        if ch == "`" and not in_s and not in_d:
             in_bt = not in_bt
             out.append(ch); ws_run = False; continue
 
         if (ch in " \t\r\n") and not (in_s or in_d or in_bt):
             if not ws_run and out:
-                out.append(' ')
+                out.append(" ")
             ws_run = True
         else:
             out.append(ch)
             ws_run = False
     # trim đầu/cuối
-    s2 = "".join(out).strip()
-    return s2
+    return "".join(out).strip()
 
 
 def _strip_trailing_connectors(s: str) -> str:
@@ -106,5 +112,4 @@ def normalize_command(cmd: str) -> str:
         return ""
     s = _strip_comments_outside_quotes(cmd)
     s = _collapse_ws_outside_quotes(s)
-    s = _strip_trailing_connectors(s)
-    return s
+    return _strip_trailing_connectors(s)

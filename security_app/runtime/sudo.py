@@ -1,4 +1,7 @@
 #security_app/runtime/sudo.py
+"""
+Xử lý elevation privilege với sudo
+"""
 from __future__ import annotations
 
 import os

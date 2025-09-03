@@ -1,4 +1,7 @@
 # security_app/core/logger.py
+"""
+Hệ thống logging với rotation và secret masking
+"""
 from __future__ import annotations
 
 import datetime

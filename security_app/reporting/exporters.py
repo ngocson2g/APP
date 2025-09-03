@@ -1,4 +1,7 @@
 #security_app/reporting/exporters.py
+"""
+Xuất báo cáo sang các format JSON/CSV
+"""
 import csv
 import json
 import os

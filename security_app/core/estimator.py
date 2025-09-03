@@ -1,4 +1,8 @@
 # security_app/core/estimator.py
+"""
+Ước lượng thời gian chạy và đề xuất cấu hình tối ưu
+Sử dụng historical data và heuristic analysis
+"""
 from __future__ import annotations
 
 from collections.abc import Sequence

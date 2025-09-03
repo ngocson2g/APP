@@ -1,4 +1,7 @@
 # security_app/app/query.py
+"""
+Module cho subcommand query - Truy vấn log results với các filter khác nhau
+"""
 from __future__ import annotations
 
 import argparse

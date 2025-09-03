@@ -1,7 +1,7 @@
 # security_app/utils/text.py
-import shutil
 import re
-from security_app.policy.secrets import mask_secrets  # << dùng bản compile
+import shutil
+
 
 def _term_width():
     return shutil.get_terminal_size((120, 20)).columns
@@ -14,7 +14,7 @@ def _safe_name(s: str, maxlen: int = 60) -> str:
 
 def _bar(value, total, width=20, ch="█"):
     if total <= 0: return ""
-    n = max(0, min(width, int(round(value * width / total))))
+    n = max(0, min(width, round(value * width / total)))
     return ch * n + " " * (width - n)
 
 def _table(rows, headers, max_width=None):

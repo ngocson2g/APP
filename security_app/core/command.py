@@ -1,4 +1,11 @@
 # security_app/core/command.py
+"""
+Module xử lý thực thi command với:
+- Timeout management
+- Retry mechanism
+- Safety checks
+- Environment sanitization
+"""
 from collections.abc import Mapping
 import os
 import subprocess
