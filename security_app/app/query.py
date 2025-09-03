@@ -1,10 +1,16 @@
 # security_app/app/query.py
 from __future__ import annotations
-import os, re, glob, json, argparse, time
+
+import argparse
 from datetime import datetime
-from typing import List, Dict, Any, Iterable, Tuple
-from security_app.utils.text import _table
+import glob
+import json
+import os
+import re
+from typing import Any
+
 from security_app.config import DEFAULT_LOGS_DIR
+from security_app.utils.text import _table
 
 # Định dạng log đang dùng:
 _ID_LINE     = re.compile(r"^ID\s*: (.+)$", re.M)
@@ -15,7 +21,7 @@ _CHECK_BLOCK = re.compile(r"---- Check ----\n(.*?)\n---- Command Results ----", 
 
 SEV_ORDER = {"critical": 5, "high": 4, "medium": 3, "low": 2, "unknown": 1, "": 0}
 
-def _list_runs(base: str) -> List[Dict[str, Any]]:
+def _list_runs(base: str) -> list[dict[str, Any]]:
     if not os.path.isdir(base): return []
     items = []
     for name in os.listdir(base):
@@ -31,8 +37,8 @@ def _list_runs(base: str) -> List[Dict[str, Any]]:
     items.sort(key=lambda x: x["mtime"], reverse=True)
     return items
 
-def _parse_rule_log(fp: str) -> Dict[str, Any]:
-    with open(fp, "r", encoding="utf-8", errors="ignore") as f:
+def _parse_rule_log(fp: str) -> dict[str, Any]:
+    with open(fp, encoding="utf-8", errors="ignore") as f:
         s = f.read()
 
     rid   = (_ID_LINE.search(s).group(1).strip()   if _ID_LINE.search(s)   else "")
@@ -58,7 +64,7 @@ def _parse_rule_log(fp: str) -> Dict[str, Any]:
         "check": check,
     }
 
-def _pick_runs(runs: List[Dict[str, Any]], last: int|None, since: float|None, until: float|None) -> List[Dict[str, Any]]:
+def _pick_runs(runs: list[dict[str, Any]], last: int|None, since: float|None, until: float|None) -> list[dict[str, Any]]:
     rs = runs
     if since is not None: rs = [r for r in rs if r["mtime"] >= since]
     if until is not None: rs = [r for r in rs if r["mtime"] <= until]
@@ -80,7 +86,7 @@ def _parse_dt(s: str|None) -> float|None:
         except Exception:
             return None
 
-def _match_keywords(rec: Dict[str, Any], keywords: List[str], scope: str) -> bool:
+def _match_keywords(rec: dict[str, Any], keywords: list[str], scope: str) -> bool:
     if not keywords: return True
     scope = (scope or "any").lower()
     hay = []
@@ -96,9 +102,9 @@ def query(
     last: int|None,
     since: str|None,
     until: str|None,
-    severities: List[str]|None,
+    severities: list[str]|None,
     status: str|None,
-    keywords: List[str]|None,
+    keywords: list[str]|None,
     scope: str,
     output_json: bool,
     limit: int|None,
@@ -116,7 +122,7 @@ def query(
         print("No runs matched.")
         return 0
 
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     for r in runs:
         for fp in sorted(glob.glob(os.path.join(r["path"], "rule-*.log"))):
             rec = _parse_rule_log(fp)
@@ -155,10 +161,10 @@ def query(
             r["severity"], r["status"], r["cmd_ok"], r["cmd_fail"], r["title"] or "—"
         ])
     _table(table, headers=headers)
-    print(f"\nMatched {len(rows)} rule(s) across {len(set(x['run'] for x in rows))} run(s).")
+    print(f"\nMatched {len(rows)} rule(s) across {len({x['run'] for x in rows})} run(s).")
     return 0
 
-def main(argv: List[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="security-app query", description="Query rule logs by time/severity/status/keywords.")
     p.add_argument("--logs-dir", default=DEFAULT_LOGS_DIR, help=f"Logs base directory (default: {DEFAULT_LOGS_DIR})")
     g = p.add_argument_group("Time window")

@@ -2,16 +2,16 @@
 import argparse
 import os
 
-from security_app.parsers.dispatch import parse_file
+from security_app.config import DEFAULT_LOGS_DIR, TOP_FAIL_LIMIT
+from security_app.core.estimator import estimate_plan, print_estimate
 from security_app.core.runner import run_all_rules
+from security_app.parsers.dispatch import parse_file
+from security_app.reporting.exporters import dump_stats_json, write_stats_csv_bundle
 from security_app.reporting.stats import compute_stats
 from security_app.reporting.terminal import print_report
-from security_app.config import DEFAULT_LOGS_DIR, TOP_FAIL_LIMIT
-from security_app.settings import default_settings, with_overrides
 from security_app.runtime.sudo import ensure_root
-from security_app.settings import require_sudo_by_default
-from security_app.core.estimator import estimate_plan, print_estimate 
-from security_app.reporting.exporters import dump_stats_json, write_stats_csv_bundle
+from security_app.settings import default_settings, require_sudo_by_default, with_overrides
+
 
 def main():
     # Cho phép: security-app query ...
@@ -76,7 +76,7 @@ def main():
         print()
 
     if args.plan_only:
-        return  # thoát sớm, không thực thi
+        return None  # thoát sớm, không thực thi
 
     est = estimate_plan(
         rules,
@@ -91,7 +91,7 @@ def main():
     run_results = run_all_rules(                   #2
         rules,
         log_base_dir=args.logs_dir,
-        workers=args.workers,
+        workers= args.workers,
         use_processes=args.proc,
         settings=settings,
     )
@@ -104,6 +104,7 @@ def main():
 
     if args.csv_out_dir:
         write_stats_csv_bundle(stats, out_dir=args.csv_out_dir)
+    return None
     
 
 if __name__ == "__main__":

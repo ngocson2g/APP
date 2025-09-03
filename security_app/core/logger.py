@@ -1,15 +1,19 @@
 # security_app/core/logger.py
 from __future__ import annotations
-import os, datetime, shutil
-from typing import List
-from security_app.models import Rule, CmdResult, RuleLogRecord
-from security_app.utils.text import _safe_name
-from security_app.policy.secrets import mask_secrets
+
+import datetime
+import os
+import shutil
+
 import security_app.config as cfg
+from security_app.models import CmdResult, Rule, RuleLogRecord
+from security_app.policy.secrets import mask_secrets
+from security_app.utils.text import _safe_name
+
 
 def _format_rule_log(rec: RuleLogRecord) -> str:
     """Định dạng bản ghi log theo đúng format hiện có (để backend parse được)."""
-    lines: List[str] = []
+    lines: list[str] = []
     lines.append(f"Rule #{rec.index}")
     lines.append(f"ID     : {rec.rule_id}")
     lines.append(f"Title  : {rec.title}")
@@ -89,7 +93,7 @@ class RunLogger:
             pass
 
     
-    def log_rule_result(self, rule_index: int, rule: Rule, cmd_results: List[CmdResult]):
+    def log_rule_result(self, rule_index: int, rule: Rule, cmd_results: list[CmdResult]):
         rule_id   = rule.id or str(rule_index)
         title     = rule.title or ""
         severity  = rule.severity or ""

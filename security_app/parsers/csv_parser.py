@@ -1,7 +1,9 @@
 #security_app/parser/csv_parser.py
 import pandas as pd
+
 from security_app.models import Rule
 from security_app.parsers.schema import COL_MAP, REQ_FIELDS
+
 
 def _normalize_columns(cols):
     # về lowercase, thay khoảng trắng/dấu gạch thành underscore để ổn định tra cứu

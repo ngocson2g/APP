@@ -1,7 +1,8 @@
 #security_app/reporting/terminal.py
-from security_app.models import Rule
-from security_app.utils.text import _term_width, _bar, _table
 from security_app.config import TOP_FAIL_LIMIT
+from security_app.models import Rule
+from security_app.utils.text import _bar, _table, _term_width
+
 
 def _get(rule, key, default=""):
     if isinstance(rule, Rule):
@@ -38,7 +39,7 @@ def print_report(stats, limit_top=TOP_FAIL_LIMIT):
     sev_order = ["low","medium","high","critical","unknown"]
     rows = []
     by_sev = stats["by_severity"]
-    for sev in sev_order + sorted([s for s in by_sev.keys() if s not in sev_order]):
+    for sev in sev_order + sorted([s for s in by_sev if s not in sev_order]):
         if sev not in by_sev:
             continue
         d = by_sev[sev]

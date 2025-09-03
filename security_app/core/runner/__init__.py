@@ -1,28 +1,31 @@
 # security_app/core/runner/__init__.py
 from __future__ import annotations
-import os
-from typing import List, Dict, Any, Tuple
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
-from security_app.models import Rule, CmdResult
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
+import os
+from typing import Any, Dict, List, Tuple
+
 from security_app.config import CMD_MARKER, DEFAULT_LOGS_DIR
-from security_app.core.logger import RunLogger
-from security_app.settings import Settings
 from security_app.core.command import run_command  # <-- dùng cho pilot run
+from security_app.core.logger import RunLogger
+from security_app.models import CmdResult, Rule
+from security_app.settings import Settings
+
 from .extract import _pre_extract_rules
-from .plan import _prepare_tasks
-from .workers import _workers
 from .merge import _merge_and_log
+from .plan import _prepare_tasks
 from .tuner import auto_guess_workers  # <-- mới
+from .workers import _workers
+
 
 def _pilot_execute(
-    tasks: List[Tuple[int, Rule, List[str]]],
-    agg: Dict[int, Dict[str, Any]],
-    pending: Dict[int, int],
+    tasks: list[tuple[int, Rule, list[str]]],
+    agg: dict[int, dict[str, Any]],
+    pending: dict[int, int],
     settings: Settings,
     logger: RunLogger,
     budget: int
-) -> Tuple[List[Tuple[int, Rule, List[str]]], List[float], List[Dict[str, Any]]]:
+) -> tuple[list[tuple[int, Rule, list[str]]], list[float], list[dict[str, Any]]]:
     """
     Chạy tuần tự 'budget' task đầu để lấy mẫu duration.
     Trả về (tasks_còn_lại, sample_durations, results_đã_hoàn_tất_rule).
@@ -33,8 +36,8 @@ def _pilot_execute(
     take = min(budget, len(tasks))
     sample = tasks[:take]
     rest = tasks[take:]
-    sample_durs: List[float] = []
-    completed: List[Dict[str, Any]] = []
+    sample_durs: list[float] = []
+    completed: list[dict[str, Any]] = []
 
     for (idx, _rule, chunk) in sample:
         # chunk là list các cmd (per_command=True thì độ dài 1)
@@ -52,13 +55,13 @@ def _pilot_execute(
     return rest, sample_durs, completed
 
 def run_all_rules(
-    rules: List[Rule],
+    rules: list[Rule],
     log_base_dir: str = DEFAULT_LOGS_DIR,
     workers: int | None = None,
     use_processes: bool = False,
     settings: Settings = None,
     per_command: bool = True,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Thực thi toàn bộ rule với concurrency; chỉ main thread ghi log (single-writer)."""
     os.makedirs(log_base_dir, exist_ok=True)
     logger = RunLogger(base_dir=log_base_dir)
@@ -67,7 +70,7 @@ def run_all_rules(
     pre = _pre_extract_rules(rules, marker=CMD_MARKER)
     tasks, agg, pending = _prepare_tasks(pre, per_command=per_command)
 
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
 
     # Log ngay những rule không có allowed-cmd
     for idx, state in list(agg.items()):
@@ -76,7 +79,7 @@ def run_all_rules(
             pending.pop(idx, None)
 
     # 2) Pilot run + tự chọn số worker nếu chưa chỉ định
-    sample_durs: List[float] = []
+    sample_durs: list[float] = []
     if tasks and workers is None:
         # ngân sách pilot:  max(8, 2*CPU) nhưng không quá 24 task
         cpu = os.cpu_count() or 4

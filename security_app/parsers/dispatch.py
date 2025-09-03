@@ -7,12 +7,11 @@ from security_app.parsers.xml_parser import parse_xml
 
 def parse_file(file_path):
     ftype = detect_file_type(file_path)
-    if ftype == 'csv':
+    if ftype == "csv":
         return parse_csv(file_path)
-    elif ftype == 'json':
+    if ftype == "json":
         return parse_json(file_path)
-    elif ftype == 'xml':
+    if ftype == "xml":
         return parse_xml(file_path)
-    else:
-        raise ValueError('Unsupported file type')
+    raise ValueError("Unsupported file type")
 

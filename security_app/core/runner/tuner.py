@@ -1,7 +1,10 @@
 # security_app/core/runner/tuner.py
 from __future__ import annotations
-import os, statistics
-from typing import Sequence
+
+from collections.abc import Sequence
+import os
+import statistics
+
 
 def auto_guess_workers(n_tasks: int, use_processes: bool, sample_durs: Sequence[float]) -> int:
     """
@@ -30,10 +33,7 @@ def auto_guess_workers(n_tasks: int, use_processes: bool, sample_durs: Sequence[
     if use_processes:
         # Lệnh dài/CPU-ish: ~CPU; lệnh ngắn: giảm để tránh overhead fork
         base = (os.cpu_count() or 4)
-        if p50 >= 0.75 or p95 >= 1.5:
-            workers = base
-        else:
-            workers = max(1, base // 2)
+        workers = base if p50 >= 0.75 or p95 >= 1.5 else max(1, base // 2)
     else:
         # Threads: I/O/latency-bound thì oversubscribe vừa phải
         if p50 < 0.15:

@@ -1,12 +1,17 @@
 # security_app/core/estimator.py
 from __future__ import annotations
-import os, re, glob, statistics
-from typing import List, Dict, Tuple, Sequence
-from security_app.models import Rule
-from security_app.core.command_extractor import extract_all_commands
-from security_app.policy.safety import deny_reason
+
+from collections.abc import Sequence
+import glob
+import os
+import re
+import statistics
+
 from security_app.config import DEFAULT_LOGS_DIR
+from security_app.core.command_extractor import extract_all_commands
 from security_app.core.runner.tuner import auto_guess_workers
+from security_app.models import Rule
+from security_app.policy.safety import deny_reason
 
 # --- Heuristic base costs (seconds) theo dạng regex --
 PAT_COST = [
@@ -48,12 +53,12 @@ def _shape_multipliers(cmd: str) -> float:
 def _first_token(cmd: str) -> str:
     return (cmd.strip().split() or [""])[0].lower()
 
-def _read_history(logs_base: str, max_files: int = 4000) -> Dict[str, Tuple[float, float, int]]:
+def _read_history(logs_base: str, max_files: int = 4000) -> dict[str, tuple[float, float, int]]:
     """
     Quét nhanh duration theo base command từ logs/<run>/rule-*.log
     Trả về: {base_cmd: (mean, p95, n)}
     """
-    durations: Dict[str, List[float]] = {}
+    durations: dict[str, list[float]] = {}
     picked = 0
     for run_dir in glob.glob(os.path.join(logs_base, "*")):
         if not os.path.isdir(run_dir):
@@ -61,7 +66,7 @@ def _read_history(logs_base: str, max_files: int = 4000) -> Dict[str, Tuple[floa
         for fp in glob.glob(os.path.join(run_dir, "rule-*.log")):
             if picked >= max_files: break
             try:
-                with open(fp, "r", encoding="utf-8", errors="ignore") as f:
+                with open(fp, encoding="utf-8", errors="ignore") as f:
                     last_cmd = None
                     for line in f:
                         line = line.rstrip("\n")
@@ -80,7 +85,7 @@ def _read_history(logs_base: str, max_files: int = 4000) -> Dict[str, Tuple[floa
             except Exception:
                 pass
 
-    out: Dict[str, Tuple[float, float, int]] = {}
+    out: dict[str, tuple[float, float, int]] = {}
     for b, ds in durations.items():
         if not ds: continue
         ds = [max(0.0, float(x)) for x in ds]
@@ -92,7 +97,7 @@ def _read_history(logs_base: str, max_files: int = 4000) -> Dict[str, Tuple[floa
         out[b] = (mean, p95, len(ds))
     return out
 
-def _estimate_cmd_seconds(cmd: str, hist: Dict[str, Tuple[float, float, int]]) -> float:
+def _estimate_cmd_seconds(cmd: str, hist: dict[str, tuple[float, float, int]]) -> float:
     b = _first_token(cmd)
     base = _base_cost(cmd) * _shape_multipliers(cmd)
     if b in hist and hist[b][2] >= 5:
@@ -101,8 +106,8 @@ def _estimate_cmd_seconds(cmd: str, hist: Dict[str, Tuple[float, float, int]]) -
         return 0.5 * base + 0.5 * mean
     return base
 
-def _list_allowed_cmds(rules: List[Rule], marker: str = "$ ") -> Tuple[List[str], int]:
-    allowed: List[str] = []
+def _list_allowed_cmds(rules: list[Rule], marker: str = "$ ") -> tuple[list[str], int]:
+    allowed: list[str] = []
     denied_cnt = 0
     for r in rules:
         cmds = extract_all_commands(getattr(r, "check", "") or "")
@@ -127,12 +132,12 @@ def _simulate_makespan(durs: Sequence[float], workers: int, overhead: float = 0.
     return max(bins) * (1.0 + overhead)
 
 def estimate_plan(
-    rules: List[Rule],
+    rules: list[Rule],
     logs_base_dir: str = DEFAULT_LOGS_DIR,
     workers: int | None = None,
     use_processes: bool = False,
     per_command: bool = True,
-) -> Dict[str, object]:
+) -> dict[str, object]:
     """
     Trả về bản ước lượng pre-run.
     """
@@ -173,7 +178,8 @@ def estimate_plan(
 
 from security_app.utils.text import _table
 
-def print_estimate(est: Dict[str, object]) -> None:
+
+def print_estimate(est: dict[str, object]) -> None:
     rows = [
         ["Rules", est["n_rules"]],
         ["Commands (allowed)", est["n_cmds"]],

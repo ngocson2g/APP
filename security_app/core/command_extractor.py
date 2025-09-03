@@ -2,6 +2,7 @@
 from security_app.config import CMD_MARKER
 from security_app.utils.normalize import normalize_command
 
+
 def extract_all_commands(checktext: str):
     if not checktext:
         return []

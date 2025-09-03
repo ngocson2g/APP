@@ -1,7 +1,9 @@
 #security_app/parser/json_parser.py
 import json
+
 from security_app.models import Rule
 from security_app.parsers.schema import COL_MAP, REQ_FIELDS
+
 
 def _lower_keys(d: dict):
     return {str(k).strip().lower(): v for k, v in d.items()}
@@ -15,7 +17,7 @@ def _get_first(d: dict, aliases):
 def _looks_like_rule(obj: dict) -> bool:
     if not isinstance(obj, dict):
         return False
-    keys = set(str(k).strip().lower() for k in obj.keys())
+    keys = {str(k).strip().lower() for k in obj}
     def has_any(aliases): return any(a in keys for a in aliases)
     return has_any(COL_MAP["id"]) and has_any(COL_MAP["severity"]) and (
         has_any(COL_MAP["check"]) or has_any(COL_MAP["description"])
@@ -52,7 +54,7 @@ def _extract_items(data):
     return None
 
 def parse_json(path: str):
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
 
     items = _extract_items(data)

@@ -1,8 +1,12 @@
 #security_app/reporting/exporters.py
-import os, sys, json, csv
-from typing import Dict, Any, List
+import csv
+import json
+import os
+import sys
+from typing import Any
 
-def _summary_from_stats(stats: Dict[str, Any]) -> Dict[str, Any]:
+
+def _summary_from_stats(stats: dict[str, Any]) -> dict[str, Any]:
     t = stats.get("totals", {})
     # Giữ schema “gần” với API backend / frontend đang dùng
     return {
@@ -15,7 +19,7 @@ def _summary_from_stats(stats: Dict[str, Any]) -> Dict[str, Any]:
         "commands_failed": t.get("total_fail", 0),
     }
 
-def _by_sev_from_stats(stats: Dict[str, Any]) -> Dict[str, Dict[str, int]]:
+def _by_sev_from_stats(stats: dict[str, Any]) -> dict[str, dict[str, int]]:
     out = {}
     by = stats.get("by_severity", {}) or {}
     for sev, d in by.items():
@@ -29,7 +33,7 @@ def _by_sev_from_stats(stats: Dict[str, Any]) -> Dict[str, Dict[str, int]]:
         }
     return out
 
-def _top_from_stats(stats: Dict[str, Any]) -> List[Dict[str, Any]]:
+def _top_from_stats(stats: dict[str, Any]) -> list[dict[str, Any]]:
     tops = []
     idx2agg = {x["rule_index"]: x for x in stats.get("all_results", [])}
     for idx, rid, sev, num_fail, title in stats.get("top_failing_rules", []):
@@ -44,7 +48,7 @@ def _top_from_stats(stats: Dict[str, Any]) -> List[Dict[str, Any]]:
         })
     return tops
 
-def build_stats_json(stats: Dict[str, Any]) -> Dict[str, Any]:
+def build_stats_json(stats: dict[str, Any]) -> dict[str, Any]:
     return {
         "summary": _summary_from_stats(stats),
         "by_severity": _by_sev_from_stats(stats),
@@ -63,7 +67,7 @@ def build_stats_json(stats: Dict[str, Any]) -> Dict[str, Any]:
         ]
     }
 
-def dump_stats_json(stats: Dict[str, Any], path: str) -> None:
+def dump_stats_json(stats: dict[str, Any], path: str) -> None:
     data = build_stats_json(stats)
     s = json.dumps(data, ensure_ascii=False, indent=2)
     if path == "-" or path.strip() == "":
@@ -73,7 +77,7 @@ def dump_stats_json(stats: Dict[str, Any], path: str) -> None:
     with open(path, "w", encoding="utf-8") as f:
         f.write(s)
 
-def _write_csv(path: str, headers: List[str], rows: List[List[object]]) -> None:
+def _write_csv(path: str, headers: list[str], rows: list[list[object]]) -> None:
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
@@ -81,7 +85,7 @@ def _write_csv(path: str, headers: List[str], rows: List[List[object]]) -> None:
         for r in rows:
             w.writerow(r)
 
-def write_stats_csv_bundle(stats: Dict[str, Any], out_dir: str) -> None:
+def write_stats_csv_bundle(stats: dict[str, Any], out_dir: str) -> None:
     out_dir = os.path.abspath(out_dir)
     os.makedirs(out_dir, exist_ok=True)
 

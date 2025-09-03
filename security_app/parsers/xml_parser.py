@@ -1,5 +1,6 @@
 #sercurity_app/xml_parser.py
 import xml.etree.ElementTree as ET
+
 from security_app.models import Rule
 
 # Với XML (XCCDF), có cả attribute và element; ta khai nhiều ứng viên
@@ -28,7 +29,7 @@ XML_FIX_XPATHS = [
     ".//xccdf:fix",
 ]
 
-REQ_FIELDS = ['id', 'description', 'check', 'fix', 'severity']
+REQ_FIELDS = ["id", "description", "check", "fix", "severity"]
 
 def _first_attr(elem, names):
     for n in names:
@@ -60,10 +61,10 @@ def _first_xpath_text(elem, xpaths, ns):
 def parse_xml(file_path):
     tree = ET.parse(file_path)
     root = tree.getroot()
-    ns = {'xccdf': 'http://checklists.nist.gov/xccdf/1.1'}
+    ns = {"xccdf": "http://checklists.nist.gov/xccdf/1.1"}
 
     rules: list[Rule] = []
-    for rule in root.findall('.//xccdf:Rule', ns):
+    for rule in root.findall(".//xccdf:Rule", ns):
         rid   = _first_attr(rule, XML_ATTR_CANDIDATES["id"])
         desc  = _first_elem_text(rule, XML_ELEM_CANDIDATES["description"], ns)
         check = _first_xpath_text(rule, XML_CHECK_XPATHS, ns)

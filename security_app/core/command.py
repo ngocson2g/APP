@@ -1,9 +1,12 @@
 # security_app/core/command.py
-import subprocess, time, os
-from typing import Optional, Mapping
+from collections.abc import Mapping
+import os
+import subprocess
+import time
+
 from security_app.models import CmdResult
-from security_app.policy.safety import deny_reason
 from security_app.policy.risk import compute_risk
+from security_app.policy.safety import deny_reason
 from security_app.settings import Settings
 
 _SAFE_ENV_BASE = {
@@ -23,12 +26,11 @@ _BAD_ENV_KEYS = {
 }
 def _build_clean_env(parent: Mapping[str, str] | None) -> dict[str, str]:
     # Bắt đầu từ base cố định; KHÔNG copy toàn bộ os.environ
-    env = dict(_SAFE_ENV_BASE)
+    return dict(_SAFE_ENV_BASE)
     # Nếu muốn giữ lại một vài biến whitelisted từ parent, có thể bổ sung tại đây (tuỳ policy)
     # Ví dụ: không giữ gì thêm để "sạch" đúng nghĩa.
-    return env
 
-def _run_once(cmd: str, timeout: Optional[float], settings: Settings) -> subprocess.CompletedProcess:
+def _run_once(cmd: str, timeout: float | None, settings: Settings) -> subprocess.CompletedProcess:
     cwd = settings.exec_cwd or "/"
     # env: sạch tối thiểu (mặc định). Nếu tắt clean_env -> thừa kế nguyên os.environ.
     env = _build_clean_env(os.environ) if settings.clean_env else dict(os.environ)
@@ -47,7 +49,7 @@ def _run_once(cmd: str, timeout: Optional[float], settings: Settings) -> subproc
 
 def _to_result(
     cmd: str,
-    rc: Optional[int],
+    rc: int | None,
     stdout: str,
     stderr: str,
     started_all: float,
@@ -79,7 +81,7 @@ def run_command(cmd: str, settings: Settings) -> CmdResult:
     timeout = float(settings.shell_timeout) if settings.shell_timeout else None
 
     attempts = 0
-    last_exc: Optional[BaseException] = None
+    last_exc: BaseException | None = None
     started_all = time.time()
 
     while attempts < max_attempts:

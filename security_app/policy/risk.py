@@ -1,6 +1,6 @@
 # security_app/policy/risk.py
-import re
 from dataclasses import dataclass
+import re
 
 SENSITIVE_PATHS = [
     r"/etc\b", r"/boot\b", r"/var/log\b", r"/var/lib\b", r"/root\b",

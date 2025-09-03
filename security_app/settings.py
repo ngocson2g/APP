@@ -2,6 +2,7 @@
 
 from security_app.models import Settings
 
+
 def default_settings() -> "Settings":
     import security_app.config as cfg
     return Settings(

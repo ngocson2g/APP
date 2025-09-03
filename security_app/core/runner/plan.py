@@ -1,21 +1,24 @@
 #security_app/core/runner/plan.py
 from __future__ import annotations
-from typing import List, Tuple, Dict, Any
-from security_app.models import Rule, CmdResult
+
+from typing import Any
+
+from security_app.models import CmdResult, Rule
+
 
 def _prepare_tasks(
-    pre: List[Tuple[int, Rule, List[str], List[CmdResult]]],
+    pre: list[tuple[int, Rule, list[str], list[CmdResult]]],
     per_command: bool = True,
-) -> Tuple[List[Tuple[int, Rule, List[str]]], Dict[int, Dict[str, Any]], Dict[int, int]]:
+) -> tuple[list[tuple[int, Rule, list[str]]], dict[int, dict[str, Any]], dict[int, int]]:
     """
     Từ pre-extract tạo:
       - tasks: [(idx, rule, [cmds_chunk]), ...]  (per_command=True => mỗi task 1 lệnh)
       - agg:   {idx: {"rule": Rule, "denied": [CmdResult], "ran": [CmdResult]}}
       - pending: {idx: số task còn lại của rule}
     """
-    tasks: List[Tuple[int, Rule, List[str]]] = []
-    agg: Dict[int, Dict[str, Any]] = {}
-    pending: Dict[int, int] = {}
+    tasks: list[tuple[int, Rule, list[str]]] = []
+    agg: dict[int, dict[str, Any]] = {}
+    pending: dict[int, int] = {}
 
     for idx, rule, allowed, denied in pre:
         agg[idx] = {"rule": rule, "denied": list(denied), "ran": []}

@@ -1,6 +1,10 @@
 #security_app/runtime/sudo.py
 from __future__ import annotations
-import os, sys, shutil
+
+import os
+import shutil
+import sys
+
 
 def _needs_root() -> bool:
     # chỉ POSIX mới có geteuid; nếu đã là root thì bỏ qua
@@ -14,7 +18,7 @@ def _resolve_entrypoint(argv0: str) -> str:
     # ưu tiên entrypoint trong venv (nếu có), fallback argv[0]
     return shutil.which("security-app") or argv0
 
-def reexec_with_sudo(argv: list[str] | None = None) -> "NoReturn":  # type: ignore[name-defined]
+def reexec_with_sudo(argv: list[str] | None = None) -> NoReturn:  # type: ignore[name-defined]
     args = list(sys.argv if argv is None else argv)
     script = _resolve_entrypoint(args[0])
     flags = _preserve_env_flags()

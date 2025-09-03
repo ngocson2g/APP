@@ -1,14 +1,14 @@
 #security_app/parser/common.py
 import os
 
+
 def detect_file_type(file_path):
     ext = os.path.splitext(file_path)[-1].lower()
-    if ext == '.csv':
-        return 'csv'
-    elif ext == '.json':
-        return 'json'
-    elif ext == '.xml':
-        return 'xml'
-    else:
-        raise ValueError('Unknown file type: ' + ext)
+    if ext == ".csv":
+        return "csv"
+    if ext == ".json":
+        return "json"
+    if ext == ".xml":
+        return "xml"
+    raise ValueError("Unknown file type: " + ext)
 

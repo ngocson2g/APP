@@ -1,16 +1,19 @@
 #security_app/core/runner/merge.py
 from __future__ import annotations
-from typing import List, Dict, Any
-from security_app.models import Rule, CmdResult
+
+from typing import Any
+
 from security_app.core.logger import RunLogger
+from security_app.models import CmdResult, Rule
+
 
 def _merge_and_log(
     idx: int,
     rule: Rule,
-    denied: List[CmdResult],
-    ran: List[CmdResult],
+    denied: list[CmdResult],
+    ran: list[CmdResult],
     logger: RunLogger,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Gộp kết quả deny + đã chạy, ghi log 1 lần, trả về summary cho reporting."""
     merged = list(denied) + list(ran)
     logger.log_rule_result(idx, rule, merged)

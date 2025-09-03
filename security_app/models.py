@@ -1,6 +1,6 @@
 # security_app/models.py
 from dataclasses import dataclass
-from typing import Optional, List
+
 
 @dataclass(frozen=True)
 class Rule:
@@ -20,7 +20,7 @@ class CmdResult:
     Kết quả thực thi 1 lệnh shell.
     """
     cmd: str
-    returncode: Optional[int]
+    returncode: int | None
     stdout: str
     stderr: str
     duration_sec: float
@@ -37,7 +37,7 @@ class RuleLogRecord:
     title: str
     severity: str
     check_masked: str
-    cmds: List[CmdResult]
+    cmds: list[CmdResult]
 
 @dataclass(frozen=True)
 class Settings:
