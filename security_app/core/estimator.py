@@ -180,20 +180,3 @@ def estimate_plan(
         "complexity": grade,
     }
 
-from security_app.utils.text import _table
-
-
-def print_estimate(est: dict[str, object]) -> None:
-    rows = [
-        ["Rules", est["n_rules"]],
-        ["Commands (allowed)", est["n_cmds"]],
-        ["Commands (denied)", est["n_denied"]],
-        ["Workers (suggested)", est["workers_suggested"]],
-        ["Pool type", "processes" if est["use_processes"] else "threads"],
-        ["p50 per-cmd (s)", est["p50_cmd"]],
-        ["p95 per-cmd (s)", est["p95_cmd"]],
-        ["Total CPU-seconds (∑)", est["cpu_seconds_sum"]],
-        ["Estimated wall-clock (s)", est["wall_seconds"]],
-        ["Complexity", est["complexity"]],
-    ]
-    _table(rows, headers=["Metric", "Value"])

@@ -4,7 +4,8 @@ from typing import Any, Optional
 import os
 
 from security_app.parsers.dispatch import parse_file
-from security_app.core.estimator import estimate_plan, print_estimate
+from security_app.core.estimator import estimate_plan
+from security_app.reporting.estimate_terminal import print_estimate
 from security_app.core.runner import run_all_rules
 from security_app.reporting.stats import compute_stats
 from security_app.reporting.terminal import print_report
