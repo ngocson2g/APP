@@ -1,6 +1,6 @@
 //apps/dashboard/frontend/src/pages/Reporting.jsx
 import React, { useEffect, useState } from 'react'
-import { api } from '../services/api'
+import { api, BASE } from '../services/api'
 import Overview from '../components/Overview'
 import BySeverityBar from '../components/BySeverityBar'
 import TopFailingTable from '../components/TopFailingTable'
@@ -10,7 +10,7 @@ import DeniedTable from '../components/DeniedTable'
 
 export default function Reporting() {
   const [runs, setRuns] = useState([])
-  const [selectedRun, setSelectedRun] = useState('')
+  const [selectedRun, setSelectedRun] = useState(() => localStorage.getItem('selected_run') || '')
   const [summary, setSummary] = useState(null)
   const [loading, setLoading] = useState(false)
   const [series, setSeries] = useState([])      // <-- thêm
@@ -19,11 +19,22 @@ export default function Reporting() {
   useEffect(() => {
     api.listRuns().then((rs) => {
       setRuns(rs)
-      if (rs.length) setSelectedRun(rs[0].id)
+      const urlRun = new URLSearchParams(window.location.search).get('run')
+      const def = urlRun || localStorage.getItem('selected_run') || (rs[0]?.id || '')
+      if (def) setSelectedRun(def)
     })
     api.getRunTimeseries(CountRuntren).then(setSeries).catch(() => {})   // <-- tải timeseries
   }, [])
 
+
+  // Lưu/lặp lại view: nhớ run đang chọn & cập nhật URL ?run=...
+  useEffect(() => {
+    if (!selectedRun) return
+    localStorage.setItem('selected_run', selectedRun)
+    const usp = new URLSearchParams(window.location.search)
+    usp.set('run', selectedRun)
+    window.history.replaceState({}, '', `/reporting?${usp.toString()}`)
+  }, [selectedRun])
   useEffect(() => {
     if (!selectedRun) return
     setLoading(true)

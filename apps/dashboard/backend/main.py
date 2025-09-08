@@ -2,12 +2,23 @@
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+from io import BytesIO
+# NEW imports
+from fastapi import Query
+from fastapi.responses import JSONResponse
 
 # Cho phép chạy kiểu package và kiểu "uvicorn main:app"
 try:
     from .reader import list_runs, get_summary, list_rules, get_timeseries, get_rule_detail
 except ImportError:
     from reader import list_runs, get_summary, list_rules, get_timeseries, get_rule_detail
+
+# NEW
+try:
+    from .exporter import build_excel, build_pdf, save_copy_if_configured
+except ImportError:
+    from exporter import build_excel, build_pdf, save_copy_if_configured
 
 app = FastAPI(title="security_app dashboard API")
 
@@ -48,3 +59,72 @@ def api_rule_detail(run_id: str, index: int):
         return get_rule_detail(run_id, index)
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Rule not found")
+    
+# --- NEW: Export Excel ---
+@app.get("/api/runs/{run_id}/export/excel")
+def api_export_excel(run_id: str):
+    try:
+        summary = get_summary(run_id)
+        rules = list_rules(run_id)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Run not found")
+    data = build_excel(summary | {"by_severity": summary.get("by_severity"),
+                                  "top_failing_rules": summary.get("top_failing_rules"),
+                                  "denied_rules": summary.get("denied_rules", [])},
+                       rules)
+    save_copy_if_configured(data, run_id, "xlsx")
+    filename = f"security-app_{run_id}.xlsx"
+    return StreamingResponse(BytesIO(data),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
+# --- NEW: Export PDF ---
+@app.get("/api/runs/{run_id}/export/pdf")
+def api_export_pdf(run_id: str):
+    try:
+        summary = get_summary(run_id)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Run not found")
+    data = build_pdf(run_id, summary)
+    save_copy_if_configured(data, run_id, "pdf")
+    filename = f"security-app_{run_id}.pdf"
+    return StreamingResponse(BytesIO(data),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+    )
+
+# --- NEW: alias dùng ?run= cho FE ---
+@app.get("/api/export/pdf")
+def api_export_pdf_q(run: str = Query(..., min_length=1)):
+    summary = get_summary(run)  # raise 404 nếu không có
+    data = build_pdf(run, summary)
+    save_copy_if_configured(data, run, "pdf")
+    return StreamingResponse(BytesIO(data),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="security-app_{run}.pdf"'}
+    )
+
+@app.get("/api/export/excel")
+def api_export_excel_q(run: str = Query(..., min_length=1)):
+    summary = get_summary(run)
+    rules = list_rules(run)
+    data = build_excel(summary | {
+        "by_severity": summary.get("by_severity"),
+        "top_failing_rules": summary.get("top_failing_rules"),
+        "denied_rules": summary.get("denied_rules", []),
+    }, rules)
+    save_copy_if_configured(data, run, "xlsx")
+    return StreamingResponse(BytesIO(data),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="security-app_{run}.xlsx"'}
+    )
+
+# --- NEW: cho FE biết có/không có export để ẩn/hiện nút ---
+@app.get("/api/capabilities")
+def api_capabilities():
+    return JSONResponse({
+        "export": {"pdf": True, "excel": True},
+        "routes": ["/api/export/pdf", "/api/export/excel",
+                   "/api/runs/{run_id}/export/pdf", "/api/runs/{run_id}/export/excel"]
+    })
