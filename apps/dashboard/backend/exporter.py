@@ -14,12 +14,14 @@ def _maybe_save_copy(data: bytes, run_id: str, ext: str) -> None:
     out_root = os.getenv("SECAPP_REPORT_DIR")
     if not out_root:
         return
+    if str(out_root).lower() in {"0", "false", "off", "none"}:
+        return
+    out_root = os.path.abspath(os.path.expanduser(out_root))  # <- chuẩn hoá tuyệt đối
     d = os.path.join(out_root, run_id)
     os.makedirs(d, exist_ok=True)
     name = f"security-app_{run_id}_{_nowstamp()}.{ext}"
     with open(os.path.join(d, name), "wb") as f:
         f.write(data)
-
 # ---------- NEW: Unicode font helpers ----------
 _UNI_REG_CANDS = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
