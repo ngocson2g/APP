@@ -438,5 +438,5 @@ TBD (ví dụ MIT). Cập nhật phần này theo giấy phép thực tế.
 
 ## 📬 Liên hệ
 
-Maintainer: Nông Ngọc Sơn · (cập nhật email/số liên hệ)
+Maintainer: Nông Ngọc Sơn · ngocson1265@gmail.com · 0834958114
 
