@@ -432,7 +432,7 @@ Tuỳ chọn: `--keep-runs N` (mặc định 50), `--runs-older-than-days D`, `-
 
 ## 📄 Giấy phép
 
-TBD (ví dụ MIT). Cập nhật phần này theo giấy phép thực tế.
+///
 
 ---
 
