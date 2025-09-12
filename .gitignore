@@ -18,6 +18,7 @@ htmlcov/
 .pytype/
 .dmypy.json
 .ipynb_checkpoints
+reportAPP/
 
 # Virtual envs
 .venv/
@@ -47,7 +48,7 @@ tests/
 
 # ---------- Data ----------
 # Mặc định bỏ qua data thô/nhạy cảm
-data/
+
 # nhưng vẫn giữ tài liệu/samples cần thiết
 !data/README.md
 !data/samples/**
