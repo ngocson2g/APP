@@ -4,6 +4,17 @@ Quản lý application settings và overrides
 """
 from security_app.models import Settings
 
+# --- Command length guard (IO-safety) ---
+import os
+
+MAX_CMD_CHARS = int(os.getenv("SECAPP_MAX_CMD_CHARS", "1200"))          # tổng ký tự
+MAX_CMD_BYTES = int(os.getenv("SECAPP_MAX_CMD_BYTES", "4096"))          # tổng bytes UTF-8
+MAX_CMD_ARGS = int(os.getenv("SECAPP_MAX_CMD_ARGS", "64"))              # số args sau shlex.split()
+MAX_CMD_PIPES = int(os.getenv("SECAPP_MAX_CMD_PIPES", "8"))             # số '|' trong lệnh
+MAX_CMD_REDIRECTS = int(os.getenv("SECAPP_MAX_CMD_REDIRECTS", "4"))     # '>' '<' tổng
+MAX_CMD_LINES = int(os.getenv("SECAPP_MAX_CMD_LINES", "20"))            # tổng dòng
+MAX_CMD_LINE_CHARS = int(os.getenv("SECAPP_MAX_CMD_LINE_CHARS", "800")) # độ dài 1 dòng
+
 
 def default_settings() -> "Settings":
     import security_app.config as cfg

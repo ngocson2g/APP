@@ -2,6 +2,12 @@
 import re
 import shutil
 
+def ellipsis_middle(s: str, max_chars: int = 180) -> str:
+    """Rút gọn chuỗi ở giữa để in log ngắn gọn."""
+    if len(s) <= max_chars:
+        return s
+    keep = max_chars // 2 - 3
+    return s[:keep] + "..." + s[-keep:]
 
 def _term_width():
     return shutil.get_terminal_size((120, 20)).columns

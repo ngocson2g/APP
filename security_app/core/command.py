@@ -13,7 +13,8 @@ import time
 
 from security_app.models import CmdResult
 from security_app.policy.risk import compute_risk
-from security_app.policy.safety import deny_reason
+from security_app.policy.safety import deny_reason, assert_cmd_length_safe
+from security_app.utils.text import ellipsis_middle  # (tuỳ dùng cho log sau này)
 from security_app.settings import Settings
 
 _SAFE_ENV_BASE = {
@@ -77,12 +78,25 @@ def run_command(cmd: str, settings: Settings) -> CmdResult:
     """
     Giữ vòng lặp retry & backoff dựa trên Settings (không đọc/mutate globals).
     """
-    # Chặn lệnh nguy hiểm (nguồn sự thật)
-    reason = deny_reason(cmd)          # nguồn sự thật cho block
-    risk = compute_risk(cmd)           # vẫn chấm để log Risk
+    # Gate 0: chặn lệnh quá dài/phức tạp để tránh nghẽn IO trước khi spawn
+    risk = compute_risk(cmd)  # chấm sớm để có thông tin nếu bị chặn
+    try:
+        assert_cmd_length_safe(cmd)  # sẽ raise nếu vượt ngưỡng
+    except Exception as e:
+       return _to_result(
+            cmd, None, "", 
+            f"DENIED length-check: {e} | RISK={risk.level}({risk.score}) {','.join(risk.factors)}",
+           time.time()
+        )
+
+    # Gate 1: chặn theo denylist (policy)
+    reason = deny_reason(cmd)
     if reason:
-        return _to_result(cmd, None, "", f"{reason} | RISK={risk.level}({risk.score}) {','.join(risk.factors)}",
-                          time.time())
+        return _to_result(
+            cmd, None, "",
+            f"{reason} | RISK={risk.level}({risk.score}) {','.join(risk.factors)}",
+            time.time()
+        )
 
     max_attempts = 1 + max(0, int(settings.retry_attempts))
     timeout = float(settings.shell_timeout) if settings.shell_timeout else None
