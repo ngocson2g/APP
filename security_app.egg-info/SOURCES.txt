@@ -11,8 +11,11 @@ security_app.egg-info/entry_points.txt
 security_app.egg-info/requires.txt
 security_app.egg-info/top_level.txt
 security_app/app/cli.py
+security_app/app/query.py
+security_app/app/run.py
 security_app/core/command.py
 security_app/core/command_extractor.py
+security_app/core/estimator.py
 security_app/core/logger.py
 security_app/parsers/common.py
 security_app/parsers/csv_parser.py
@@ -20,6 +23,9 @@ security_app/parsers/dispatch.py
 security_app/parsers/json_parser.py
 security_app/parsers/schema.py
 security_app/parsers/xml_parser.py
+security_app/reporting/estimate_terminal.py
+security_app/reporting/exporters.py
 security_app/reporting/stats.py
 security_app/reporting/terminal.py
+security_app/utils/normalize.py
 security_app/utils/text.py

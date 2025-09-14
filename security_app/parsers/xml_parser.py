@@ -1,6 +1,7 @@
 #sercurity_app/xml_parser.py
 import xml.etree.ElementTree as ET
 
+from .schema import REQ_FIELDS
 from security_app.models import Rule
 
 # Với XML (XCCDF), có cả attribute và element; ta khai nhiều ứng viên
@@ -28,8 +29,6 @@ XML_FIX_XPATHS = [
     ".//xccdf:fixtext",
     ".//xccdf:fix",
 ]
-
-REQ_FIELDS = ["id", "description", "check", "fix", "severity"]
 
 def _first_attr(elem, names):
     for n in names:
