@@ -28,6 +28,9 @@ def parse_csv(path: str):
         sev   = (_pick_first(r, COL_MAP["severity"]) or "").lower()
         title = _pick_first(r, COL_MAP.get("title", [])) or _pick_first(r, COL_MAP.get("name", []))
 
+        # NEW: lấy Assessment Status nếu có
+        assess = (_pick_first(r, COL_MAP.get("assessment_status", [])) or "").strip().lower()
+        
         # validate theo REQ_FIELDS
         vals = {"id": rid, "description": desc, "check": check, "fix": fix, "severity": sev}
         missing = [f for f in REQ_FIELDS if not vals.get(f)]

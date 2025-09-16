@@ -26,6 +26,9 @@ COL_MAP = {
     # không bắt buộc – phục vụ hiển thị
     "title": ["title", "rule_title", "name"],
     "name":  ["name", "title"],
+
+    # NEW:
+    "assessment_status": ["assessment_status", "assessment status", "status"]
 }
 
 # Trường bắt buộc phải có dữ liệu

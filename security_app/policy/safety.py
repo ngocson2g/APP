@@ -32,6 +32,13 @@ def deny_reason(cmd: str) -> str | None:
 class SafetyError(ValueError):
     pass
 
+# NEW: deny theo metadata của rule
+def deny_rule_by_meta(rule) -> str | None:
+    status = (getattr(rule, "assessment_status", "") or "").strip().lower()
+    if status and status in {s.lower() for s in RULE_DENY_ASSESSMENT_STATUS}:
+        return f"DENIED by policy: Assessment Status={status}"
+    return None
+
 @dataclass
 class CmdMetrics:
     chars: int
@@ -102,3 +109,4 @@ def assert_cmd_length_safe(cmd: str, limits: CmdLimits | None = None):
         short = ellipsis_middle(cmd, 200)
         raise SafetyError(f"{reason} :: {short}")
     return metrics
+

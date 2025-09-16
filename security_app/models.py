@@ -20,6 +20,7 @@ class Rule:
     fix: str
     severity: str
     title: str = "" 
+    assessment_status: str = ""   # NEW: metadata để deny theo trạng thái
 
 @dataclass
 class CmdResult:
