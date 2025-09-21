@@ -26,5 +26,10 @@ export const api = {
     const r = await fetch(`${BASE}/api/runs/${encodeURIComponent(runId)}/rule/${index}`)
     if (!r.ok) throw new Error('Failed to get rule detail')
     return r.json()
+  },
+  async getRunWaves(runId) {
+    const res = await fetch(`${BASE}/api/runs/${encodeURIComponent(runId)}/waves`);
+    if (!res.ok) throw new Error("waves not found");
+    return await res.json(); // { total_cmds, waves: [...] }
   }
 }

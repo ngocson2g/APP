@@ -7,6 +7,7 @@ import TopFailingTable from '../components/TopFailingTable'
 import RunTrend from '../components/RunTrend'   // <-- thêm
 import RuleDialog from '../components/RuleDialog'
 import DeniedTable from '../components/DeniedTable'
+import WaveChart from '../components/WaveChart'
 
 export default function Reporting() {
   const [runs, setRuns] = useState([])
@@ -16,6 +17,8 @@ export default function Reporting() {
   const [series, setSeries] = useState([])      // <-- thêm
   const [openIdx, setOpenIdx] = useState(null)
   const CountRuntren = 20
+  const [waves, setWaves] = useState(null)
+
   useEffect(() => {
     api.listRuns().then((rs) => {
       setRuns(rs)
@@ -41,6 +44,13 @@ export default function Reporting() {
     api.getSummary(selectedRun)
       .then((s) => { setSummary(s); setLoading(false) })
       .catch(() => setLoading(false))
+  }, [selectedRun])
+
+  useEffect(() => {
+    if (!selectedRun) return
+    api.getRunWaves(selectedRun)
+      .then(setWaves)
+      .catch(() => setWaves(null))
   }, [selectedRun])
 
   return (
@@ -110,6 +120,10 @@ export default function Reporting() {
           setOpenIdx(idx)
         }}
         />
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>Execution waves (throughput • p50/p95 • timeout%)</h3>
+          <WaveChart waves={waves?.waves || []} />
+        </div>
         <RuleDialog
           open={openIdx !== null}
           runId={selectedRun}

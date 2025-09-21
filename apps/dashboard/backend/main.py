@@ -1,6 +1,6 @@
 # apps/dashboard/backend/main.py
 
-import os
+import os, json
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
@@ -131,3 +131,14 @@ def api_capabilities():
         "routes": ["/api/export/pdf", "/api/export/excel",
                    "/api/runs/{run_id}/export/pdf", "/api/runs/{run_id}/export/excel"]
     })
+    
+    
+LOGS_DIR = os.environ.get("SECAPP_LOGS_DIR", "logs")
+
+@app.get("/api/runs/{run_id}/waves")
+def get_run_waves(run_id: str):
+    fp = os.path.join(LOGS_DIR, run_id, "waves.json")
+    if not os.path.exists(fp):
+        raise HTTPException(status_code=404, detail="waves not found")
+    with open(fp, encoding="utf-8") as f:
+        return JSONResponse(json.load(f))
