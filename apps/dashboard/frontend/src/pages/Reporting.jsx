@@ -112,18 +112,18 @@ export default function Reporting() {
           <h3 style={{ marginTop: 0 }}>By severity</h3>
           <BySeverityBar bySeverity={summary.by_severity} />
         </div>
-
-        <TopFailingTable
-        items={summary?.top_failing_rules || []}
-        onSelect={(idx) => {
-          console.log('[Reporting] onSelect idx =', idx)
-          setOpenIdx(idx)
-        }}
-        />
         <div className="card">
           <h3 style={{ marginTop: 0 }}>Execution waves (throughput • p50/p95 • timeout%)</h3>
           <WaveChart waves={waves?.waves || []} />
         </div>
+        <TopFailingTable
+          items={summary?.top_failing_rules || []}
+          onSelect={(idx) => {
+            console.log('[Reporting] onSelect idx =', idx)
+            setOpenIdx(idx)
+        }}
+        />
+        
         <RuleDialog
           open={openIdx !== null}
           runId={selectedRun}

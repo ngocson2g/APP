@@ -52,3 +52,30 @@ button:active { transform: translateY(1px); }
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: 12px; padding: 16px; overflow: auto; max-height: 84vh;
 }
+
+/* Chart theme (ăn theo palette sẵn có) */
+:root{
+  --chart-axis: var(--muted);
+  --chart-grid: var(--border);
+  --chart-legend: var(--text);
+  --chart-tooltip-bg: var(--bg-card);
+  --chart-tooltip-border: var(--border);
+
+  /* Cột throughput: gradient primary → accent */
+  --chart-bar-1: var(--primary);
+  --chart-bar-2: var(--accent);
+  /* viền cột: trộn sáng hơn một chút (có fallback nếu browser không hỗ trợ) */
+  --chart-bar-stroke: color-mix(in srgb, var(--primary), white 40%);
+}
+
+/* Fallback cho trình duyệt chưa hỗ trợ color-mix */
+@supports not (color: color-mix(in srgb, white, black)) {
+  :root { --chart-bar-stroke: #60a5fa; } /* blue-400 gần với primary */
+}
+
+/* Đường p50/p95/timeout – giữ tương phản cao, hợp dark mode */
+:root{
+  --chart-p50:  #a78bfa; /* violet-400 */
+  --chart-p95:  #fbbf24; /* amber-400 */
+  --chart-timeout: #f87171; /* red-400 */
+}
