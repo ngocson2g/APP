@@ -25,6 +25,16 @@ RETRY_ATTEMPTS   = 1         # số lần thử lại (không tính lần đầu
 RETRY_DELAY_SEC  = 0.5       # backoff cố định giữa các lần thử
 RETRY_ON_TIMEOUT = True      # có retry khi timeout không
 
+# ---- LPT / Chunking / Waves (mặc định) ----
+# Ngưỡng nhận diện lệnh "ngắn"
+CHUNK_SHORT_THRESHOLD = 0.15   # giây
+# Kích thước chunk mặc định cho lệnh ngắn
+CHUNK_SIZE_DEFAULT = 4
+# Kích thước sóng (wave) để auto-tuning giữa các đợt submit
+LPT_WAVE_MIN = 200
+LPT_WAVE_MAX = 500
+
+
 # Danh sách mẫu lệnh bị chặn (regex, không phân biệt hoa thường)
 CMD_DENYLIST = [
     r"\brm\s+-rf\s+/\b",

@@ -4,23 +4,22 @@ Safety policy (denylist): compile một lần & dùng chung cho runner/command.
 """
 from __future__ import annotations
 
+from __future__ import annotations
 import re
-
-from security_app.config import CMD_DENYLIST
-
 from dataclasses import dataclass
 import shlex
 
+from security_app.config import CMD_DENYLIST
 from security_app import settings
 from security_app.utils.text import ellipsis_middle
 
 # Compile 1 lần (mỗi process)
 COMPILED_DENY_RE = [re.compile(p, re.IGNORECASE) for p in CMD_DENYLIST]
 
+# NEW: danh sách trạng thái assessment bị chặn (theo yêu cầu trước đó)
+RULE_DENY_ASSESSMENT_STATUS = {"manual", "na", "not_applicable"}  # có thể mở rộng qua config nếu muốn
+
 def deny_reason(cmd: str) -> str | None:
-    """
-    Trả về lý do bị chặn nếu 'cmd' match denylist; ngược lại None.
-    """
     s = (cmd or "").strip()
     if not s:
         return "DENIED: empty command"
@@ -32,7 +31,6 @@ def deny_reason(cmd: str) -> str | None:
 class SafetyError(ValueError):
     pass
 
-# NEW: deny theo metadata của rule
 def deny_rule_by_meta(rule) -> str | None:
     status = (getattr(rule, "assessment_status", "") or "").strip().lower()
     if status and status in {s.lower() for s in RULE_DENY_ASSESSMENT_STATUS}:
