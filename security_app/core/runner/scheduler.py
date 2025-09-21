@@ -88,8 +88,12 @@ def build_scheduled_tasks(
     tasks.sort(key=lambda t: t[3], reverse=True)
     return tasks, agg, pending
 
-def suggest_wave_size(n_tasks: int) -> int:
-    if n_tasks <= 0:
-        return LPT_WAVE_MIN
-    target = 300
-    return int(max(LPT_WAVE_MIN, min(LPT_WAVE_MAX, target, n_tasks)))
+# def suggest_wave_size(n_tasks: int) -> int:
+#     if n_tasks <= 0:
+#         return LPT_WAVE_MIN
+#     target = 300
+#     return int(max(LPT_WAVE_MIN, min(LPT_WAVE_MAX, target, n_tasks)))
+
+def suggest_wave_size(backlog: int) -> int:
+    # cập nhật 0.5–2 giây/lần: wave tối đa 128 chunk, tối thiểu 8
+    return max(8, min(128, backlog // 4 or 1))

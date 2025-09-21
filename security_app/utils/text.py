@@ -1,6 +1,7 @@
 # security_app/utils/text.py
 import re
 import shutil
+from typing import Iterable
 
 def ellipsis_middle(s: str, max_chars: int = 180) -> str:
     """Rút gọn chuỗi ở giữa để in log ngắn gọn."""
@@ -13,15 +14,30 @@ def _term_width():
     return shutil.get_terminal_size((120, 20)).columns
 
 def _safe_name(s: str, maxlen: int = 60) -> str:
-    if not s:
-        return "rule"
-    s = re.sub(r"[^a-zA-Z0-9._-]+", "_", s.strip())
-    return (s[:maxlen]).strip("_") or "rule"
+    """
+    Biến tiêu đề thành tên file an toàn, cắt độ dài vừa phải.
+    """
+    s = re.sub(r"[^\w\-.]+", "_", s.strip())
+    if len(s) <= maxlen:
+        return s
+    return s[: maxlen - 3] + "..."
 
-def _bar(value, total, width=20, ch="█"):
-    if total <= 0: return ""
-    n = max(0, min(width, round(value * width / total)))
-    return ch * n + " " * (width - n)
+def _bar(done: int, total: int, width: int = 20) -> str:
+    """
+    Thanh tiến độ ASCII đơn giản (dùng cho CLI).
+    Ví dụ: [██████████          ]
+    """
+    try:
+        total = int(total)
+        done = int(done)
+    except Exception:
+        return ""
+    if total <= 0:
+        return ""
+    width = max(4, int(width or 20))
+    frac = max(0.0, min(1.0, (done / total)))
+    filled = int(frac * width)
+    return ("█" * filled) + (" " * (width - filled))
 
 def _table(rows, headers, max_width=None):
     if max_width is None:
@@ -38,9 +54,11 @@ def _table(rows, headers, max_width=None):
         i = cols - 1
         widths[i] = max(8, widths[i] - overflow)
 
-    def cut(s, w): s = str(s); return (s[:w-1] + "…") if len(s) > w else s
+    def cut(s, w):
+        s = str(s)
+        return (s[: w - 1] + "…") if len(s) > w else s
 
     print(" | ".join(cut(headers[i], widths[i]).ljust(widths[i]) for i in range(cols)))
-    print("-+-".join("-"*widths[i] for i in range(cols)))
+    print("-+-".join("-" * widths[i] for i in range(cols)))
     for r in rows:
         print(" | ".join(cut(r[i], widths[i]).ljust(widths[i]) for i in range(cols)))
