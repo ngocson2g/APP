@@ -25,6 +25,8 @@ from security_app.utils.text import _bar
 from .merge import _merge_and_log
 from .scheduler import build_scheduled_tasks, suggest_wave_size
 from .tuner import auto_guess_workers
+from .metrics import WaveMetricsSink
+from .command_port import CommandRunner, default_command_runner
 
 import sys
 
@@ -83,10 +85,11 @@ def _count_timeouts(results: list[CmdResult]) -> int:
 
 
 # ---------- Worker payload ----------
-def _workers_chunk(payload: tuple[int, Rule, list[str], Settings]) -> tuple[int, list[CmdResult]]:
-    """Worker xử lý 1 chunk (n lệnh)."""
-    idx, _rule, allowed_cmds, settings = payload
-    results: list[CmdResult] = [run_command(cmd, settings) for cmd in allowed_cmds]
+def _workers_chunk(payload: tuple[int, Rule, list[str], Settings, CommandRunner]) -> tuple[int, list[CmdResult]]:
+    """Worker xử lý 1 chunk (n lệnh) bằng runner được tiêm vào."""
+    idx, _rule, allowed_cmds, settings, run_fn = payload
+    # run_fn là hàm top-level picklable: (cmd, settings) -> CmdResult
+    results: list[CmdResult] = [run_fn(cmd, settings) for cmd in allowed_cmds]
     return idx, results
 
 
@@ -98,6 +101,7 @@ def run_all_rules(
     use_processes: bool = False,         # giữ tham số cũ (không dùng khi dual-pool)
     settings: Settings | None = None,
     per_command: bool = True,            # giữ tham số cũ, chunking động ở scheduler
+    command_runner: CommandRunner | None = None,  # NEW: DI port
 ) -> list[dict[str, Any]]:
     """
     Thực thi toàn bộ rule với LPT + waves + dual-pool (ProcessPool + ThreadPool),
@@ -116,6 +120,8 @@ def run_all_rules(
         exec_cwd=None,
         clean_env=True,
     )
+    
+    run_fn: CommandRunner = command_runner or default_command_runner
 
     # 1) Lập danh sách task theo LPT (đã deny/allowed + chunking động)
     tasks, agg, pending = build_scheduled_tasks(rules, logs_base_dir=log_base_dir)
@@ -151,19 +157,8 @@ def run_all_rules(
         guessed_cap_cpu = min(guessed_cap_cpu, int(workers))
         guessed_cap_io  = min(guessed_cap_io, int(workers))
 
-    # 3) Khởi tạo metrics lưu waves.json
-    metrics = {
-        "run_id": os.path.basename(logger.run_dir),
-        "started_at": time.time(),
-        "total_cmds": int(total_cmds_planned),
-        "waves": [],
-    }
-    def _write_metrics():
-        p_tmp = os.path.join(logger.run_dir, "waves.json.tmp")
-        p_dst = os.path.join(logger.run_dir, "waves.json")
-        with open(p_tmp, "w", encoding="utf-8") as f:
-            json.dump(metrics, f, ensure_ascii=False, indent=2)
-        os.replace(p_tmp, p_dst)
+    # 3) Khởi tạo sink ghi metrics theo wave (SRP)
+    sink = WaveMetricsSink(run_dir=logger.run_dir, total_cmds=total_cmds_planned)
 
     cmds_done = 0
     ema_thr: float | None = None  # EMA cho throughput để mượt ETA
@@ -197,12 +192,12 @@ def run_all_rules(
              ThreadPoolExecutor(max_workers=use_workers_io or 1) as ex_io:
 
             for (idx, rule, chunk, _est) in cpu_wave:
-                fut = ex_cpu.submit(_workers_chunk, (idx, rule, chunk, settings))
+                fut = ex_cpu.submit(_workers_chunk, (idx, rule, chunk, settings, run_fn))
                 futures[fut] = ("cpu", idx, len(chunk))
                 cmds_in_wave_cpu += len(chunk)
 
             for (idx, rule, chunk, _est) in io_wave:
-                fut = ex_io.submit(_workers_chunk, (idx, rule, chunk, settings))
+                fut = ex_io.submit(_workers_chunk, (idx, rule, chunk, settings, run_fn))
                 futures[fut] = ("io", idx, len(chunk))
                 cmds_in_wave_io += len(chunk)
 
@@ -263,23 +258,15 @@ def run_all_rules(
         else:
             p50 = p95 = 0.0
 
-        # Ghi metrics JSON
-        metrics["waves"].append({
-            "wave": wave_no + 1,
-            "started_at": t0,
-            "ended_at": t1,
-            "elapsed_sec": round(elapsed, 6),
-            "cmds": int(cmds_in_wave_total),
-            "thr_total": round(thr_total, 6),
-            "thr_cpu": round(thr_cpu, 6),
-            "thr_io": round(thr_io, 6),
-            "timeouts": int(timeouts_total),
-            "timeout_rate": round(timeout_rate, 6),
-            "p50": round(p50, 6),
-            "p95": round(p95, 6),
-        })
-        metrics["updated_at"] = time.time()
-        _write_metrics()
+       # Ghi metrics (SRP: giao cho sink)
+        sink.add_wave(
+            wave_no + 1,
+            started_at=t0, ended_at=t1,
+            cmds_total=cmds_in_wave_total,
+            thr_total=thr_total, thr_cpu=thr_cpu, thr_io=thr_io,
+            timeouts=timeouts_total, timeout_rate=timeout_rate,
+            p50=p50, p95=p95,
+        )
 
         # In progress + ETA (CLI)
         cmds_done += cmds_in_wave_total
@@ -307,6 +294,5 @@ def run_all_rules(
     results.sort(key=lambda x: x["rule_index"])
 
     # Đánh dấu kết thúc
-    metrics["finished_at"] = time.time()
-    _write_metrics()
+    sink.finish()
     return results
