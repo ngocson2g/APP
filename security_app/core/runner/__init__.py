@@ -30,6 +30,14 @@ from .command_port import CommandRunner, default_command_runner
 
 import sys
 
+# ======== AIMD Tuning (config qua ENV, có giá trị mặc định an toàn) ========
+AIMD_TIMEOUT_RATE = float(os.getenv("SECAPP_AIMD_TIMEOUT_RATE", "0.15"))  # 15% timeouts coi là nghẽn
+AIMD_P95_SPIKE    = float(os.getenv("SECAPP_AIMD_P95_SPIKE", "0.50"))     # p95 tăng >50% coi là nghẽn
+AIMD_BETA         = float(os.getenv("SECAPP_AIMD_BETA", "0.70"))          # multiplicative decrease ×0.7
+AIMD_ADD          = int(os.getenv("SECAPP_AIMD_ADD", "1"))                # additive increase +1
+WAVE_SCALE_MIN    = float(os.getenv("SECAPP_WAVE_SCALE_MIN", "0.50"))     # thu nhỏ wave tối đa 50%
+WAVE_SCALE_MAX    = float(os.getenv("SECAPP_WAVE_SCALE_MAX", "2.00"))     # phóng to wave tối đa 2x
+
 
 # ---------- Phân loại CPU-ish / IO-ish ----------
 _CPUISH_TOKENS = {
@@ -163,11 +171,25 @@ def run_all_rules(
     cmds_done = 0
     ema_thr: float | None = None  # EMA cho throughput để mượt ETA
     wave_no = 0
+    
+    
+    # ======== Biến trạng thái cho AIMD & timeout động ========
+    cap_cpu_cur = max(1, int(guessed_cap_cpu))  # bắt đầu từ ước lượng ban đầu
+    cap_io_cur  = max(1, int(guessed_cap_io))
+    # (bảo thủ) trần mềm: không vượt quá ước lượng ban đầu
+    cap_cpu_max = max(1, int(guessed_cap_cpu))
+    cap_io_max  = max(1, int(guessed_cap_io))
+    wave_scale  = 1.0
+    prev_p95: float | None = None
+    no_congest_waves = 0
+
 
     # 4) Chạy theo waves
     while tasks:
         # Lấy một wave hợp lý
-        wave_size = suggest_wave_size(len(tasks))
+        wave_size_base = suggest_wave_size(len(tasks))
+        # áp dụng scale động (AIMD) và kẹp an toàn 8..128
+        wave_size = int(max(8, min(128, wave_size_base * wave_scale)))
         wave_tasks = tasks[:wave_size]
         tasks = tasks[wave_size:]
 
@@ -178,10 +200,9 @@ def run_all_rules(
             idx, rule, chunk, est = item
             (cpu_wave if _classify_chunk(chunk) == "cpu" else io_wave).append(item)
 
-        # Số worker mỗi làn (≤ số task còn lại của làn)
-        use_workers_cpu = max(1, min(guessed_cap_cpu, len(cpu_wave))) if cpu_wave else 1
-        use_workers_io  = max(1, min(guessed_cap_io,  len(io_wave)))  if io_wave  else 1
-
+        # Số worker mỗi làn (≤ số task còn lại của làn), dùng “cap hiện tại” của AIMD
+        use_workers_cpu = max(1, min(cap_cpu_cur, len(cpu_wave))) if cpu_wave else 1
+        use_workers_io  = max(1, min(cap_io_cur,  len(io_wave)))  if io_wave  else 1
         # Submit song song
         t0 = time.time()
         futures = {}
@@ -258,6 +279,43 @@ def run_all_rules(
         else:
             p50 = p95 = 0.0
 
+        # ---- Timeout động cho WAVE KẾ TIẾP (theo p95 thực tế) ----
+        try:
+            t_dyn = None
+            # dùng lại heuristic 3×p95 + 1s, clamp 5..60
+            if p95 and p95 > 0:
+                t_dyn = p95 * 3.0 + 1.0
+                if t_dyn < 5.0:  t_dyn = 5.0
+                if t_dyn > 60.0: t_dyn = 60.0
+            if t_dyn:
+                settings.shell_timeout = float(t_dyn)
+        except Exception:
+            pass
+
+        # ---- AIMD: điều chỉnh cap_cpu/io và wave_scale cho WAVE KẾ TIẾP ----
+        congested = (timeout_rate > AIMD_TIMEOUT_RATE) or (
+            (prev_p95 is not None) and (p95 > prev_p95 * (1.0 + AIMD_P95_SPIKE))
+        )
+        if congested:
+            # multiplicative decrease
+            cap_cpu_cur = max(1, int(cap_cpu_cur * AIMD_BETA))
+            cap_io_cur  = max(1, int(cap_io_cur  * AIMD_BETA))
+            wave_scale  = max(WAVE_SCALE_MIN, wave_scale * AIMD_BETA)
+            no_congest_waves = 0
+        else:
+            # additive increase (không vượt trần mềm)
+            if cap_cpu_cur < cap_cpu_max:
+                cap_cpu_cur = min(cap_cpu_max, cap_cpu_cur + AIMD_ADD)
+            if cap_io_cur < cap_io_max:
+                cap_io_cur  = min(cap_io_max,  cap_io_cur  + AIMD_ADD)
+            wave_scale = min(WAVE_SCALE_MAX, wave_scale + 0.10)
+            no_congest_waves += 1
+        prev_p95 = p95
+
+        # (tuỳ chọn) In debug ngắn gọn để quan sát điều chỉnh
+        # print(f"[aimd] next caps: cpu={cap_cpu_cur} io={cap_io_cur} wave_scale={wave_scale:.2f} timeout={settings.shell_timeout}")
+ 
+
        # Ghi metrics (SRP: giao cho sink)
         sink.add_wave(
             wave_no + 1,
@@ -279,7 +337,10 @@ def run_all_rules(
         line = (
             f"[wave {wave_no+1}] cmds={cmds_in_wave_total} | {elapsed:.2f}s | "
             f"thr={thr_total:.2f} cmd/s | to={timeout_rate*100:.1f}% | "
-            f"p50={p50:.3f}s p95={p95:.3f}s | ETA ~ {eta_min:02d}:{eta_s:02d}  [{bar}]"
+            f"p50={p50:.3f}s p95={p95:.3f}s | "
+            f"Wcpu={use_workers_cpu} Wio={use_workers_io} ws×={wave_scale:.2f} | "
+            f"tmo={settings.shell_timeout if settings.shell_timeout else 0:.1f}s | "
+            f"ETA ~ {eta_min:02d}:{eta_s:02d}  [{bar}]"
         )
         if sys.stdout.isatty():
             print(line, end="\r", flush=True)   # cập nhật cùng 1 dòng
