@@ -51,6 +51,10 @@ def run_once(
     est_pre = estimate_plan(
         rules, logs_base_dir=logs_dir, workers=workers, use_processes=proc, per_command=True
     )
+    est = dict(est_pre)
+    est["workers_used"] = workers
+
+    
     if estimate or plan_only:
         print("=" * 80)
         print("PRE-RUN ESTIMATE".center(80))
@@ -64,10 +68,14 @@ def run_once(
     shell_timeout = timeout if timeout else _autotimeout_from_est(est_pre.get("p95_cmd"))
     settings = with_overrides(base, shell_timeout=shell_timeout, retry_attempts=retries)
 
-    # Ước lượng đề xuất workers nếu chưa set (để show lại sau cùng)
-    est = estimate_plan(rules, logs_base_dir=logs_dir, workers=workers, use_processes=proc)
+    # Tái dùng est_pre để lấy workers_suggested (tránh gọi estimate_plan lần 2)
     if not workers:
-        workers = est["workers_suggested"]
+        try:
+            workers = int(est_pre.get("workers_suggested") or 1)
+        except Exception:
+            workers = 1
+    # Dùng lại est_pre cho phần trả về/report
+    est = est_pre
 
     run_results = run_all_rules(
         rules, log_base_dir=logs_dir, workers=workers, use_processes=proc, settings=settings

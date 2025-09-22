@@ -38,7 +38,7 @@ def parse_csv(path: str):
             raise Exception(f"Missing {missing} in CSV row (tentative id={rid or '(unknown)'})")
 
         rules.append(Rule(
-            id=rid, description=desc, check=check, fix=fix, severity=sev, title=title or ""
+            id=rid, description=desc, check=check, fix=fix, severity=sev, title=title, assessment_status=assess or ""
         ))
     return rules
 

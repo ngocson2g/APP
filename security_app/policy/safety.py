@@ -2,7 +2,6 @@
 """
 Safety policy (denylist): compile một lần & dùng chung cho runner/command.
 """
-from __future__ import annotations
 
 from __future__ import annotations
 import re
