@@ -1,6 +1,6 @@
 #security_app/reporting/terminal.py
 from security_app.config import TOP_FAIL_LIMIT
-from security_app.models import Rule
+from security_app.models import Rule, as_rule
 from security_app.utils.text import _bar, _table, _term_width
 
 
@@ -80,21 +80,17 @@ def print_report(stats, limit_top=TOP_FAIL_LIMIT):
         cmds = x.get("cmd_results") or []
         nd = sum(1 for r in cmds if "DENIED" in (getattr(r, "stderr", "") or "").upper())
         if nd > 0:
-            rid = _get(x["rule"], "id", x["rule_index"])
-            sev = _get(x["rule"], "severity", "")
-            title = _get(x["rule"], "title", "")
-            denied_rows.append([rid, sev, nd, title])
+            r = as_rule(x["rule"])                 # NEW
+            denied_rows.append([r.id or x["rule_index"], r.severity, nd, r.title or ""])
 
     if denied_rows:
         print("Denied by safety policy:")
         _table(denied_rows, headers=["Rule ID","Sev","#Denied","Title"])
         print()
 
-
     # ----- Danh sách ID -----
-    all_results = stats["all_results"]
-    fail_ids = [str(_get(r["rule"], "id", r["rule_index"])) for r in all_results if r["num_fail"] > 0]
-    ok_ids   = [str(_get(r["rule"], "id", r["rule_index"])) for r in all_results if r["num_fail"] == 0]
+    fail_ids = [as_rule(r["rule"]).id or str(r["rule_index"]) for r in all_results if r["num_fail"] > 0]  # NEW
+    ok_ids   = [as_rule(r["rule"]).id or str(r["rule_index"]) for r in all_results if r["num_fail"] == 0] # NEW
 
     print(f"Failing Rule IDs ({len(fail_ids)}):")
     print(", ".join(fail_ids))

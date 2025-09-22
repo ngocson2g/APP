@@ -7,6 +7,7 @@ import json
 import os
 import sys
 from typing import Any
+from security_app.models import as_rule 
 
 
 def _summary_from_stats(stats: dict[str, Any]) -> dict[str, Any]:
@@ -51,22 +52,22 @@ def _top_from_stats(stats: dict[str, Any]) -> list[dict[str, Any]]:
         })
     return tops
 
+
 def build_stats_json(stats: dict[str, Any]) -> dict[str, Any]:
     return {
         "summary": _summary_from_stats(stats),
         "by_severity": _by_sev_from_stats(stats),
         "top_failing_rules": _top_from_stats(stats),
-        # thêm chi tiết theo rule để bên ngoài có thể tái xử lý nếu muốn
         "rules": [
-            {
-                "id": (r["rule"].id if hasattr(r["rule"], "id") else r["rule"].get("id") or str(r["rule_index"])),
-                "severity": (r["rule"].severity if hasattr(r["rule"], "severity") else r["rule"].get("severity") or "unknown"),
-                "title": (r["rule"].title if hasattr(r["rule"], "title") else r["rule"].get("title") or ""),
-                "cmd_ok": int(r.get("num_ok", 0)),
-                "cmd_fail": int(r.get("num_fail", 0)),
-                "status": "ok" if int(r.get("num_fail", 0)) == 0 else "fail",
-            }
-            for r in stats.get("all_results", [])
+            (lambda rule, rec: {
+                "id": rule.id or str(rec["rule_index"]),
+                "severity": rule.severity or "unknown",
+                "title": rule.title or "",
+                "cmd_ok": int(rec.get("num_ok", 0)),
+                "cmd_fail": int(rec.get("num_fail", 0)),
+                "status": "ok" if int(rec.get("num_fail", 0)) == 0 else "fail",
+            })(as_rule(rec["rule"]), rec)
+            for rec in stats.get("all_results", [])
         ]
     }
 
