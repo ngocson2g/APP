@@ -1,10 +1,4 @@
 # security_app/utils/normalize.py
-"""
-Chuẩn hóa commands với:
-- Comment stripping
-- Whitespace normalization
-- Security sanitization
-"""
 from __future__ import annotations
 
 
