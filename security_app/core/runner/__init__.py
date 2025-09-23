@@ -283,8 +283,10 @@ def run_all_rules(
             # dùng lại heuristic 3×p95 + 1s, clamp 5..60
             if p95 and p95 > 0:
                 t_dyn = p95 * 3.0 + 1.0
-                if t_dyn < 5.0:  t_dyn = 5.0
-                if t_dyn > 60.0: t_dyn = 60.0
+                if t_dyn < 5.0:  
+                    t_dyn = 5.0
+                if t_dyn > 60.0: 
+                    t_dyn = 60.0
             if t_dyn:
                 settings.shell_timeout = float(t_dyn)
         except Exception:

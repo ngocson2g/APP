@@ -35,29 +35,37 @@ def compute_risk(cmd: str) -> Risk:
 
     # destructive / write class
     if any(re.search(p, s) for p in WRITE_PATTERNS):
-        score += 40; factors.append("write/state-change")
+        score += 40 
+        factors.append("write/state-change")
     if re.search(r"\brm\s+-r?f?\s+/", s) or re.search(r"\bdd\s+of=/dev/", s):
-        score += 80; factors.append("destructive")
+        score += 80 
+        factors.append("destructive")
 
     # sensitive paths
     sp_hits = [p for p in SENSITIVE_PATHS if re.search(p, s, re.I)]
     if sp_hits:
         mult = 1.0
-        if re.search(r"/etc\b", s): mult *= 1.5
-        if re.search(r"/var/log\b", s): mult *= 1.3
-        if re.search(r"\s/(\s|$)", s): mult *= 1.8
+        if re.search(r"/etc\b", s): 
+            mult *= 1.5
+        if re.search(r"/var/log\b", s): 
+            mult *= 1.3
+        if re.search(r"\s/(\s|$)", s): 
+            mult *= 1.8
         score = int(score * mult)
         factors += [f"path:{h}" for h in sp_hits[:3]]
 
     # scope amplifiers
     if any(re.search(p, s) for p in SCOPE_FLAGS):
-        score += 25; factors.append("wide-scope")
+        score += 25 
+        factors.append("wide-scope")
 
     # mitigations
     if any(re.search(p, s) for p in DRYRUN_HINTS):
-        score -= 20; factors.append("dry-run")
+        score -= 20 
+        factors.append("dry-run")
     if re.search(HOME_HINT, s):
-        score -= 10; factors.append("home-scope")
+        score -= 10 
+        factors.append("home-scope")
 
     score = max(0, score)
     level = "low" if score < 30 else "medium" if score < 60 else "high" if score < 80 else "critical"

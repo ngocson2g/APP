@@ -1,15 +1,15 @@
 # security_app/core/runner/scheduler.py
 from __future__ import annotations
-
 from typing import Any, List, Tuple
 
+from security_app.models import CmdResult, Rule
+from security_app.core.command_extractor import extract_all_commands
+from security_app.policy.safety import deny_reason
 # ❌ BỎ import gây vòng lặp:
 # from security_app.core.estimator import _read_history, _estimate_cmd_seconds
-from security_app.config import CHUNK_SHORT_THRESHOLD, CHUNK_SIZE_DEFAULT
-from security_app.core.command_extractor import extract_all_commands
-from security_app.models import CmdResult, Rule
-from security_app.policy.safety import deny_reason
-
+from security_app.config import (
+    CHUNK_SHORT_THRESHOLD, CHUNK_SIZE_DEFAULT
+)
 
 def _mk_denied(cmd: str, reason: str) -> CmdResult:
     return CmdResult(cmd=cmd, returncode=None, stdout="", stderr=reason, duration_sec=0.0, ok=False)
