@@ -1,8 +1,11 @@
 # apps/dashboard/backend/reader/rule_reader.py
-import os
 import glob
-from typing import List, Dict, Any
-from .config import LOGS_BASE, _RC_OK_LINE, _ID_LINE, _TITLE_LINE, _SEV_LINE, _DENIED_MARK, _CMD_LINE
+import os
+from typing import Any, Dict, List
+
+from .config import (_CMD_LINE, _DENIED_MARK, _ID_LINE, _RC_OK_LINE, _SEV_LINE,
+                     _TITLE_LINE, LOGS_BASE)
+
 
 def _parse_rule_log(path: str) -> Dict[str, Any]:
     base = os.path.basename(path)

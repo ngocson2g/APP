@@ -7,28 +7,26 @@ Main runner module - Điều phối song song: LPT + waves + phân làn CPU-ish/
 """
 from __future__ import annotations
 
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
-import json
 import os
 import re
 import statistics
+import sys
 import time
-from typing import Any, Dict, List, Tuple
+from concurrent.futures import (ProcessPoolExecutor, ThreadPoolExecutor,
+                                as_completed)
+from typing import Any, Tuple
 
-from security_app.config import CMD_MARKER, DEFAULT_LOGS_DIR
-from security_app.core.command import run_command
+from security_app.config import DEFAULT_LOGS_DIR
 from security_app.core.logger import RunLogger
 from security_app.models import CmdResult, Rule
 from security_app.settings import Settings
 from security_app.utils.text import _bar
 
+from .command_port import CommandRunner, default_command_runner
 from .merge import _merge_and_log
+from .metrics import WaveMetricsSink
 from .scheduler import build_scheduled_tasks, suggest_wave_size
 from .tuner import auto_guess_workers
-from .metrics import WaveMetricsSink
-from .command_port import CommandRunner, default_command_runner
-
-import sys
 
 # ======== AIMD Tuning (config qua ENV, có giá trị mặc định an toàn) ========
 AIMD_TIMEOUT_RATE = float(os.getenv("SECAPP_AIMD_TIMEOUT_RATE", "0.15"))  # 15% timeouts coi là nghẽn

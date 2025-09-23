@@ -1,7 +1,7 @@
 # security_app/utils/text.py
 import re
 import shutil
-from typing import Iterable
+
 
 def ellipsis_middle(s: str, max_chars: int = 180) -> str:
     """Rút gọn chuỗi ở giữa để in log ngắn gọn."""

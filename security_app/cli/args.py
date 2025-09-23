@@ -1,6 +1,9 @@
 # security_app/cli/args.py
 from __future__ import annotations
-import argparse, os
+
+import argparse
+import os
+
 from security_app import config as CFG
 
 DEFAULT_LOGS_DIR = getattr(CFG, "DEFAULT_LOGS_DIR", "logs")

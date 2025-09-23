@@ -1,9 +1,12 @@
 # apps/dashboard/backend/reader/summary_reader.py
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from security_app.reporting.stats import compute_stats
+
+from .config import LOGS_BASE
 from .rule_reader import _read_run_results
 from .run_reader import _list_run_dirs
-from .config import LOGS_BASE
+
 
 def get_summary(run_id: str) -> Dict[str, Any]:
     run_results = _read_run_results(run_id)

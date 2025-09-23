@@ -2,8 +2,8 @@
 """
 Đánh giá risk level của commands
 """
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 
 SENSITIVE_PATHS = [
     r"/etc\b", r"/boot\b", r"/var/log\b", r"/var/lib\b", r"/root\b",

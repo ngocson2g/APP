@@ -1,6 +1,8 @@
 #secirity_app/reporting/stats.py
 from collections import defaultdict
-from security_app.models import as_rule, Rule  # NEW
+
+from security_app.models import Rule, as_rule  # NEW
+
 
 def _get(obj, attr, default=""):
     if obj is None:

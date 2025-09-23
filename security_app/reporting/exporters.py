@@ -7,7 +7,8 @@ import json
 import os
 import sys
 from typing import Any
-from security_app.models import as_rule 
+
+from security_app.models import as_rule
 
 
 def _summary_from_stats(stats: dict[str, Any]) -> dict[str, Any]:

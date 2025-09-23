@@ -1,9 +1,12 @@
 # security_app/core/runner/command_port.py
 from __future__ import annotations
-from typing import Protocol, Callable
+
+from typing import Protocol
+
+from security_app.core.command import run_command as _default_run_command
 from security_app.models import CmdResult
 from security_app.settings import Settings
-from security_app.core.command import run_command as _default_run_command
+
 
 class CommandRunner(Protocol):
     """Port: triển khai thực thi lệnh. Chỉ 1 trách nhiệm."""

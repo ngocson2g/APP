@@ -1,9 +1,9 @@
 # security_app/core/runner/tuner.py
 from __future__ import annotations
 
-from collections.abc import Sequence
 import os
 import statistics
+from collections.abc import Sequence
 
 
 def auto_guess_workers(n_tasks: int, use_processes: bool, sample_durs: Sequence[float]) -> int:

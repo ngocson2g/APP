@@ -9,6 +9,7 @@ Data models cho ứng dụng
 from dataclasses import dataclass
 from typing import Any, Mapping
 
+
 @dataclass(frozen=True)
 class Rule:
     """

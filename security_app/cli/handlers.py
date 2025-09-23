@@ -1,8 +1,12 @@
 # security_app/cli/handlers.py
 from __future__ import annotations
-import json, os, sys
+
+import json
+import os
+import sys
 from pathlib import Path
 from typing import Any, Dict
+
 from security_app import config as CFG
 from security_app.app.run import run_once
 from security_app.maintenance.cleanup import run_cleanup

@@ -1,10 +1,13 @@
 # security_app/core/command.py
+import os
+import random
+import subprocess
+import time
 from collections.abc import Mapping
-import os, subprocess, time, random
+
 from security_app.models import CmdResult
 from security_app.policy.risk import compute_risk
-from security_app.policy.safety import deny_reason, assert_cmd_length_safe
-from security_app.utils.text import ellipsis_middle
+from security_app.policy.safety import assert_cmd_length_safe, deny_reason
 from security_app.settings import Settings
 
 _SAFE_ENV_BASE = {

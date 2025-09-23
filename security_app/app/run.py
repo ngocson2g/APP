@@ -1,19 +1,22 @@
 # security_app/app/run.py
 from __future__ import annotations
-from typing import Any, Optional
-import os
 
-from security_app.parsers.dispatch import parse_file
+import os
+from typing import Any, Optional
+
+from security_app.config import DEFAULT_LOGS_DIR, TOP_FAIL_LIMIT
 from security_app.core.estimator import estimate_plan
-from security_app.reporting.estimate_terminal import print_estimate
 from security_app.core.runner import run_all_rules
+from security_app.parsers.dispatch import parse_file
+from security_app.reporting.estimate_terminal import print_estimate
+from security_app.reporting.exporters import (dump_stats_json,
+                                              write_stats_csv_bundle)
 from security_app.reporting.stats import compute_stats
 from security_app.reporting.terminal import print_report
-from security_app.reporting.exporters import dump_stats_json, write_stats_csv_bundle
-from security_app.settings import default_settings, with_overrides
 from security_app.runtime.sudo import ensure_root
-from security_app.settings import require_sudo_by_default
-from security_app.config import DEFAULT_LOGS_DIR, TOP_FAIL_LIMIT
+from security_app.settings import (default_settings, require_sudo_by_default,
+                                   with_overrides)
+
 
 def _autotimeout_from_est(p95: float | None) -> float | None:
     if not p95 or p95 <= 0:

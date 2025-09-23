@@ -1,16 +1,20 @@
 # apps/dashboard/backend/main.py
 
-import os, json
+import json
+import os
+from io import BytesIO
+
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, JSONResponse
-from io import BytesIO
+from fastapi.responses import JSONResponse, StreamingResponse
 
 # Cho phép chạy kiểu package và kiểu "uvicorn main:app"
 try:
-    from .reader import list_runs, get_summary, list_rules, get_timeseries, get_rule_detail
+    from .reader import (get_rule_detail, get_summary, get_timeseries,
+                         list_rules, list_runs)
 except ImportError:
-    from reader import list_runs, get_summary, list_rules, get_timeseries, get_rule_detail
+    from reader import (get_rule_detail, get_summary, get_timeseries,
+                        list_rules, list_runs)
 
 try:
     from .exporter import build_excel, build_pdf, save_copy_if_configured

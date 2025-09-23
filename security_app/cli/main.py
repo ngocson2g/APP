@@ -1,8 +1,11 @@
 # security_app/cli/main.py
 from __future__ import annotations
+
 import sys
+
 from security_app.cli.args import build_parser
 from security_app.cli.handlers import handle_cleanup, handle_run
+
 
 def main(argv=None) -> int:
     if argv is None:

@@ -1,7 +1,10 @@
 # security_app/reporting/estimate_terminal.py
 from __future__ import annotations
+
 from typing import Dict
+
 from security_app.utils.text import _table
+
 
 def print_estimate(est: Dict[str, object]) -> None:
     """

@@ -20,13 +20,19 @@ def _strip_comments_outside_quotes(s: str) -> str:
         # chuyển trạng thái quote
         if ch == "'" and not in_d and not in_bt:
             in_s = not in_s
-            out.append(ch); i += 1; continue
+            out.append(ch) 
+            i += 1 
+            continue
         if ch == '"' and not in_s and not in_bt:
             in_d = not in_d
-            out.append(ch); i += 1; continue
+            out.append(ch) 
+            i += 1 
+            continue
         if ch == "`" and not in_s and not in_d:
             in_bt = not in_bt
-            out.append(ch); i += 1; continue
+            out.append(ch) 
+            i += 1 
+            continue
 
         # '#' ngoài mọi quote & không phải \#
         if ch == "#" and not (in_s or in_d or in_bt):
@@ -61,13 +67,19 @@ def _collapse_ws_outside_quotes(s: str) -> str:
     for ch in s:
         if ch == "'" and not in_d and not in_bt:
             in_s = not in_s
-            out.append(ch); ws_run = False; continue
+            out.append(ch) 
+            ws_run = False 
+            continue
         if ch == '"' and not in_s and not in_bt:
             in_d = not in_d
-            out.append(ch); ws_run = False; continue
+            out.append(ch) 
+            ws_run = False 
+            continue
         if ch == "`" and not in_s and not in_d:
             in_bt = not in_bt
-            out.append(ch); ws_run = False; continue
+            out.append(ch) 
+            ws_run = False 
+            continue
 
         if (ch in " \t\r\n") and not (in_s or in_d or in_bt):
             if not ws_run and out:

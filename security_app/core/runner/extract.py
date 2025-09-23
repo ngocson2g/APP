@@ -1,8 +1,10 @@
 # security_app/core/runner/extract.py
 from __future__ import annotations
+
 from security_app.core.command_extractor import extract_all_commands
 from security_app.models import CmdResult, Rule
 from security_app.policy.safety import deny_reason, deny_rule_by_meta
+
 
 def _mk_denied(cmd: str, reason: str) -> CmdResult:
     return CmdResult(cmd=cmd, returncode=None, stdout="", stderr=reason, duration_sec=0.0, ok=False)

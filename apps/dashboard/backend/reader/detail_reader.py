@@ -1,8 +1,11 @@
 # apps/dashboard/backend/reader/detail_reader.py
-import re, os
-from typing import Dict, Any
+import os
+import re
+from typing import Any, Dict
+
+from .config import _ID_LINE, _RC_OK_LINE, _SEV_LINE, _TITLE_LINE
 from .rule_reader import _read_rule_file
-from .config import _RC_OK_LINE, _ID_LINE, _TITLE_LINE, _SEV_LINE, _CMD_LINE
+
 
 def get_rule_detail(run_id: str, rule_index: int) -> Dict[str, Any]:
     path = _read_rule_file(run_id, rule_index)
@@ -15,11 +18,11 @@ def get_rule_detail(run_id: str, rule_index: int) -> Dict[str, Any]:
     with open(path, "r", encoding="utf-8", errors="ignore") as f:
         for raw in f:
             line = raw.rstrip("\n")
-            m = _ID_LINE.match(line);     
+            m = _ID_LINE.match(line)     
             if m: rid = m.group(1).strip();           continue
-            m = _TITLE_LINE.match(line);  
+            m = _TITLE_LINE.match(line)  
             if m: title = (m.group(1) or "").strip(); continue
-            m = _SEV_LINE.match(line);    
+            m = _SEV_LINE.match(line)    
             if m: sev = (m.group(1) or "").strip().lower(); continue
 
             if line.strip() == "---- Check ----":

@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
-from typing import List
+
+from security_app.models import Rule
 
 from .schema import REQ_FIELDS
-from security_app.models import Rule
 
 # Ứng viên attribute trên <Rule>
 XML_ATTR_CANDIDATES = {

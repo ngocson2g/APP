@@ -2,10 +2,10 @@
 """
 Quản lý application settings và overrides
 """
-from security_app.models import Settings
-
 # --- Command length guard (IO-safety) ---
 import os
+
+from security_app.models import Settings
 
 MAX_CMD_CHARS = int(os.getenv("SECAPP_MAX_CMD_CHARS", "1200"))          # tổng ký tự
 MAX_CMD_BYTES = int(os.getenv("SECAPP_MAX_CMD_BYTES", "4096"))          # tổng bytes UTF-8

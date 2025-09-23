@@ -3,8 +3,10 @@
 Secret masker: compile SECRET_REPLACERS một lần, mask nhanh hơn.
 """
 from __future__ import annotations
+
 import re
 from typing import List, Tuple
+
 from security_app.config import SECRET_REPLACERS
 
 # Danh sách (pattern đã compile, replacement)

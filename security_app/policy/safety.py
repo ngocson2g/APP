@@ -4,12 +4,13 @@ Safety policy (denylist): compile một lần & dùng chung cho runner/command.
 """
 
 from __future__ import annotations
-import re
-from dataclasses import dataclass
-import shlex
 
-from security_app.config import CMD_DENYLIST
+import re
+import shlex
+from dataclasses import dataclass
+
 from security_app import settings
+from security_app.config import CMD_DENYLIST
 from security_app.utils.text import ellipsis_middle
 
 # Compile 1 lần (mỗi process)
