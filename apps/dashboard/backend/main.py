@@ -141,4 +141,8 @@ def get_run_waves(run_id: str):
     if not os.path.exists(fp):
         raise HTTPException(status_code=404, detail="waves not found")
     with open(fp, encoding="utf-8") as f:
-        return JSONResponse(json.load(f))
+        data = json.load(f)
+    resp = JSONResponse(data)
+    # NGĂN CACHE TRÌNH DUYỆT/PROXY
+    resp.headers["Cache-Control"] = "no-store, max-age=0"
+    return resp

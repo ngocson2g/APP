@@ -8,15 +8,39 @@ import {
 export default function WaveChart({ waves = [], height = 360 }) {
   if (!waves?.length) return <p className="text-sm opacity-70">No wave data.</p>
 
-  const data = waves.map(w => ({
-    wave: w.wave,
+  const data = React.useMemo(() => {
+  const arr = (waves || []).map(w => ({
+    wave: Number(w.wave || 0),
+    // dùng trực tiếp các trường đã tính sẵn trong JSON
     thr_total: Number(w.thr_total || 0),
-    thr_cpu: Number(w.thr_cpu || 0),
-    thr_io: Number(w.thr_io || 0),
-    timeout_pct: Math.round((Number(w.timeout_rate || 0) * 100) * 100) / 100,
+    thr_cpu:   Number(w.thr_cpu   || 0),
+    thr_io:    Number(w.thr_io    || 0),
+    timeout_pct: Math.round(Number(w.timeout_rate || 0) * 10000) / 100, // => %
     p95: Number(w.p95 || 0),
     p50: Number(w.p50 || 0),
+    // thêm 2 trường phụ để tự check lệch (không vẽ)
+    _cmds: Number(w.cmds || 0),
+    _elapsed: Number(w.elapsed_sec || 0),
   }))
+  // sort theo thứ tự wave tăng dần đề phòng file chưa được sắp xếp
+  arr.sort((a, b) => a.wave - b.wave)
+
+  // cảnh báo nếu thr_total trong file khác với cmds/elapsed (>5%)
+  arr.forEach(d => {
+    if (d._cmds > 0 && d._elapsed > 0) {
+      const calc = d._cmds / d._elapsed
+      const diff = Math.abs(calc - d.thr_total) / (d.thr_total || 1)
+      if (diff > 0.05) {
+        // chỉ log dev, không ảnh hưởng UI
+        console.warn(`[Wave ${d.wave}] thr mismatch: json=${d.thr_total} calc=${calc.toFixed(3)}`)
+      }
+    }
+  })
+
+  // loại bỏ trường phụ trước khi trả về cho chart
+  return arr.map(({ _cmds, _elapsed, ...rest }) => rest)
+}, [waves])
+
 
   return (
     <div style={{ width: '100%', height }}>

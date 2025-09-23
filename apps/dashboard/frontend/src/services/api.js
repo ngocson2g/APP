@@ -1,6 +1,12 @@
 //apps/dashboard/frontend/src/services/api.js
 export const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
+async function _json(url) {
+  const r = await fetch(url, { cache: 'no-store', headers: { 'Cache-Control': 'no-store' } })
+  if (!r.ok) throw new Error(`HTTP ${r.status}`)
+  return r.json()
+}
+
 export const api = {
   async listRuns() {
     const r = await fetch(`${BASE}/api/runs`)
@@ -28,8 +34,8 @@ export const api = {
     return r.json()
   },
   async getRunWaves(runId) {
-    const res = await fetch(`${BASE}/api/runs/${encodeURIComponent(runId)}/waves`);
-    if (!res.ok) throw new Error("waves not found");
-    return await res.json(); // { total_cmds, waves: [...] }
+    // cache-bust bằng timestamp để chắc chắn không dính cache cũ
+    const t = Date.now()
+    return _json(`${BASE}/api/runs/${encodeURIComponent(runId)}/waves?t=${t}`)
   }
 }
