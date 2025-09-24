@@ -171,7 +171,7 @@ def run_all_rules(
     cap_io_max  = max(1, int(guessed_cap_io))
     wave_scale  = 1.0
     prev_p95: float | None = None
-    no_congest_waves = 0
+    #no_congest_waves = 0
 
 
     # 4) Chạy theo waves
@@ -293,7 +293,7 @@ def run_all_rules(
             cap_cpu_cur = max(1, int(cap_cpu_cur * AIMD_BETA))
             cap_io_cur  = max(1, int(cap_io_cur  * AIMD_BETA))
             wave_scale  = max(WAVE_SCALE_MIN, wave_scale * AIMD_BETA)
-            no_congest_waves = 0
+            #no_congest_waves = 0
         else:
             # additive increase (không vượt trần mềm)
             if cap_cpu_cur < cap_cpu_max:
@@ -301,7 +301,7 @@ def run_all_rules(
             if cap_io_cur < cap_io_max:
                 cap_io_cur  = min(cap_io_max,  cap_io_cur  + AIMD_ADD)
             wave_scale = min(WAVE_SCALE_MAX, wave_scale + 0.10)
-            no_congest_waves += 1
+            #no_congest_waves += 1
         prev_p95 = p95
 
         # (tuỳ chọn) In debug ngắn gọn để quan sát điều chỉnh

@@ -31,11 +31,7 @@ def deny_reason(cmd: str) -> str | None:
 class SafetyError(ValueError):
     pass
 
-def deny_rule_by_meta(rule) -> str | None:
-    status = (getattr(rule, "assessment_status", "") or "").strip().lower()
-    if status and status in {s.lower() for s in RULE_DENY_ASSESSMENT_STATUS}:
-        return f"DENIED by policy: Assessment Status={status}"
-    return None
+
 
 @dataclass
 class CmdMetrics:
