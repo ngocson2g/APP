@@ -73,14 +73,6 @@ def _classify_chunk(chunk_cmds: list[str]) -> str:
     """Trả về 'cpu' nếu bất kỳ lệnh nào trong chunk là CPU-ish, ngược lại 'io'."""
     return "cpu" if any(_is_cpuish_cmd(c) for c in (chunk_cmds or [])) else "io"
 
-def _count_types(tasks: list[Tuple[int, Rule, list[str], float]]) -> tuple[int, int]:
-    cpu = io = 0
-    for _idx, _rule, chunk, _est in tasks:
-        if _classify_chunk(chunk) == "cpu":
-            cpu += 1
-        else:
-            io += 1
-    return cpu, io
 
 def _count_timeouts(results: list[CmdResult]) -> int:
     n = 0

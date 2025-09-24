@@ -32,7 +32,7 @@ ENV/
 logs/
 # Bất kỳ file .log rơi vãi
 *.log
-
+out/
 tests/
 
 # ---------- Config / secrets ----------

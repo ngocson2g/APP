@@ -4,12 +4,6 @@ from security_app.models import Rule, as_rule
 from security_app.utils.text import _bar, _table, _term_width
 
 
-def _get(rule, key, default=""):
-    if isinstance(rule, Rule):
-        return getattr(rule, key, default)
-    if isinstance(rule, dict):
-        return rule.get(key, default)
-    return default
 
 def print_report(stats, limit_top=TOP_FAIL_LIMIT):
     W = _term_width()
