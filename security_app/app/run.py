@@ -42,6 +42,8 @@ def run_once(
     save_report: bool = False,
     out_dir: Optional[str] = None,
 ) -> dict[str, Any]:
+    
+    #1. Chuẩn bị 
     if require_sudo_by_default():
         ensure_root(required=True)
     if not os.path.exists(input):
@@ -50,7 +52,7 @@ def run_once(
     base = default_settings()
     rules = parse_file(input)
 
-    # Ước lượng trước (nếu cần in) + để suy ra timeout động
+    #2. Ước lượng trước (nếu cần in) + để suy ra timeout động
     est_pre = estimate_plan(
         rules, logs_base_dir=logs_dir, workers=workers, use_processes=proc, per_command=True
     )
@@ -80,9 +82,12 @@ def run_once(
     # Dùng lại est_pre cho phần trả về/report
     est = est_pre
 
+    #4. thực thi
     run_results = run_all_rules(
         rules, log_base_dir=logs_dir, workers=workers, use_processes=proc, settings=settings
     )
+    
+    #5. Báo cáo
     stats = compute_stats(run_results)
     print_report(stats, limit_top=top)
 
