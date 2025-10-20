@@ -1,21 +1,98 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "security-app"
 version = "0.1.0"
-description = "Run STIG/Checklist and report results."
+description = "Lightweight Ubuntu 24.04 compliance checker with LPT/wave scheduling, AIMD, and multi-format reporting."
+readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["pandas"]
+license = { text = "MIT" }
+authors = [
+  { name = "Nông Ngọc Sơn" }
+]
+keywords = ["compliance", "security", "Ubuntu", "scheduling", "LPT", "AIMD", "reporting"]
+# Core app hiện không phụ thuộc thư viện ngoài tiêu chuẩn (stdlib).
+dependencies = []
+
+# Nhóm phụ thuộc tuỳ chọn
+[project.optional-dependencies]
+dashboard = [
+  "fastapi==0.115.0",
+  "uvicorn[standard]==0.30.6",
+  "pydantic==2.8.2",
+  "python-dotenv==1.0.1",
+  "openpyxl==3.1.5",
+  "fpdf2>=2.7,<3",
+]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=4.1",
+  "coverage[toml]>=7.4",
+  "vulture>=2.11",
+  "mypy>=1.10",
+  "ruff>=0.5",
+  "black>=24.4",
+  "isort>=5.13",
+  "build>=1.2",
+  "twine>=5.0",
+]
 
 [project.scripts]
-security-app = "security_app.app.cli:main"
+security-app = "security_app.cli.main:main"
+# Tuỳ chọn: bật shortcut chạy dashboard (nếu muốn)
+# security-dashboard = "apps.dashboard.backend.main:run"
 
 [tool.setuptools]
-packages = ["security_app",
-            "security_app.app",
-            "security_app.core",
-            "security_app.parsers",
-            "security_app.reporting",
-            "security_app.utils"]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+# Đóng gói core + (tuỳ chọn) dashboard backend
+include = [
+  "security_app*",
+  "apps.dashboard.backend*",
+]
+exclude = [
+  "htmlcov*",
+  "logs*",
+  "data*",
+  "tests*",
+]
+
+# Nếu sau này muốn ship kèm data ngoài package, cân nhắc chuyển data/ vào gói
+# hoặc dùng data-files để cài vào share/ (tránh tham chiếu đường dẫn tương đối ngoài package).
+
+# ---- Chất lượng mã & kiểm thử ----
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+lint.select = ["E","F","I","UP","B","SIM"]
+lint.ignore = ["E203","E501"]  # tương thích black, nới dòng dài khi cần
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+combine_as_imports = true
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["security_app"]
+omit = [
+  "tests/*",
+  "apps/dashboard/backend/*",
+]
+
+[tool.coverage.report]
+skip_empty = true
+show_missing = true
+fail_under = 85
