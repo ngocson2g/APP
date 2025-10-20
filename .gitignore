@@ -29,8 +29,8 @@ ENV/
 
 # ---------- App outputs & logs ----------
 # Toàn bộ run logs sinh ra khi chạy security-app
-logs/*
-logs/**/*
+#logs/*
+#logs/**/*
 # Bất kỳ file .log rơi vãi
 *.log
 out/
