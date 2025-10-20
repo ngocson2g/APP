@@ -14,7 +14,7 @@ authors = [
 ]
 keywords = ["compliance", "security", "Ubuntu", "scheduling", "LPT", "AIMD", "reporting"]
 # Core app hiện không phụ thuộc thư viện ngoài tiêu chuẩn (stdlib).
-dependencies = []
+dependencies = ["pandas"]
 
 # Nhóm phụ thuộc tuỳ chọn
 [project.optional-dependencies]
