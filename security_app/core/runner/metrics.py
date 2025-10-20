@@ -5,7 +5,7 @@ import json
 import os
 import time
 from typing import Any, Dict
-
+from security_app.runtime.ownership import chown_path
 
 class WaveMetricsSink:
     """
@@ -58,3 +58,4 @@ class WaveMetricsSink:
         with open(tmp, "w", encoding="utf-8") as f:
             json.dump(self._metrics, f, ensure_ascii=False, indent=2)
         os.replace(tmp, dst)
+        chown_path(dst)

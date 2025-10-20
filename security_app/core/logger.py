@@ -12,7 +12,8 @@ import security_app.config as cfg
 from security_app.models import CmdResult, Rule, RuleLogRecord
 from security_app.policy.secrets import mask_secrets
 from security_app.utils.text import _safe_name
-
+#from security_app.runtime.netinfo import primary_ipv4
+from security_app.runtime.ownership import chown_path
 
 def _format_rule_log(rec: RuleLogRecord) -> str:
     """Định dạng bản ghi log theo đúng format hiện có (để backend parse được)."""
@@ -48,10 +49,15 @@ class RunLogger:
 
     def __init__(self, base_dir: str = "logs", run_name: str | None = None, keep_runs: int | None = None):
         self.base_dir = base_dir
+        #ip = primary_ipv4()
         ts = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        self.run_dir = os.path.join(base_dir, run_name or ts)
+        self.run_dir = os.path.join(base_dir, run_name or ts)    #self.run_dir = os.path.join(base_dir,ip , run_name or ts)
+        
         os.makedirs(self.run_dir, exist_ok=True)
 
+        #swap user
+        chown_path(self.run_dir, recursive=False)
+        
         keep = cfg.LOG_ROTATE_KEEP if keep_runs is None else int(keep_runs)
         self._rotate_old_runs(keep)
 
@@ -117,4 +123,6 @@ class RunLogger:
 
         with open(per_rule_path, "w", encoding="utf-8") as f:
             f.write(_format_rule_log(rec))
+            
+        chown_path(per_rule_path)
 

@@ -16,6 +16,11 @@
 
 ---
 
+## Quick Navigation
+[Requirements](#-requirements) · [CLI Quick Start](#-quick-start) · [Dashboard](#-dashboard-api--ui) · [Cleanup](#-cleanup)
+
+---
+
 ## 📁 Repository Structure (high-level)
 
 ```
@@ -166,6 +171,7 @@ security-app --csv-out-dir out/csv data/list.json
 
 ```bash
 # from APP/apps/dashboard/backend
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
@@ -438,5 +444,5 @@ Tuỳ chọn: `--keep-runs N` (mặc định 50), `--runs-older-than-days D`, `-
 
 ## 📬 Liên hệ
 
-Maintainer: Nông Ngọc Sơn · ngocson1265@gmail.com · 0834958114
+Maintainer: Nông Ngọc Sơn 
 
