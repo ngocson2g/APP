@@ -13,7 +13,8 @@ def mock_logger():
 
 def test_merge_and_log_all_ran_ok(mock_logger):
     """Test merging when all commands ran successfully."""
-    rule = Rule(id="R1", check="$ cmd1\n$ cmd2", severity="high")
+    # FIX: Add description and fix
+    rule = Rule(id="R1", description="", check="$ cmd1\n$ cmd2", fix="", severity="high")
     idx = 0
     denied = []
     ran = [
@@ -40,7 +41,8 @@ def test_merge_and_log_all_ran_ok(mock_logger):
 
 def test_merge_and_log_mixed_results(mock_logger):
     """Test merging with denied, failed, and ok commands."""
-    rule = Rule(id="R-MIX", check="$ denied_cmd\n$ fail_cmd\n$ ok_cmd", severity="medium")
+    # FIX: Add description and fix
+    rule = Rule(id="R-MIX", description="Mixed rule desc", check="$ denied_cmd\n$ fail_cmd\n$ ok_cmd", fix="Mixed fix", severity="medium")
     idx = 1
     denied = [CmdResult(cmd="denied_cmd", returncode=None, stdout="", stderr="DENIED", duration_sec=0.0, ok=False)]
     ran = [
@@ -64,7 +66,8 @@ def test_merge_and_log_mixed_results(mock_logger):
 
 def test_merge_and_log_only_denied(mock_logger):
     """Test merging when all commands were denied."""
-    rule = Rule(id="R-DENY", check="$ cmd1", severity="low")
+    # FIX: Add description and fix
+    rule = Rule(id="R-DENY", description="", check="$ cmd1", fix="", severity="low")
     idx = 2
     denied = [CmdResult(cmd="cmd1", returncode=None, stdout="", stderr="DENIED", duration_sec=0.0, ok=False)]
     ran = []

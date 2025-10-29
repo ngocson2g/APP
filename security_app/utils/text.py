@@ -5,9 +5,12 @@ import shutil
 
 def ellipsis_middle(s: str, max_chars: int = 180) -> str:
     """Rút gọn chuỗi ở giữa để in log ngắn gọn."""
-    if len(s) <= max_chars:
+    # FIX: Use <= to handle exact length correctly
+    if len(s) <= max_chars or max_chars < 6: # Need at least ~6 chars for "a...b"
         return s
-    keep = max_chars // 2 - 3
+    keep = max(0, max_chars // 2 - 3)
+    if keep == 0:
+        return s[:max_chars-3] + "..."
     return s[:keep] + "..." + s[-keep:]
 
 def _term_width():
@@ -22,7 +25,7 @@ def _safe_name(s: str, maxlen: int = 60) -> str:
         return s
     return s[: maxlen - 3] + "..."
 
-def _bar(done: int, total: int, width: int = 20) -> str:
+def _bar(done: int, total: int, width: int | str = 20) -> str: # Allow str for width input type hint
     """
     Thanh tiến độ ASCII đơn giản (dùng cho CLI).
     Ví dụ: [██████████          ]
@@ -30,11 +33,15 @@ def _bar(done: int, total: int, width: int = 20) -> str:
     try:
         total = int(total)
         done = int(done)
-    except Exception:
+        # FIX: Move width processing inside try block
+        # Use default 20 if width is None or empty string BEFORE int conversion
+        width_val = width if width else 20
+        width = max(4, int(width_val))
+    except (ValueError, TypeError): # Catch more potential errors
         return ""
     if total <= 0:
         return ""
-    width = max(4, int(width or 20))
+    # width = max(4, int(width or 20)) # <-- MOVE THIS LINE UP
     frac = max(0.0, min(1.0, (done / total)))
     filled = int(frac * width)
     return ("█" * filled) + (" " * (width - filled))
