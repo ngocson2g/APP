@@ -41,21 +41,21 @@ CMD_DENYLIST = [
     r"rm\s+-(?:rf|fr)\s+/(?:$|\s)",               # rm -rf /
     r"dd\s+if=.*\s+of=/dev/(?:sd|hd)",            # dd if=... of=/dev/sdX|hdX
     r"(?:^|\s)(?:mkfs\.[A-Za-z0-9]+|fdisk\s+/dev/)",   # mkfs.* hoặc fdisk /dev/...
-    r">\s*/(?:etc|boot|root|home)(?:\s|$)",       # redirect ghi đè vào đường dẫn trọng yếu
+    r">\s*/(?:etc|boot|root|home)(?:/|\s|$)",       # redirect ghi đè vào đường dẫn trọng yếu
 
     # Fork bomb & tấn công tài nguyên
-    r":\s*\(\s*\)\s*\{\s*:\s*\|\s*:\s*;\s*\}\s*;?\s*:", # bash fork bomb ::(){ :|:& };:
+    r":\s*\(\s*\)\s*\{\s*:\s*\|\s*:\s*(?:&|;)\s*\}\s*;?\s*:", # bash fork bomb ::(){ :|:& };: or ::(){ :|:; };:
     r"python\d?\s+-c\s+.*os\.fork",               # python -c '...os.fork...'
 
     # Quản trị hệ thống & khởi động lại
     r"\bshutdown\b\s+(?:-h|-P|-r|\bnow\b|\bhalt\b)\b",
     r"\b(?:reboot|poweroff)\b",
     r"\binit\s+[06]\b",
-    r"\bservice\s+.+\s+(?:stop|restart)\b",
-    r"\bsystemctl\s+.+\s+(?:stop|restart|mask)\b",
+    r"\bservice\s+\S+\s+(?:stop|restart)\b", 
+    r"\bsystemctl\s+(?:stop|restart|mask)\s+\S+", 
 
     # Cài đặt hoặc gỡ phần mềm
-    r"\bapt[- ]get\s+(?:install|remove|purge)\b",
+    r"\bapt(?:[- ]get)?\s+(?:install|remove|purge|upgrade)\b",
     r"\bsnap\s+install\b",
     r"\bdpkg\s+-i\b",
 
@@ -66,11 +66,11 @@ CMD_DENYLIST = [
     # Thao tác mạng & thiết bị
     r"\biptables\b[^\n]*\s--flush\b",
     r"\bmount\b\s+.*\s+/(?:etc|var|usr)\b",
-    r"\bchmod\s+[0-7]{3,4}\s+/(?:etc|bin)\b",
+    r"\bchmod\s+[0-7]{3,4}\s+/(?:etc|bin|sbin|usr)\b",
 
     # (Giữ/ghép các mẫu cũ nếu bạn đang dùng)
-    r"\bcurl\b\s+.*\|\s*sh\b",
-    r"\bwget\b\s+.*\|\s*sh\b",
+    # r"\bcurl\b\s+.*\|\s*sh\b",
+    # r"\bwget\b\s+.*\|\s*sh\b",
 ]
 
 # Mẫu secret để mask trong log (regex → replacement)

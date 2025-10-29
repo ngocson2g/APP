@@ -119,8 +119,9 @@ def test_check_cmd_length_line_too_long():
 def test_assert_cmd_length_safe_raises_on_violation():
     """Tests that assert_cmd_length_safe raises SafetyError on violation."""
     limits = CmdLimits(max_chars=5)
-    with pytest.raises(SafetyError, match=r"too-long/complex: chars 6>5"):
-        assert_cmd_length_safe("this is too long", limits)
+    # FIX: Update the expected character count in the match regex
+    with pytest.raises(SafetyError, match=r"too-long/complex: chars 16>5"):
+        assert_cmd_length_safe("this is too long", limits) # "this is too long" has 16 chars
 
 def test_assert_cmd_length_safe_ok_on_valid():
     """Tests that assert_cmd_length_safe passes for a valid command."""
