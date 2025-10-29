@@ -37,14 +37,38 @@ LPT_WAVE_MAX = 500
 
 # Danh sách mẫu lệnh bị chặn (regex, không phân biệt hoa thường)
 CMD_DENYLIST = [
-    r"\brm\s+-rf\s+/\b",
-    r":\(\)\s*{\s*:\|\:&\s*};\s*:",       # fork bomb
-    r"\bshutdown\b", r"\breboot\b",
-    r"\bmkfs\.", r"\bdd\s+if=", r"\bdd\s+of=/dev/",
-    r"\bchown\s+-R\s+root\b",
-    r"\bpasswd\b", r"\buseradd\b\s+.*\s+-p\b",
-    r"\bmount\b\s+.*",
-    r"\bnohup\b\s+.*&",
+    # Xóa hệ thống & dữ liệu
+    r"rm\s+-(?:rf|fr)\s+/(?:$|\s)",               # rm -rf /
+    r"dd\s+if=.*\s+of=/dev/(?:sd|hd)",            # dd if=... of=/dev/sdX|hdX
+    r"(?:^|\s)(?:mkfs\.[A-Za-z0-9]+|fdisk\s+/dev/)",   # mkfs.* hoặc fdisk /dev/...
+    r">\s*/(?:etc|boot|root|home)(?:\s|$)",       # redirect ghi đè vào đường dẫn trọng yếu
+
+    # Fork bomb & tấn công tài nguyên
+    r":\s*\(\s*\)\s*\{\s*:\s*\|\s*:\s*;\s*\}\s*;?\s*:", # bash fork bomb ::(){ :|:& };:
+    r"python\d?\s+-c\s+.*os\.fork",               # python -c '...os.fork...'
+
+    # Quản trị hệ thống & khởi động lại
+    r"\bshutdown\b\s+(?:-h|-P|-r|\bnow\b|\bhalt\b)\b",
+    r"\b(?:reboot|poweroff)\b",
+    r"\binit\s+[06]\b",
+    r"\bservice\s+.+\s+(?:stop|restart)\b",
+    r"\bsystemctl\s+.+\s+(?:stop|restart|mask)\b",
+
+    # Cài đặt hoặc gỡ phần mềm
+    r"\bapt[- ]get\s+(?:install|remove|purge)\b",
+    r"\bsnap\s+install\b",
+    r"\bdpkg\s+-i\b",
+
+    # Mã động & tải về (pipe vào interpreter)
+    r"\b(?:curl|wget)\b[^|]*\|\s*(?:sh|bash|python3?|perl|ruby)\b",
+    r"\becho\b.+\|\s*base64\s+-d(?:\s+\S+)*\s*\|\s*(?:sh|bash|python3?)\b",
+
+    # Thao tác mạng & thiết bị
+    r"\biptables\b[^\n]*\s--flush\b",
+    r"\bmount\b\s+.*\s+/(?:etc|var|usr)\b",
+    r"\bchmod\s+[0-7]{3,4}\s+/(?:etc|bin)\b",
+
+    # (Giữ/ghép các mẫu cũ nếu bạn đang dùng)
     r"\bcurl\b\s+.*\|\s*sh\b",
     r"\bwget\b\s+.*\|\s*sh\b",
 ]
