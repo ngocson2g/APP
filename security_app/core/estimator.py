@@ -54,7 +54,9 @@ def _shape_multipliers(cmd: str) -> float:
     if re.search(r"\s/(\s|$)", s):     mult *= 1.8  # nghi ngờ quét gốc
     return mult
 
-def _first_token(cmd: str) -> str:
+def _first_token(cmd: str | None) -> str: # Thêm | None vào type hint
+    if not cmd: # Kiểm tra None hoặc chuỗi rỗng
+        return ""
     return (cmd.strip().split() or [""])[0].lower()
 
 def _read_history(logs_base: str, max_files: int = 4000) -> dict[str, tuple[float, float, int]]:
