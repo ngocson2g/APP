@@ -29,13 +29,18 @@ def _format_rule_log(rec: RuleLogRecord) -> str:
     for r in rec.cmds:
         lines.append(f"$ {r.cmd}")
         lines.append(f"RC={r.returncode} | OK={r.ok} | {r.duration_sec:.3f}s")
-        if r.stdout:
+        
+        # *** Áp dụng mask_secrets cho stdout và stderr ***
+        masked_stdout = mask_secrets(r.stdout)
+        masked_stderr = mask_secrets(r.stderr)
+        
+        if masked_stdout: # Kiểm tra chuỗi sau khi mask
             lines.append("-- stdout --")
-            lines.append(str(r.stdout).rstrip())
-        if r.stderr:
+            lines.append(masked_stdout.rstrip())
+        if masked_stderr: # Kiểm tra chuỗi sau khi mask
             lines.append("-- stderr --")
-            lines.append(str(r.stderr).rstrip())
-        lines.append("")  # ngăn cách mỗi command
+            lines.append(masked_stderr.rstrip())
+        lines.append("") # Ngăn cách mỗi command
     return "\n".join(lines) + "\n"
 
 
