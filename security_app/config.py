@@ -74,11 +74,13 @@ CMD_DENYLIST = [
 ]
 
 # Mẫu secret để mask trong log (regex → replacement)
-SECRET_REPLACERS = [
-    (r"(?i)\b(password|passwd)\s*[:=]\s*([^\s'\"\\]+)", r"\1=******"),
-    (r"(?i)\b(token|apikey|api_key|secret)\s*[:=]\s*([A-Za-z0-9._-]{6,})", r"\1=******"),
-    (r"(?i)bearer\s+([A-Za-z0-9._-]+)", "Bearer ******"),
-    (r"(?i)sshpass\s+-p\s+(\S+)", "sshpass -p ******"),
-    (r"(?i)--password\s+(\S+)", "--password ******"),
+SECRET_REPLACERS = [  
+    (r"(?i)(\b(?:password|passwd)\b)(\s*)([:=])(\s*)([^\s'\"\\]+)", r"\1\2\3\4******"),
+    (r"(?i)(\b(?:token|apikey|api_key|secret)\b)(\s*)([:=])(\s*)(([A-Za-z0-9._-]{6,}))", r"\1\2\3\4******"),
+    (r"(?i)(bearer)(\s+)([A-Za-z0-9._-]+)", r"\1\2******"),
+    (r"(?i)(sshpass\s+-p)(\s+)(\S+)", r"\1\2******"),
+    (r"(?i)(--password(?:=|\s+))(\S+)", r"\1******"),
+    (r"([^:\s]+):([^@:\s]+)(@\S+)", r"\1:******\3"),
+    
 ]
 

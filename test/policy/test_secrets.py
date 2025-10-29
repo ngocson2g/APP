@@ -5,7 +5,7 @@ from security_app.policy.secrets import mask_secrets
 @pytest.mark.parametrize("input_text, expected_output", [
     # Basic password masking
     ("User password=secret123 login", "User password=****** login"),
-    ("Set passwd: my_password!", "Set passwd: ******!"),
+    ("Set passwd: my_password!", "Set passwd: ******"),
     ("connection_string = 'user:password@host'", "connection_string = 'user:******@host'"), # Inside quotes ignored by simple regex, maybe ok
     ("Password= very_secure ", "Password= ****** "), # Spaces around value
     ("PASSword: TopSecret", "PASSword: ******"), # Case insensitive key
