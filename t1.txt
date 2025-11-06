@@ -1,0 +1,141 @@
+[wave 1] cmds=97 | 9.24s | thr=10.50 cmd/s | to=0.0% | p50=0.534s p95=3.841s | Wcpu=8 Wio=32 ws×=1.10 | tmo=5.0s | ETA ~ 00:27  [███████                       ]
+[wave 2] cmds=80 | 2.30s | thr=34.80 cmd/s | to=0.0% | p50=0.018s p95=0.646s | Wcpu=8 Wio=29 ws×=1.20 | tmo=5.0s | ETA ~ 00:11  [█████████████                 ]
+[wave 3] cmds=63 | 5.81s | thr=10.85 cmd/s | to=0.0% | p50=0.533s p95=0.688s | Wcpu=8 Wio=11 ws×=1.30 | tmo=5.0s | ETA ~ 00:09  [██████████████████            ]
+[wave 4] cmds=48 | 0.73s | thr=65.37 cmd/s | to=0.0% | p50=0.020s p95=0.678s | Wcpu=4 Wio=32 ws×=1.40 | tmo=5.0s | ETA ~ 00:03  [██████████████████████        ]
+[wave 5] cmds=35 | 0.10s | thr=349.42 cmd/s | to=0.0% | p50=0.000s p95=0.049s | Wcpu=8 Wio=23 ws×=1.50 | tmo=5.0s | ETA ~ 00:00  [████████████████████████      ]
+[wave 6] cmds=24 | 0.64s | thr=37.62 cmd/s | to=0.0% | p50=0.004s p95=0.609s | Wcpu=5 Wio=19 ws×=1.05 | tmo=5.0s | ETA ~ 00:00  [██████████████████████████    ]
+[wave 7] cmds=10 | 0.03s | thr=319.73 cmd/s | to=0.0% | p50=0.007s p95=0.026s | Wcpu=1 Wio=9 ws×=1.15 | tmo=5.0s | ETA ~ 00:00  [███████████████████████████   ]
+[wave 8] cmds=9 | 0.55s | thr=16.44 cmd/s | to=0.0% | p50=0.002s p95=0.785s | Wcpu=5 Wio=4 ws×=0.81 | tmo=5.0s | ETA ~ 00:00  [████████████████████████████  ]
+[wave 9] cmds=8 | 0.03s | thr=229.43 cmd/s | to=0.0% | p50=0.000s p95=0.033s | Wcpu=4 Wio=1 ws×=0.91 | tmo=5.0s | ETA ~ 00:00  [████████████████████████████  ]
+[wave 10] cmds=8 | 0.00s | thr=1661.44 cmd/s | to=0.0% | p50=0.002s p95=0.003s | Wcpu=1 Wio=8 ws×=1.01 | tmo=5.0s | ETA ~ 00:00  [█████████████████████████████ ]
+[wave 11] cmds=8 | 0.00s | thr=1700.42 cmd/s | to=0.0% | p50=0.002s p95=0.002s | Wcpu=1 Wio=8 ws×=1.11 | tmo=5.0s | ETA ~ 00:00  [██████████████████████████████]
+========================================================================================================================
+                                              CHECKLIST EXECUTION SUMMARY                                               
+========================================================================================================================
+      Total rules: 246
+           All OK: 80
+    With failures: 166
+        Pass rate: 32.52%
+   Total commands: 399
+      Commands OK: 203
+  Commands failed: 196
+
+By severity:
+Severity | Rules | #Rules OK/Fail   | Cmd OK/Cmds | #Cmd Fail | OK bar              
+---------+-------+------------------+-------------+-----------+---------------------
+unknown  | 246   | 80 ok / 166 fail | 203/399     | 196       | ██████████          
+
+Top failing rules (max 10):
+#  | Rule ID  | Sev | #CmdFail | Title                                                       
+---+----------+-----+----------+-------------------------------------------------------------
+1  | 1.1.1.1  |     | 3        | Ensure cramfs kernel module is not available                
+2  | 1.5.3    |     | 3        | Ensure core dumps are restricted                            
+3  | 6.2.2.4  |     | 3        | Ensure system warns when audit logs are low on space        
+4  | 6.2.3.11 |     | 3        | Ensure session initiation info is collected                 
+5  | 1.1.1.10 |     | 2        | Ensure unused filesystems kernel modules are not available  
+6  | 1.3.1.3  |     | 2        | Ensure all AppArmor profiles are in enforce or complain mode
+7  | 1.7.5    |     | 2        | Ensure GDM screen locks cannot be overridden                
+8  | 2.3.3    |     | 2        | Ensure chrony is correctly configured                       
+9  | 2.3.6    |     | 2        | Ensure time sources are organization-approved               
+10 | 3.1.2    |     | 2        | Ensure packet redirect sending is disabled (IPv4)           
+
+Denied by safety policy:
+Rule ID   | Sev | #Denied | Title                                                                        
+----------+-----+---------+------------------------------------------------------------------------------
+1.1.1.1   |     | 1       | Ensure cramfs kernel module is not available                                 
+1.1.1.2   |     | 1       | Ensure freevxfs kernel module is not available                               
+1.1.1.3   |     | 1       | Ensure hfs kernel module is not available                                    
+1.1.1.4   |     | 1       | Ensure hfsplus kernel module is not available                                
+1.1.1.5   |     | 1       | Ensure jffs2 kernel module is not available                                  
+1.1.1.6   |     | 1       | Ensure overlayfs kernel module is not available                              
+1.1.1.7   |     | 1       | Ensure squashfs kernel module is not available                               
+1.1.1.8   |     | 1       | Ensure udf kernel module is not available                                    
+1.1.1.9   |     | 1       | Ensure usb-storage kernel module is not available                            
+1.1.1.10  |     | 2       | Ensure unused filesystems kernel modules are not available                   
+1.3.1.1   |     | 1       | Ensure AppArmor is installed                                                 
+1.3.1.2   |     | 1       | Ensure AppArmor is enabled in the bootloader configuration                   
+2.1.3     |     | 1       | Ensure dhcp server services are not in use                                   
+2.1.4     |     | 1       | Ensure dns server services are not in use                                    
+2.1.6     |     | 1       | Ensure ftp server services are not in use                                    
+2.1.7     |     | 1       | Ensure ldap server services are not in use                                   
+2.1.8     |     | 1       | Ensure message access server services are not in use                         
+2.1.10    |     | 1       | Ensure nis server services are not in use                                    
+2.1.14    |     | 1       | Ensure samba file server services are not in use                             
+2.1.16    |     | 1       | Ensure tftp server services are not in use                                   
+2.1.17    |     | 1       | Ensure web proxy server services are not in use                              
+2.1.18    |     | 1       | Ensure web server services are not in use                                    
+2.1.21    |     | 1       | Ensure mail transfer agent is configured for local-only mode                 
+2.1.22    |     | 1       | Ensure only approved services are listening on a network interface           
+2.3.2     |     | 1       | Ensure chrony is installed and enabled (if used)                             
+2.3.6     |     | 1       | Ensure time sources are organization-approved                                
+2.4.6     |     | 1       | Ensure only approved peripheral services are present                         
+3.3.1     |     | 1       | Ensure dccp is disabled                                                      
+3.3.2     |     | 1       | Ensure sctp is disabled                                                      
+3.3.3     |     | 1       | Ensure rds is disabled                                                       
+3.3.4     |     | 1       | Ensure tipc is disabled                                                      
+3.4.1.1   |     | 1       | Ensure nftables is installed                                                 
+3.4.1.4   |     | 1       | Ensure default deny policy on input & forward                                
+3.4.1.5   |     | 1       | Ensure only approved inbound ports/services are open                         
+3.5.1     |     | 1       | Ensure UFW is installed                                                      
+3.5.4     |     | 1       | Ensure only approved ports/services are allowed                              
+4.1.1     |     | 1       | Ensure auditd is installed                                                   
+4.1.6     |     | 1       | Ensure system reacts when audit logs are full                                
+4.1.8     |     | 1       | Ensure time change events are collected                                      
+4.1.11    |     | 1       | Ensure session initiation info is collected                                  
+4.1.12    |     | 1       | Ensure MAC policy changes are collected                                      
+4.1.13    |     | 1       | Ensure DAC permission changes are collected                                  
+4.1.15    |     | 1       | Ensure kernel module loading/unloading is collected                          
+4.1.16    |     | 1       | Ensure file deletion events are collected                                    
+4.1.18    |     | 1       | Ensure successful/unsuccessful file access is collected (optional per policy)
+4.2.1     |     | 1       | Ensure rsyslog is installed                                                  
+4.2.4     |     | 1       | Ensure remote logging is configured (if required)                            
+4.2.5     |     | 1       | Ensure rsyslog is not a log server (unless approved)                         
+4.2.7     |     | 1       | Ensure journald → rsyslog forwarding enabled (if rsyslog used)               
+4.2.9     |     | 1       | Ensure log files have proper ownership/permissions                           
+4.3.1     |     | 1       | Ensure logrotate is installed                                                
+4.3.3     |     | 1       | Ensure rotation policies meet org requirements                               
+4.4.1     |     | 1       | Ensure audit log directory ownership/perm are strict                         
+4.4.2     |     | 1       | Ensure rsyslog config files are protected                                    
+4.4.3     |     | 1       | Ensure journald config files are protected                                   
+5.1.4     |     | 1       | Ensure sshd access is configured                                             
+5.1.7     |     | 1       | Ensure ClientAliveInterval & ClientAliveCountMax are configured              
+5.2.1     |     | 1       | Ensure sudo is installed                                                     
+5.2.3     |     | 1       | Ensure sudo log file exists                                                  
+5.3.1     |     | 1       | Ensure password creation requirements are configured (pwquality)             
+5.3.2     |     | 1       | Ensure lockout for failed password attempts is configured (faillock)         
+5.3.4     |     | 1       | Ensure strong password hashing algorithm is used                             
+5.3.5     |     | 1       | Ensure PAM reads existing password (try_first_pass / use_authtok)            
+5.4.1     |     | 1       | Ensure password expiration (PASS_MAX_DAYS) is configured                     
+5.4.2     |     | 1       | Ensure minimum days between password changes (PASS_MIN_DAYS) is configured   
+5.4.3     |     | 1       | Ensure password expiration warning days (PASS_WARN_AGE) is configured        
+5.4.4     |     | 1       | Ensure inactive password lock is configured                                  
+5.4.5     |     | 1       | Ensure system accounts are non-login (except needed)                         
+5.4.6     |     | 1       | Ensure default user umask is configured (027 or 077)                         
+5.4.7     |     | 1       | Ensure home directories are owned by the user                                
+5.4.8     |     | 1       | Ensure home directories are not group/world-writable                         
+5.4.9     |     | 1       | Ensure dot files are not world-writable                                      
+5.4.10    |     | 1       | Ensure no .forward, .netrc, .rhosts files exist (or are restricted)          
+6.1.1.2   |     | 1       | Ensure journald log file access is configured                                
+6.1.1.3   |     | 1       | Ensure journald log file rotation is configured                              
+6.1.1.4   |     | 1       | Ensure only one logging system is in use                                     
+6.1.2.1.1 |     | 1       | Ensure systemd-journal-remote is installed                                   
+6.1.2.1.2 |     | 1       | Ensure systemd-journal-upload authentication is configured                   
+6.1.3.1   |     | 1       | Ensure rsyslog is installed                                                  
+6.1.3.5   |     | 1       | Ensure rsyslog logging is configured                                         
+6.1.3.6   |     | 1       | Ensure rsyslog is configured to send logs to a remote log host               
+6.1.3.7   |     | 1       | Ensure rsyslog is not configured to receive logs from a remote client        
+6.2.1.1   |     | 1       | Ensure auditd packages are installed                                         
+6.2.3.4   |     | 1       | Ensure date/time modifications are collected                                 
+6.2.3.5   |     | 1       | Ensure network environment changes are collected                             
+6.2.3.7   |     | 1       | Ensure unsuccessful file access attempts are collected                       
+6.2.3.9   |     | 1       | Ensure DAC permission modification events are collected                      
+6.2.3.10  |     | 1       | Ensure successful filesystem mounts are collected                            
+6.3.1     |     | 1       | Ensure AIDE is installed                                                     
+6.3.8     |     | 1       | Ensure permissions on backup files are configured                            
+
+Failing Rule IDs (166):
+1.1.1.1, 1.1.1.2, 1.1.1.3, 1.1.1.4, 1.1.1.5, 1.1.1.6, 1.1.1.7, 1.1.1.8, 1.1.1.9, 1.1.1.10, 1.2.1.1, 1.2.2.1, 1.3.1.1, 1.3.1.2, 1.3.1.3, 1.3.1.4, 1.4.1, 1.5.1, 1.5.2, 1.5.3, 1.5.5, 1.7.2, 1.7.3, 1.7.5, 1.7.6, 1.7.7, 1.7.8, 1.7.9, 1.7.10, 2.1.3, 2.1.4, 2.1.6, 2.1.7, 2.1.8, 2.1.10, 2.1.14, 2.1.16, 2.1.17, 2.1.18, 2.1.21, 2.1.22, 2.3.2, 2.3.3, 2.3.4, 2.3.6, 2.4.1, 2.4.6, 3.1.1, 3.1.2, 3.2.1, 3.2.2, 3.2.3, 3.2.4, 3.2.5, 3.2.6, 3.2.7, 3.2.8, 3.2.9, 3.2.10, 3.3.1, 3.3.2, 3.3.3, 3.3.4, 3.4.1.1, 3.4.1.2, 3.4.1.3, 3.4.1.4, 3.4.1.5, 3.4.1.7, 3.5.1, 3.5.2, 3.5.3, 3.5.4, 3.5.5, 3.5.6, 4.1.1, 4.1.2, 4.1.4, 4.1.5, 4.1.6, 4.1.8, 4.1.9, 4.1.10, 4.1.11, 4.1.12, 4.1.13, 4.1.15, 4.1.16, 4.1.17, 4.1.18, 4.2.1, 4.2.2, 4.2.4, 4.2.5, 4.2.6, 4.2.7, 4.2.8, 4.2.9, 4.3.1, 4.3.3, 4.4.1, 4.4.2, 4.4.3, 5.1.1, 5.1.2, 5.1.3, 5.1.4, 5.1.7, 5.2.1, 5.2.2, 5.2.3, 5.2.4, 5.2.5, 5.2.6, 5.3.1, 5.3.2, 5.3.3, 5.3.4, 5.3.5, 5.4.1, 5.4.2, 5.4.3, 5.4.4, 5.4.5, 5.4.6, 5.4.7, 5.4.8, 5.4.9, 5.4.10, 6.1.1.2, 6.1.1.3, 6.1.1.4, 6.1.2.1.1, 6.1.2.1.2, 6.1.2.1.3, 6.1.2.3, 6.1.2.4, 6.1.3.1, 6.1.3.2, 6.1.3.3, 6.1.3.4, 6.1.3.5, 6.1.3.6, 6.1.3.7, 6.1.4.1, 6.2.1.1, 6.2.1.2, 6.2.1.3, 6.2.1.4, 6.2.2.1, 6.2.2.2, 6.2.2.3, 6.2.2.4, 6.2.3.1, 6.2.3.2, 6.2.3.4, 6.2.3.5, 6.2.3.7, 6.2.3.8, 6.2.3.9, 6.2.3.10, 6.2.3.11, 6.3.1, 6.3.2, 6.3.3, 6.3.8
+
+OK Rule IDs (80):
+1.1.2.1, 1.1.2.2, 1.1.2.3, 1.1.2.4, 1.1.2.5, 1.1.2.6, 1.1.2.7, 1.2.1.2, 1.4.2, 1.5.4, 1.6.1, 1.6.2, 1.6.3, 1.6.4, 1.6.5, 1.6.6, 1.7.1, 1.7.4, 2.1.1, 2.1.2, 2.1.5, 2.1.9, 2.1.11, 2.1.12, 2.1.13, 2.1.15, 2.1.19, 2.1.20, 2.2.1, 2.2.2, 2.2.3, 2.2.4, 2.2.5, 2.2.6, 2.3.1, 2.3.5, 2.3.7, 2.4.2, 2.4.3, 2.4.4, 2.4.5, 3.2.11, 3.4.1.6, 4.1.3, 4.1.7, 4.1.14, 4.2.3, 4.3.2, 5.1.5, 5.1.6, 5.1.8, 5.1.9, 5.1.10, 5.1.11, 5.1.12, 5.1.13, 5.1.14, 5.1.15, 5.1.16, 5.1.17, 5.1.18, 5.1.19, 5.1.20, 5.1.21, 5.1.22, 5.4.11, 6.1.1.1, 6.1.2.1.4, 6.1.2.2, 6.1.3.8, 6.2.3.3, 6.2.3.6, 6.3.4, 6.3.5, 6.3.6, 6.3.7, 6.3.9, 6.3.10, 6.3.11, 6.3.12
+

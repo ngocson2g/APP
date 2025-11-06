@@ -1,0 +1,50 @@
+{
+  "run_id": "2025-10-31_17-32-15",
+  "started_at": 1761906735.7590108,
+  "total_cmds": 228,
+  "waves": [
+    {
+      "wave": 1,
+      "started_at": 1761906735.7593052,
+      "ended_at": 1761906737.9353206,
+      "elapsed_sec": 2.176015,
+      "cmds": 57,
+      "thr_total": 26.194668,
+      "thr_cpu": 12.408001,
+      "thr_io": 13.786667,
+      "timeouts": 0,
+      "timeout_rate": 0.0,
+      "p50": 0.1043,
+      "p95": 0.83029
+    },
+    {
+      "wave": 2,
+      "started_at": 1761906737.9358387,
+      "ended_at": 1761906739.149671,
+      "elapsed_sec": 1.213832,
+      "cmds": 46,
+      "thr_total": 37.896501,
+      "thr_cpu": 13.181392,
+      "thr_io": 24.715109,
+      "timeouts": 0,
+      "timeout_rate": 0.0,
+      "p50": 0.57875,
+      "p95": 0.71586
+    },
+    {
+      "wave": 3,
+      "started_at": 1761906739.150165,
+      "ended_at": 1761906739.9034445,
+      "elapsed_sec": 0.753279,
+      "cmds": 37,
+      "thr_total": 49.118558,
+      "thr_cpu": 2.655057,
+      "thr_io": 46.463501,
+      "timeouts": 0,
+      "timeout_rate": 0.0,
+      "p50": 0.6103,
+      "p95": 0.71107
+    }
+  ],
+  "updated_at": 1761906739.9035816
+}
