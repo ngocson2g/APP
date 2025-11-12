@@ -9,5 +9,5 @@ _RC_OK_LINE = re.compile(r"^RC=(?P<rc>-?\d+|None)\s*\|\s*OK=(?P<ok>True|False)\b
 _ID_LINE = re.compile(r"^ID\s*: (.+)$")
 _TITLE_LINE = re.compile(r"^Title\s*: (.*)$")
 _SEV_LINE = re.compile(r"^Severity\s*: (.*)$")
-_DENIED_MARK = re.compile(r"\bDENIED\b", re.IGNORECASE)
+_DENIED_MARK = re.compile(r"^\s*DENIED\b", re.IGNORECASE)
 _CMD_LINE = re.compile(r"^\$ (.+)$")

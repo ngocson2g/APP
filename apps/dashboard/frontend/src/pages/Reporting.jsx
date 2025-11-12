@@ -118,7 +118,7 @@ export default function Reporting() {
           <WaveChart waves={waves?.waves || []} />
         </div>
         <TopFailingTable
-          items={summary?.all_rules  || []}
+          items={summary?.top_failing_rules || []}
           onSelect={(idx) => {
             console.log('[Reporting] onSelect idx =', idx)
             setOpenIdx(idx)
