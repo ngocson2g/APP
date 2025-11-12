@@ -1,5 +1,6 @@
 #security_app/parser/csv_parser.py
 import pandas as pd
+import html  # <-- THÊM MỚI: Import thư viện chuẩn HTML
 
 from security_app.models import Rule
 from security_app.parsers.schema import COL_MAP, REQ_FIELDS
@@ -12,7 +13,9 @@ def _normalize_columns(cols):
 def _pick_first(row, aliases):
     for k in aliases:
         if k in row and pd.notnull(row[k]) and str(row[k]).strip():
-            return str(row[k]).strip()
+            value = str(row[k]).strip()
+            # <-- SỬA ĐỔI: Tự động chuẩn hóa (unescape) các ký tự HTML
+            return html.unescape(value)
     return ""
 
 def parse_csv(path: str):
@@ -25,10 +28,9 @@ def parse_csv(path: str):
         desc  = _pick_first(r, COL_MAP["description"])
         check = _pick_first(r, COL_MAP["check"])
         
-        # === THÊM DÒNG NÀY ===
-        if check:
-            check = check.replace("&#039;", "'")
-        # ======================
+        # === XÓA BỎ KHỐI NÀY ===
+        # (Vì _pick_first đã tự động xử lý '&#039;' và tất cả các entities khác)
+        # =======================
 
         fix   = _pick_first(r, COL_MAP["fix"])
         sev   = (_pick_first(r, COL_MAP["severity"]) or "").lower()
@@ -47,4 +49,3 @@ def parse_csv(path: str):
             id=rid, description=desc, check=check, fix=fix, severity=sev, title=title, assessment_status=assess or ""
         ))
     return rules
-
