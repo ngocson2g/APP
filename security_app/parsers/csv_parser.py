@@ -24,6 +24,12 @@ def parse_csv(path: str):
         rid   = _pick_first(r, COL_MAP["id"])
         desc  = _pick_first(r, COL_MAP["description"])
         check = _pick_first(r, COL_MAP["check"])
+        
+        # === THÊM DÒNG NÀY ===
+        if check:
+            check = check.replace("&#039;", "'")
+        # ======================
+
         fix   = _pick_first(r, COL_MAP["fix"])
         sev   = (_pick_first(r, COL_MAP["severity"]) or "").lower()
         title = _pick_first(r, COL_MAP.get("title", [])) or _pick_first(r, COL_MAP.get("name", []))
