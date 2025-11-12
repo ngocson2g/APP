@@ -41,6 +41,7 @@ def run_once(
     csv_out_dir: Optional[str] = None,
     save_report: bool = False,
     out_dir: Optional[str] = None,
+    list_all_rules: bool = False,
 ) -> dict[str, Any]:
     
     #1. Chuẩn bị 
@@ -89,7 +90,7 @@ def run_once(
     
     #5. Báo cáo
     stats = compute_stats(run_results)
-    print_report(stats, limit_top=top)
+    print_report(stats, limit_top=top, list_all_rules=list_all_rules)
 
     if json_out:
         dump_stats_json(stats, json_out)

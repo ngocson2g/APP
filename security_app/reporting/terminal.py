@@ -2,10 +2,10 @@
 from security_app.config import TOP_FAIL_LIMIT
 from security_app.models import Rule, as_rule
 from security_app.utils.text import _bar, _table, _term_width
+import re
 
 
-
-def print_report(stats, limit_top=TOP_FAIL_LIMIT):
+def print_report(stats, limit_top=TOP_FAIL_LIMIT, list_all_rules: bool = False):
     W = _term_width()
     print("=" * W)
     print("CHECKLIST EXECUTION SUMMARY".center(W))
@@ -92,4 +92,29 @@ def print_report(stats, limit_top=TOP_FAIL_LIMIT):
     print(f"OK Rule IDs ({len(ok_ids)}):")
     print(", ".join(ok_ids))
     print()
+    
+    if list_all_rules:
+        print("=" * W)
+        print("ALL RULES STATUS LIST (id title_safe status)".center(W))
+        print("=" * W)
+        
+        rule_strings = []
+        all_results = stats.get("all_results", []) # [cite: 251]
+        
+        for x in all_results:
+            rule = as_rule(x.get("rule")) # [cite: 248, 260]
+            # Xác định trạng thái true/false
+            status = "true" if x.get("num_fail", 0) == 0 else "false"
+            
+            # Chuẩn hóa tiêu đề: thay mọi khoảng trắng (space, tab, newline) bằng 1 dấu '_'
+            clean_title = re.sub(r"\s+", "_", (rule.title or "No-Title").strip())
+            
+            # Định dạng: ID tieu_de_rule trang_thai
+            rule_strings.append(f"{rule.id} | {status} | {clean_title}  \n")
+            
+        
+        # In tất cả ra trên một dòng, cách nhau bằng 1 dấu cách
+        print(" ".join(rule_strings))
+        print()
+    # ===============================================
 

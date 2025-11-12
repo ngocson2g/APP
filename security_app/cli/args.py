@@ -32,6 +32,11 @@ def build_parser() -> argparse.ArgumentParser:
         nargs="?", 
         help="Path to the input checklist file (CSV, JSON, or XML) to run."
     )
+    
+    p.add_argument(
+        "--list-all-rules", 
+        action="store_true", 
+        help="Print a space-separated list of all rules and their status.")
 
     # --- Nhóm Đối số CHẠY (RUN args) ---
     run_group = p.add_argument_group("Run Options", "Controls the execution of a security check")
