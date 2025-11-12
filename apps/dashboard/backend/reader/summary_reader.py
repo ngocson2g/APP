@@ -50,38 +50,23 @@ def get_summary(run_id: str) -> Dict[str, Any]:
     summary["by_severity"] = by_sev
     summary["top_failing_rules"] = tops
 
+    # =================================================================
+    # === BẮT ĐẦU VÒNG LẶP KẾT HỢP (THAY THẾ 2 VÒNG LẶP CŨ) ===
+    # =================================================================
+    
     denied_rules = []
+    all_rules_list = []
     total_denied_cmds = 0
     order = {"critical":5,"high":4,"medium":3,"low":2,"unknown":1}
-    for r in run_results:
-        nd = int(r.get("num_denied", 0) or 0)
-        if nd > 0:
-            total_denied_cmds += nd
-            rule = r["rule"] or {}
-            denied_rules.append({
-                "id": rule.get("id") or str(r["rule_index"]),
-                "severity": (rule.get("severity") or "unknown").lower(),
-                "title": rule.get("title") or "",
-                "denied": nd,
-                "examples": r.get("denied_cmds", []),
-            })
-    denied_rules.sort(key=lambda x: ((-order.get(x["severity"],0)), -x["denied"]))
 
-    summary["denied"] = {
-        "rules_with_denied": len(denied_rules),
-        "total_denied_cmds": total_denied_cmds,
-    }
-    summary["denied_rules"] = denied_rules
-    
-    all_rules_list = []
     # Tái sử dụng 'run_results' đã đọc ở đầu hàm
     for r in run_results:
         rule = r.get("rule", {})
-        num_fail = r.get("num_fail", 0)
-        # [cite_start]Lấy thông tin num_denied từ 'run_results' [cite: 128]
-        num_denied = r.get("num_denied", 0) 
+        # Lấy thông tin num_denied từ 'run_results'
+        num_denied = int(r.get("num_denied", 0) or 0) 
+        num_fail = int(r.get("num_fail", 0) or 0)
 
-        # --- Logic status mới ---
+        # --- Logic status mới (Dùng cho all_rules_list) ---
         status = "ok"
         if num_denied > 0:
             status = "denied"  # Ưu tiên 1: Bị "denied"
@@ -89,6 +74,7 @@ def get_summary(run_id: str) -> Dict[str, Any]:
             status = "fail"    # Ưu tiên 2: Bị "fail"
         # Mặc định là "ok"
 
+        # --- 1. Xây dựng all_rules_list (từ vòng lặp 2 cũ) ---
         all_rules_list.append({
             "rule_index": r.get("rule_index", 0),
             "id": rule.get("id") or str(r.get("rule_index", 0)),
@@ -98,6 +84,31 @@ def get_summary(run_id: str) -> Dict[str, Any]:
             "cmd_fail": num_fail,
             "status": status, # Gửi status đã tính toán (ok, fail, hoặc denied)
         })
+
+        # --- 2. Xây dựng denied_rules (từ vòng lặp 1 cũ) ---
+        if num_denied > 0:
+            total_denied_cmds += num_denied
+            denied_rules.append({
+                "id": rule.get("id") or str(r["rule_index"]),
+                "severity": (rule.get("severity") or "unknown").lower(),
+                "title": rule.get("title") or "",
+                "denied": num_denied,
+                "examples": r.get("denied_cmds", []),
+            })
+
+    # =================================================================
+    # === KẾT THÚC VÒNG LẶP KẾT HỢP ===
+    # =================================================================
+
+    # Sắp xếp và gán 'denied' (từ vòng lặp 1 cũ)
+    denied_rules.sort(key=lambda x: ((-order.get(x["severity"],0)), -x["denied"]))
+    summary["denied"] = {
+        "rules_with_denied": len(denied_rules),
+        "total_denied_cmds": total_denied_cmds,
+    }
+    summary["denied_rules"] = denied_rules
+    
+    # Gán 'all_rules' (từ vòng lặp 2 cũ)
     summary["all_rules"] = all_rules_list
     
     return summary

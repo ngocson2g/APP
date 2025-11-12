@@ -79,3 +79,19 @@ button:active { transform: translateY(1px); }
   --chart-p95:  #fbbf24; /* amber-400 */
   --chart-timeout: #f87171; /* red-400 */
 }
+
+/* Style cho filter inputs trong bảng */
+.table thead input.table-filter-input {
+  width: 95%; /* Để 95% cho có padding */
+  padding: 4px 6px;
+  background-color: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 400;
+}
+.table th {
+  /* Đảm bảo input không bị tràn */
+  box-sizing: border-box; 
+}
