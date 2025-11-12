@@ -15,12 +15,14 @@ def print_report(stats, limit_top=TOP_FAIL_LIMIT, list_all_rules: bool = False):
     t = stats["totals"]
     kv = [
         ("Total rules", t["total_rules"]),
-        ("All OK", t["rules_all_ok"]),
-        ("With failures", t["rules_with_fail"]),
+        ("    All OK", t["rules_all_ok"]),
+        ("    With failures", t["rules_with_fail"]),
+        ("    With denied", t.get("total_rules_denied", 0)),
         ("Pass rate", f"{t['pass_rate']:.2f}%"),
         ("Total commands", t["total_cmds"]),
-        ("Commands OK", t["total_ok"]),
-        ("Commands failed", t["total_fail"]),
+        ("    Commands OK", t["total_ok"]),
+        ("    Commands failed", t["total_fail"]),
+        ("    Commands denied", t.get("total_cmds_denied", 0)),
     ]
     width_key = max(len(k) for k, _ in kv) + 2
     for k, v in kv:
@@ -67,14 +69,15 @@ def print_report(stats, limit_top=TOP_FAIL_LIMIT, list_all_rules: bool = False):
         print("(Không có rule lỗi)")
     print()
 
-     # ----- Denied by safety policy -----
+    # ----- Denied by safety policy -----
     all_results = stats["all_results"]
     denied_rows = []
     for x in all_results:
-        cmds = x.get("cmd_results") or []
-        nd = sum(1 for r in cmds if "DENIED" in (getattr(r, "stderr", "") or "").upper())
+        # Dùng số liệu đã tính sẵn từ stats.py
+        nd = x.get("num_denied_cmds", 0) 
+        
         if nd > 0:
-            r = as_rule(x["rule"])                 # NEW
+            r = as_rule(x["rule"])
             denied_rows.append([r.id or x["rule_index"], r.severity, nd, r.title or ""])
 
     if denied_rows:
