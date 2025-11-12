@@ -123,8 +123,14 @@ class RunLogger:
             cmds=list(cmd_results),
         )
 
-        short = _safe_name(title or rule_id)
-        per_rule_path = os.path.join(self.run_dir, f"rule-{rule_index:03d}_{short}.log")
+        # === THAY ĐỔI CÁC DÒNG NÀY ===
+        # Tạo tên an toàn cho cả ID và Tiêu đề
+        safe_id = _safe_name(rule_id, maxlen=40)
+        safe_title = _safe_name(title or "no_title", maxlen=60)
+
+        # Kết hợp chúng lại: rule-001_V-12345_ten_rule_an_toan.log
+        per_rule_path = os.path.join(self.run_dir, f"rule-{rule_index:03d}_{safe_id}_{safe_title}.log")
+        # =============================
 
         with open(per_rule_path, "w", encoding="utf-8") as f:
             f.write(_format_rule_log(rec))
