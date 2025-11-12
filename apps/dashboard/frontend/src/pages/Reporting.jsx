@@ -8,6 +8,7 @@ import RunTrend from '../components/RunTrend'   // <-- thêm
 import RuleDialog from '../components/RuleDialog'
 import DeniedTable from '../components/DeniedTable'
 import WaveChart from '../components/WaveChart'
+import AllRulesTable from '../components/AllRulesTable'
 
 export default function Reporting() {
   const [runs, setRuns] = useState([])
@@ -117,7 +118,7 @@ export default function Reporting() {
           <WaveChart waves={waves?.waves || []} />
         </div>
         <TopFailingTable
-          items={summary?.top_failing_rules || []}
+          items={summary?.all_rules  || []}
           onSelect={(idx) => {
             console.log('[Reporting] onSelect idx =', idx)
             setOpenIdx(idx)
@@ -131,6 +132,13 @@ export default function Reporting() {
           onClose={() => setOpenIdx(null)}
         />
         <DeniedTable items={summary.denied_rules} />
+        <AllRulesTable
+          items={summary?.all_rules || []} // <-- LƯU Ý QUAN TRỌNG
+          onSelect={(idx) => {
+            console.log('[Reporting] onSelect AllRulesTable idx =', idx)
+            setOpenIdx(idx)
+          }}
+        />
       </>
     )}
     </>

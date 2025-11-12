@@ -72,6 +72,22 @@ def get_summary(run_id: str) -> Dict[str, Any]:
         "total_denied_cmds": total_denied_cmds,
     }
     summary["denied_rules"] = denied_rules
+    
+    all_rules_list = []
+    for r in run_results:
+        rule = r.get("rule", {})
+        num_fail = r.get("num_fail", 0)
+        all_rules_list.append({
+            "rule_index": r.get("rule_index", 0),
+            "id": rule.get("id") or str(r.get("rule_index", 0)),
+            "severity": (rule.get("severity") or "unknown"),
+            "title": rule.get("title") or "",
+            "cmd_ok": r.get("num_ok", 0),
+            "cmd_fail": num_fail,
+            "status": "ok" if num_fail == 0 else "fail",
+        })
+    summary["all_rules"] = all_rules_list
+    
     return summary
 
 def list_rules(run_id: str) -> List[Dict[str, Any]]:
