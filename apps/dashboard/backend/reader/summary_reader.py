@@ -74,9 +74,21 @@ def get_summary(run_id: str) -> Dict[str, Any]:
     summary["denied_rules"] = denied_rules
     
     all_rules_list = []
+    # Tái sử dụng 'run_results' đã đọc ở đầu hàm
     for r in run_results:
         rule = r.get("rule", {})
         num_fail = r.get("num_fail", 0)
+        # [cite_start]Lấy thông tin num_denied từ 'run_results' [cite: 128]
+        num_denied = r.get("num_denied", 0) 
+
+        # --- Logic status mới ---
+        status = "ok"
+        if num_denied > 0:
+            status = "denied"  # Ưu tiên 1: Bị "denied"
+        elif num_fail > 0:
+            status = "fail"    # Ưu tiên 2: Bị "fail"
+        # Mặc định là "ok"
+
         all_rules_list.append({
             "rule_index": r.get("rule_index", 0),
             "id": rule.get("id") or str(r.get("rule_index", 0)),
@@ -84,7 +96,7 @@ def get_summary(run_id: str) -> Dict[str, Any]:
             "title": rule.get("title") or "",
             "cmd_ok": r.get("num_ok", 0),
             "cmd_fail": num_fail,
-            "status": "ok" if num_fail == 0 else "fail",
+            "status": status, # Gửi status đã tính toán (ok, fail, hoặc denied)
         })
     summary["all_rules"] = all_rules_list
     

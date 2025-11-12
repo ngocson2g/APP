@@ -19,6 +19,8 @@ export default function Overview({ summary }) {
     ['Total commands', summary.total_commands],
     ['Cmd OK', summary.commands_ok],
     ['Cmd failed', summary.commands_failed],
+    ['Rules Denied', summary.denied?.rules_with_denied ?? 0],
+    ['Cmds Denied', summary.denied?.total_denied_cmds ?? 0],
   ]
   return (
     <div className="grid">
