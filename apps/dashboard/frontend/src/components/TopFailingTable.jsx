@@ -19,6 +19,19 @@ export default function TopFailingTable({ items = [], onSelect = () => {} }) {
   const pickIndex = (r, i) => (r.rule_index ?? r.index ?? r.idx ?? i)
   if (!data.length) return <p className="muted">No failing rules.</p>
 
+
+  // (Helper) Quyết định màu sắc dựa trên status
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'fail':
+        return { color: 'var(--danger)', fontWeight: 700 }; [cite_start]// [cite: 76]
+      case 'denied':
+        return { color: 'var(--warn)', fontWeight: 700 }; [cite_start]// [cite: 76]
+      default:
+        return { color: 'inherit' };
+    }
+  }
+
   return (
     <div className="card">
       <h3 style={{marginTop:0}}>Top failing rules</h3>
@@ -44,7 +57,12 @@ export default function TopFailingTable({ items = [], onSelect = () => {} }) {
                 <td>{r.title || '—'}</td>
                 <td>{r.cmd_ok ?? 0}</td>
                 <td>{r.cmd_fail ?? 0}</td>
-                <td style={{textTransform:'capitalize'}}>{r.status || 'fail'}</td>
+                <td style={{
+                  textTransform:'capitalize',
+                  ...getStatusStyle(r.status) // Áp dụng style (màu sắc)
+                }}>
+                  {r.status || 'fail'}
+                </td>
                 <td>
                   <button
                     onClick={(e) => {
