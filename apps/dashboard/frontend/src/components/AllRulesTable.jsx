@@ -1,4 +1,3 @@
-/* ==== BEGIN FILE /home/son/Do_an/APP/apps/dashboard/frontend/src/components/AllRulesTable.jsx ==== */
 // apps/dashboard/frontend/src/components/AllRulesTable.jsx
 import React, { useMemo, useState } from 'react' // <-- Đã thêm useState
 
@@ -181,4 +180,3 @@ export default function AllRulesTable({ items = [], onSelect = () => {} }) {
     </div>
   )
 }
-/* ====  END FILE /home/son/Do_an/APP/apps/dashboard/frontend/src/components/AllRulesTable.jsx  ==== */
