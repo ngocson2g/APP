@@ -5,6 +5,54 @@ import {
   CartesianGrid, XAxis, YAxis, Tooltip, Legend, Brush, ReferenceLine
 } from 'recharts'
 
+// CustomTooltip component (đặt bên ngoài RunTrend)
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    // payload[0] thường là Failure Rate (màu đỏ)
+    // payload[1] thường là Pass Rate (màu xanh primary)
+    // payload[2] thường là MA5 (màu xanh accent)
+
+    const failureRate = payload.find(item => item.dataKey === 'failure_rate');
+    const passRate = payload.find(item => item.dataKey === 'pass_rate');
+    const ma5 = payload.find(item => item.dataKey === 'ma5');
+
+    return (
+      <div 
+        style={{ 
+          background: 'var(--bg-card)', 
+          border: '1px solid var(--border)', 
+          borderRadius: '8px', 
+          padding: '12px', 
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          minWidth: '180px'
+        }}
+      >
+        <p style={{ margin: 0, marginBottom: '8px', fontWeight: 'bold', color: 'var(--text)' }}>
+          Run ID: {label}
+        </p>
+        {failureRate && (
+          <p style={{ margin: 0, color: 'var(--danger)' }}>
+            {failureRate.name}: {failureRate.value.toFixed(2)} %
+          </p>
+        )}
+        {passRate && (
+          <p style={{ margin: 0, color: 'var(--primary)' }}>
+            {passRate.name}: {passRate.value.toFixed(2)} %
+          </p>
+        )}
+        {ma5 && (
+          <p style={{ margin: 0, color: 'var(--accent)' }}>
+            {ma5.name}: {ma5.value.toFixed(2)} %
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  return null;
+};
+
+
 export default function RunTrend({ data }) {
   if (!data || !data.length) return <p className="muted">No run data.</p>
 
@@ -29,13 +77,20 @@ export default function RunTrend({ data }) {
   }
 
   return (
-    <div style={{ width: '100%', height: 360 }}>
-      <ResponsiveContainer>
-        <ComposedChart data={chartData}>
+    <div style={{ width: '100%', height: 400 }}>
+      <ResponsiveContainer width="99%" height={400} className="chart-wrapper">
+        <ComposedChart width={1500} height={400} data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,.35)" />
-            <XAxis dataKey="idx" tick={{ fill: 'var(--muted)' }} />
+            <XAxis 
+              dataKey="run"     // <-- 1. Thay "idx" thành "run"
+              angle={-45}         // <-- 2. Xoay nhãn 45 độ
+              textAnchor="end"    // <-- 3. Căn chỉnh nhãn về bên phải
+              height={150}         // <-- 4. Thêm chiều cao cho trục X để chứa nhãn
+              interval={0}        // <-- 5. (Tùy chọn) Hiển thị TẤT CẢ các nhãn
+              tick={{ fill: 'var(--muted)', fontSize: 10 }} // <-- 6. Thu nhỏ chữ 
+            />
             <YAxis yAxisId="left" tick={{ fill: 'var(--muted)' }} domain={[0,100]} />
-            <Tooltip wrapperStyle={{ background:'var(--bg-card)', border:'1px solid var(--border)' }} />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
 
             {/* 1. ĐÃ XÓA/ẨN DÒNG NÀY ĐỂ BỎ NÉT ĐỨT VÀNG */}

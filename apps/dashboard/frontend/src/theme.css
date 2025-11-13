@@ -168,3 +168,8 @@ button:active { transform: translateY(1px); }
   /* Đảm bảo input không bị tràn */
   box-sizing: border-box; 
 }
+
+/* Trong theme.css hoặc App.jsx */
+.chart-wrapper {
+  overflow-x: auto; /* Kích hoạt thanh cuộn ngang khi nội dung quá rộng */
+}
