@@ -22,16 +22,23 @@ _BAD_ENV_KEYS = {"SSH_AUTH_SOCK","HTTP_PROXY","HTTPS_PROXY","NO_PROXY","FTP_PROX
 
 import re
 
-# Các từ khóa cho thấy "tìm thấy là lỗi"
+# (Cải tiến) Các từ khóa cho thấy "tìm thấy là lỗi"
 _INVERTED_LOGIC_KEYWORDS = [
     "this is a finding",
     "if this returns a result",
     "if any occurrences",
     "if output is produced",
-    "no results should be returned"
+    "no results should be returned",
+    "if the package is installed", # Dành riêng cho các trường hợp như 'telnetd'
+    "should not be installed",
 ]
-# Các lệnh thường trả về RC=1 khi "không tìm thấy"
-_INVERTED_CMD_RX = re.compile(r"^\s*(sudo\s+)?(grep|egrep|fgrep|awk)\b")
+
+# (Regex Cải tiến) Tìm các lệnh "đảo ngược" (grep, awk, v.v.)
+# Lần này, chúng ta chỉ cần tìm xem 'grep' CÓ XUẤT HIỆN ở bất kỳ đâu không.
+_INVERTED_CMD_RX = re.compile(
+    r"\b(grep|egrep|fgrep|awk)\b",
+    re.IGNORECASE
+)
 
 def _is_logic_inverted(cmd: str, check_text: str | None) -> bool:
     """
@@ -51,7 +58,6 @@ def _is_logic_inverted(cmd: str, check_text: str | None) -> bool:
         return True
 
     return False
-
 
 def _build_clean_env(parent: Mapping[str, str] | None) -> dict[str, str]:
     return dict(_SAFE_ENV_BASE)
