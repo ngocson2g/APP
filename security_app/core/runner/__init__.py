@@ -183,6 +183,11 @@ def run_all_rules(
         wave_tasks = tasks[:wave_size]
         tasks = tasks[wave_size:]
 
+        #Thu thập rule_id trong wave
+        rule_ids_in_wave = sorted(list(set(
+            task[1].id for task in wave_tasks if task[1] and task[1].id
+        )))
+        
         # Phân làn
         cpu_wave: list[Tuple[int, Rule, list[str], float]] = []
         io_wave:  list[Tuple[int, Rule, list[str], float]] = []
@@ -316,6 +321,7 @@ def run_all_rules(
             thr_total=thr_total, thr_cpu=thr_cpu, thr_io=thr_io,
             timeouts=timeouts_total, timeout_rate=timeout_rate,
             p50=p50, p95=p95,
+            rule_ids=rule_ids_in_wave,
         )
 
         # In progress + ETA (CLI)

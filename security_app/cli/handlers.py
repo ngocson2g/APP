@@ -37,7 +37,7 @@ def handle_run(args) -> int:
         return 2
 
     run_kwargs_keys = ["input","logs_dir","top","workers","proc","timeout","retries",
-                       "estimate","plan_only","json_out","csv_out_dir","save_report","out_dir","list_all_rules", "print_report"]
+                       "estimate","plan_only","json_out","csv_out_dir","save_report","out_dir","list_all_rules"]
     run_kwargs: Dict[str, Any] = {k: getattr(args, k) for k in run_kwargs_keys}
     run_once(**run_kwargs)
 

@@ -38,14 +38,10 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true", 
         help="Print a space-separated list of all rules and their status.")
 
+    
     # --- Nhóm Đối số CHẠY (RUN args) ---
     run_group = p.add_argument_group("Run Options", "Controls the execution of a security check")
-    run_group.add_argument(
-        "--silent",
-        dest="print_report",
-        action="store_false",
-        help="Disable printing the summary report to the terminal. (Default: True)"
-    )
+    
     run_group.add_argument(
         "--logs-dir", 
         default=DEFAULT_LOGS_DIR,

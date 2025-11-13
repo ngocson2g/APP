@@ -29,7 +29,8 @@ class WaveMetricsSink:
     def add_wave(self, wave_no: int, *,
                  started_at: float, ended_at: float,
                  cmds_total: int, thr_total: float, thr_cpu: float, thr_io: float,
-                 timeouts: int, timeout_rate: float, p50: float, p95: float) -> None:
+                 timeouts: int, timeout_rate: float, p50: float, p95: float,
+                 rule_ids: list[str] | None = None) -> None:
         self._metrics["waves"].append({
             "wave": int(wave_no),
             "started_at": float(started_at),
@@ -43,6 +44,7 @@ class WaveMetricsSink:
             "timeout_rate": round(float(timeout_rate), 6),
             "p50": round(float(p50), 6),
             "p95": round(float(p95), 6),
+            "rule_ids": rule_ids or [],
         })
         self._metrics["updated_at"] = time.time()
         self._flush()
