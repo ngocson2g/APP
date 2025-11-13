@@ -23,12 +23,12 @@ const CustomTooltip = ({ active, payload, label }) => {
           border: '1px solid var(--border)', 
           borderRadius: '8px', 
           padding: '12px', 
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          boxShadow: '0 4px 6px rgba(165, 159, 159, 0.1)',
           minWidth: '180px'
         }}
       >
         <p style={{ margin: 0, marginBottom: '8px', fontWeight: 'bold', color: 'var(--text)' }}>
-          Run ID: {label}
+          Device: {label}
         </p>
         {failureRate && (
           <p style={{ margin: 0, color: 'var(--danger)' }}>
@@ -64,7 +64,7 @@ export default function RunTrend({ data, selectedRun }) {
       run: r.id,
       time: new Date(r.mtime * 1000).toLocaleString(),
       pass_rate: pass_rate,
-      failure_rate: 100 - pass_rate, // <-- THÊM DÒNG NÀY
+      failure_rate: 100 - pass_rate, 
       with_failures: Number(r.with_failures ?? 0),
       commands_failed: Number(r.commands_failed ?? 0),
     }

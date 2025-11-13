@@ -109,7 +109,7 @@ export default function Reporting() {
     {loading && <p>Loading…</p>}
     {!loading && summary && (
       <>
-        <Overview summary={summary} />
+        <Overview summary={summary } waves={waves?.waves || []}/>
         <div className="card">
           <h3 style={{ marginTop: 0 }}>By severity</h3>
           <BySeverityBar bySeverity={summary.by_severity} />
