@@ -7,29 +7,12 @@ from security_app.core.command_extractor import extract_all_commands
 from security_app.policy.safety import deny_reason
 # ❌ BỎ import gây vòng lặp:
 # from security_app.core.estimator import _read_history, _estimate_cmd_seconds
-from security_app.config import (
-    CHUNK_SHORT_THRESHOLD, CHUNK_SIZE_DEFAULT
-)
+
 
 def _mk_denied(cmd: str, reason: str) -> CmdResult:
     return CmdResult(cmd=cmd, returncode=None, stdout="", stderr=reason, duration_sec=0.0, ok=False)
 
-def _chunk_by_size(cmds: List[str], size: int) -> List[List[str]]:
-    return [cmds[i:i+size] for i in range(0, len(cmds), size)]
 
-def _chunk_dynamic(cmds: List[str], ests: List[float]) -> List[List[str]]:
-    """
-    Quy tắc chunking động:
-    - Nếu rule có >=10 lệnh và >=60% lệnh có est <= CHUNK_SHORT_THRESHOLD:
-      + nếu max(est) < 0.10s -> chunk 5; else chunk 4.
-    - Ngược lại: mỗi task 1 lệnh.
-    """
-    if len(cmds) >= 10:
-        short_ratio = sum(1 for e in ests if e <= CHUNK_SHORT_THRESHOLD) / max(1, len(ests))
-        if short_ratio >= 0.60:
-            size = 5 if (ests and max(ests) < 0.10) else CHUNK_SIZE_DEFAULT
-            return _chunk_by_size(cmds, size)
-    return [[c] for c in cmds]
 
 # ✅ Thêm helper lazy-import để tránh vòng lặp:
 def _get_estimators():
@@ -74,14 +57,17 @@ def build_scheduled_tasks(
             pending[idx] = 0
             continue
 
+        # 1. Ước tính thời gian cho TẤT CẢ lệnh trong rule này
         ests = [_estimate_cmd_seconds(c, hist) for c in allowed]
-        chunks = _chunk_dynamic(allowed, ests)
+        
+        # 2. Tổng thời gian ước tính cho TOÀN BỘ rule (đây là trọng số LPT mới)
+        total_rule_est = sum(ests) or 0.01
 
-        for ch in chunks:
-            est_chunk = sum(_estimate_cmd_seconds(c, hist) for c in ch) or 0.01
-            tasks.append((idx, rule, ch, float(est_chunk)))
+        # 3. Tạo MỘT task duy nhất chứa TẤT CẢ các lệnh (thay vì 'ch' (chunk))
+        tasks.append((idx, rule, allowed, float(total_rule_est)))
 
-        pending[idx] = len(chunks)
+        # 4. Mỗi rule giờ chỉ có 1 task (thay vì len(chunks))
+        pending[idx] = 1
 
     tasks.sort(key=lambda t: t[3], reverse=True)
     return tasks, agg, pending
