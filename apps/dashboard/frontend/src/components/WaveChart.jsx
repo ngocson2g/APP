@@ -31,7 +31,7 @@ export default function WaveChart({ waves = [], height = 360 }) {
       const calc = d._cmds / d._elapsed
       const diff = Math.abs(calc - d.thr_total) / (d.thr_total || 1)
       if (diff > 0.05) {
-        // chỉ log dev, không ảnh hưởng UI
+         // chỉ log dev, không ảnh hưởng UI
         console.warn(`[Wave ${d.wave}] thr mismatch: json=${d.thr_total} calc=${calc.toFixed(3)}`)
       }
     }
@@ -46,13 +46,14 @@ export default function WaveChart({ waves = [], height = 360 }) {
     <div style={{ width: '100%', height }}>
       <ResponsiveContainer>
         <ComposedChart data={data} margin={{ top: 10, right: 18, left: 0, bottom: 0 }}>
-          {/* Gradients + strokes lấy từ CSS variables */}
+  
+           {/* Gradients + strokes lấy từ CSS variables */}
           <defs>
             <linearGradient id="thrFill" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%"  stopColor="var(--chart-bar-1)" stopOpacity="0.95" />
               <stop offset="100%" stopColor="var(--chart-bar-2)" stopOpacity="0.9" />
             </linearGradient>
-          </defs>
+           </defs>
 
           <CartesianGrid vertical={false} stroke="var(--chart-grid)" strokeDasharray="3 3" />
           <XAxis
@@ -61,7 +62,8 @@ export default function WaveChart({ waves = [], height = 360 }) {
             axisLine={{ stroke: 'var(--chart-grid)' }}
             tickLine={{ stroke: 'var(--chart-grid)' }}
           />
-          <YAxis
+    
+           <YAxis
             yAxisId="left"
             tick={{ fill: 'var(--chart-axis)', fontSize: 12 }}
             axisLine={{ stroke: 'var(--chart-grid)' }}
@@ -69,15 +71,20 @@ export default function WaveChart({ waves = [], height = 360 }) {
             label={{ value: 'cmd/s', angle: -90, position: 'insideLeft', fill: 'var(--chart-axis)', fontSize: 12 }}
             domain={[0, 'auto']}
           />
+          
+          {/* =====  CẬP NHẬT TRỤC Y BÊN PHẢI ===== */}
           <YAxis
             yAxisId="right"
             orientation="right"
             tick={{ fill: 'var(--chart-axis)', fontSize: 12 }}
             axisLine={{ stroke: 'var(--chart-grid)' }}
             tickLine={{ stroke: 'var(--chart-grid)' }}
-            label={{ value: 'Timeout (%)', angle: 90, position: 'insideRight', fill: 'var(--chart-axis)', fontSize: 12 }}
-            domain={[0, 100]}
+            
+            /* Sửa label và bỏ domain cố định [0, 100] */
+            label={{ value: 'Latency (s) / Timeout (%)', angle: 90, position: 'insideRight', fill: 'var(--chart-axis)', fontSize: 12 }}
+            domain={[0, 'auto']} 
           />
+          {/* ===== KẾT THÚC CẬP NHẬT TRỤC Y BÊN PHẢI ===== */}
 
           <Tooltip
             contentStyle={{ background: 'var(--chart-tooltip-bg)', border: '1px solid var(--chart-tooltip-border)', borderRadius: 8 }}
@@ -86,21 +93,21 @@ export default function WaveChart({ waves = [], height = 360 }) {
           />
           <Legend wrapperStyle={{ color: 'var(--chart-legend)' }} iconType="circle" />
 
-          {/* Bar: Throughput */}
+          {/* Bar: Throughput (vẫn ở trục trái) */}
           <Bar
             yAxisId="left"
             dataKey="thr_total"
             name="Throughput (cmd/s)"
             fill="url(#thrFill)"
-            stroke="var(--chart-bar-stroke)"
+             stroke="var(--chart-bar-stroke)"
             strokeWidth={1}
             radius={[8, 8, 2, 2]}
             maxBarSize={26}
           />
 
-          {/* Lines: p95 / p50 / Timeout% */}
+          {/* ===== BẮT ĐẦU CẬP NHẬT TRỤC CHO CÁC ĐƯỜNG LINE ===== */}
           <Line
-            yAxisId="left"
+            yAxisId="right" /* <-- THAY ĐỔI: Chuyển sang trục phải */
             type="monotone"
             dataKey="p95"
             name="p95 (s)"
@@ -109,27 +116,30 @@ export default function WaveChart({ waves = [], height = 360 }) {
             dot={false}
             activeDot={{ r: 4 }}
           />
-          <Line
-            yAxisId="left"
+    
+           <Line
+            yAxisId="right" /* <-- THAY ĐỔI: Chuyển sang trục phải */
             type="monotone"
             dataKey="p50"
             name="p50 (s)"
             stroke="var(--chart-p50)"
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 4 }}
+             activeDot={{ r: 4 }}
           />
           <Line
-            yAxisId="right"
+            yAxisId="right" /* (Giữ nguyên) */
             type="monotone"
             dataKey="timeout_pct"
             name="Timeout (%)"
             stroke="var(--chart-timeout)"
             strokeWidth={2}
-            dot={false}
+ 
+             dot={false}
             activeDot={{ r: 4 }}
             strokeDasharray="5 4"
           />
+          {/* ===== KẾT THÚC CẬP NHẬT ===== */}
         </ComposedChart>
       </ResponsiveContainer>
     </div>

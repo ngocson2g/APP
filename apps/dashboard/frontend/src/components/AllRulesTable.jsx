@@ -63,6 +63,8 @@ export default function AllRulesTable({ items = [], onSelect = () => {} }) {
         return { color: 'var(--danger)', fontWeight: 700 };
       case 'denied':
         return { color: 'var(--warn)', fontWeight: 700 };
+      case 'ok':
+        return { color: 'var(--success)', fontWeight: 700};
       default:
         return { color: 'inherit' };
     }
