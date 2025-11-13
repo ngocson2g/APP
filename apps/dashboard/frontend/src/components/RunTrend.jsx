@@ -53,7 +53,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 
-export default function RunTrend({ data }) {
+export default function RunTrend({ data, selectedRun }) {
   if (!data || !data.length) return <p className="muted">No run data.</p>
 
   // Chuẩn hoá & tính MA5 cho pass_rate
@@ -76,6 +76,37 @@ export default function RunTrend({ data }) {
     chartData[i].ma5 = Math.round(avg * 100) / 100
   }
 
+  // THÊM MỚI: Component để render nhãn trục X tùy chỉnh
+  const CustomXAxisTick = (props) => {
+    // props này được Recharts tự động truyền vào
+    const { x, y, payload } = props;
+    
+    // Lấy run_id của nhãn này
+    const tickValue = payload.value;
+
+    // Kiểm tra xem nhãn này có phải là run đang được chọn hay không
+    const isSelected = (tickValue === selectedRun);
+
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text
+          x={0}
+          y={0}
+          dy={5} // Hiệu chỉnh vị trí dọc một chút
+          textAnchor="end" // Căn lề phải
+          transform="rotate(-45)" // Xoay 45 độ
+          style={{
+            fill: isSelected ? 'var(--primary)' : 'var(--muted)', // Đổi màu nếu được chọn
+            fontSize: 10,
+            fontWeight: isSelected ? 700 : 400 // In đậm nếu được chọn
+          }}
+        >
+          {tickValue}
+        </text>
+      </g>
+    );
+  };
+
   return (
     <div style={{ width: '100%', height: 400 }}>
       <ResponsiveContainer width="99%" height={400} className="chart-wrapper">
@@ -87,7 +118,7 @@ export default function RunTrend({ data }) {
               textAnchor="end"    // <-- 3. Căn chỉnh nhãn về bên phải
               height={150}         // <-- 4. Thêm chiều cao cho trục X để chứa nhãn
               interval={0}        // <-- 5. (Tùy chọn) Hiển thị TẤT CẢ các nhãn
-              tick={{ fill: 'var(--muted)', fontSize: 10 }} // <-- 6. Thu nhỏ chữ 
+              tick={<CustomXAxisTick />}
             />
             <YAxis yAxisId="left" tick={{ fill: 'var(--muted)' }} domain={[0,100]} />
             <Tooltip content={<CustomTooltip />} />

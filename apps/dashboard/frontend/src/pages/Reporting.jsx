@@ -101,7 +101,7 @@ export default function Reporting() {
     {/* TIMESERIES luôn hiện (nếu có dữ liệu) */}
     <div className="card">
       <h3 style={{ marginTop: 0 }}>History (last 20 runs)</h3>
-      <RunTrend data={series} />
+      <RunTrend data={series} selectedRun={selectedRun} />
     </div>
 
     {/* SUMMARY của run đã chọn */}
