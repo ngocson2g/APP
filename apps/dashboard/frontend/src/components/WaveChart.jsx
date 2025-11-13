@@ -63,28 +63,25 @@ export default function WaveChart({ waves = [], height = 360 }) {
             tickLine={{ stroke: 'var(--chart-grid)' }}
           />
     
-           <YAxis
+          <YAxis
             yAxisId="left"
             tick={{ fill: 'var(--chart-axis)', fontSize: 12 }}
             axisLine={{ stroke: 'var(--chart-grid)' }}
             tickLine={{ stroke: 'var(--chart-grid)' }}
-            label={{ value: 'cmd/s', angle: -90, position: 'insideLeft', fill: 'var(--chart-axis)', fontSize: 12 }}
+            label={{ value: 'Latency(s) p50 & p95', angle: -90, position: 'insideLeft', fill: 'var(--chart-axis)', fontSize: 12 }}
             domain={[0, 'auto']}
           />
           
-          {/* =====  CẬP NHẬT TRỤC Y BÊN PHẢI ===== */}
+          {/* TRỤC PHẢI (mới): cmd/s */}
           <YAxis
             yAxisId="right"
             orientation="right"
             tick={{ fill: 'var(--chart-axis)', fontSize: 12 }}
             axisLine={{ stroke: 'var(--chart-grid)' }}
             tickLine={{ stroke: 'var(--chart-grid)' }}
-            
-            /* Sửa label và bỏ domain cố định [0, 100] */
-            label={{ value: 'Latency (s) / Timeout (%)', angle: 90, position: 'insideRight', fill: 'var(--chart-axis)', fontSize: 12 }}
+            label={{ value: 'cmd/s', angle: 90, position: 'insideRight', fill: 'var(--chart-axis)', fontSize: 12 }}
             domain={[0, 'auto']} 
           />
-          {/* ===== KẾT THÚC CẬP NHẬT TRỤC Y BÊN PHẢI ===== */}
 
           <Tooltip
             contentStyle={{ background: 'var(--chart-tooltip-bg)', border: '1px solid var(--chart-tooltip-border)', borderRadius: 8 }}
@@ -95,7 +92,7 @@ export default function WaveChart({ waves = [], height = 360 }) {
 
           {/* Bar: Throughput (vẫn ở trục trái) */}
           <Bar
-            yAxisId="left"
+            yAxisId="right"
             dataKey="thr_total"
             name="Throughput (cmd/s)"
             fill="url(#thrFill)"
@@ -107,7 +104,7 @@ export default function WaveChart({ waves = [], height = 360 }) {
 
           {/* ===== BẮT ĐẦU CẬP NHẬT TRỤC CHO CÁC ĐƯỜNG LINE ===== */}
           <Line
-            yAxisId="right" /* <-- THAY ĐỔI: Chuyển sang trục phải */
+            yAxisId="left" /* <-- THAY ĐỔI: Chuyển sang trục phải */
             type="monotone"
             dataKey="p95"
             name="p95 (s)"
@@ -118,7 +115,7 @@ export default function WaveChart({ waves = [], height = 360 }) {
           />
     
            <Line
-            yAxisId="right" /* <-- THAY ĐỔI: Chuyển sang trục phải */
+            yAxisId="left" /* <-- THAY ĐỔI: Chuyển sang trục phải */
             type="monotone"
             dataKey="p50"
             name="p50 (s)"
@@ -127,18 +124,7 @@ export default function WaveChart({ waves = [], height = 360 }) {
             dot={false}
              activeDot={{ r: 4 }}
           />
-          <Line
-            yAxisId="right" /* (Giữ nguyên) */
-            type="monotone"
-            dataKey="timeout_pct"
-            name="Timeout (%)"
-            stroke="var(--chart-timeout)"
-            strokeWidth={2}
- 
-             dot={false}
-            activeDot={{ r: 4 }}
-            strokeDasharray="5 4"
-          />
+    
           {/* ===== KẾT THÚC CẬP NHẬT ===== */}
         </ComposedChart>
       </ResponsiveContainer>

@@ -9,6 +9,7 @@ import RuleDialog from '../components/RuleDialog'
 import DeniedTable from '../components/DeniedTable'
 import WaveChart from '../components/WaveChart'
 import AllRulesTable from '../components/AllRulesTable'
+import ThroughputBreakdownChart from '../components/ThroughputBreakdownChart'
 
 export default function Reporting() {
   const [runs, setRuns] = useState([])
@@ -116,6 +117,11 @@ export default function Reporting() {
         <div className="card">
           <h3 style={{ marginTop: 0 }}>Execution waves (throughput • p50/p95 • timeout%)</h3>
           <WaveChart waves={waves?.waves || []} />
+          
+        </div>
+        <div className="card">
+          <h3 style={{ marginTop: 0 }}>Throughput & Commands Breakdown</h3>
+          <ThroughputBreakdownChart waves={waves?.waves || []} />
         </div>
         <TopFailingTable
           items={summary?.top_failing_rules || []}
