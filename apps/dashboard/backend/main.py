@@ -8,6 +8,9 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
+from .reader.config import LIMITS_SERIES
+
+
 # Cho phép chạy kiểu package và kiểu "uvicorn main:app"
 try:
     from .reader import (get_rule_detail, get_summary, get_timeseries,
@@ -56,7 +59,7 @@ def api_rules(run_id: str):
         raise HTTPException(status_code=404, detail="Run not found")
 
 @app.get("/api/runs/timeseries")
-def api_runs_timeseries(limit: int = 20):
+def api_runs_timeseries(limit: int = LIMITS_SERIES):
     return get_timeseries(limit=limit)
 
 @app.get("/api/runs/{run_id}/rule/{index}")

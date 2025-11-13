@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 
 from security_app.reporting.stats import compute_stats
 
-from .config import LOGS_BASE
+from .config import LOGS_BASE, LIMITS_SERIES
 from .rule_reader import _read_run_results
 from .run_reader import _list_run_dirs
 
@@ -51,7 +51,7 @@ def get_summary(run_id: str) -> Dict[str, Any]:
     summary["top_failing_rules"] = tops
 
     # =================================================================
-    # === BẮT ĐẦU VÒNG LẶP KẾT HỢP (THAY THẾ 2 VÒNG LẶP CŨ) ===
+    # === BẮT ĐẦU VÒNG LẶP KẾT HỢP) ===
     # =================================================================
     
     denied_rules = []
@@ -129,8 +129,8 @@ def list_rules(run_id: str) -> List[Dict[str, Any]]:
         })
     return out
 
-def get_timeseries(limit: int = 20) -> List[Dict[str, Any]]:
-    runs = _list_run_dirs(LOGS_BASE)[: max(1, int(limit))]
+def get_timeseries(limit: int = LIMITS_SERIES) -> List[Dict[str, Any]]:
+    runs = _list_run_dirs(LOGS_BASE)[: max(1, min(int(limit), LIMITS_SERIES))]
     items: List[Dict[str, Any]] = []
     for r in runs:
         rs = _read_run_results(r["id"])

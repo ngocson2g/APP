@@ -17,7 +17,7 @@ export default function Reporting() {
   const [loading, setLoading] = useState(false)
   const [series, setSeries] = useState([])      // <-- thêm
   const [openIdx, setOpenIdx] = useState(null)
-  const CountRuntren = 20
+  const CountRuntren = 20 //LIMITS_TIMESERIES
   const [waves, setWaves] = useState(null)
 
   useEffect(() => {
