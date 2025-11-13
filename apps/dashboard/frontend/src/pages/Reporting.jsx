@@ -100,7 +100,7 @@ export default function Reporting() {
 
     {/* TIMESERIES luôn hiện (nếu có dữ liệu) */}
     <div className="card">
-      <h3 style={{ marginTop: 0 }}>Trends (last 20 runs)</h3>
+      <h3 style={{ marginTop: 0 }}>History (last 20 runs)</h3>
       <RunTrend data={series} />
     </div>
 

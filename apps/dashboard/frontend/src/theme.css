@@ -3,24 +3,97 @@
   /* KHÓA THEME: luôn dark, không lệ thuộc hệ điều hành/trình duyệt */
   color-scheme: dark;
 
-  /* Palette */
-  --bg: #0f172a;        /* slate-900 */
-  --bg-card:#111827;    /* gray-900 */
-  --text:#e5e7eb;       /* gray-200 */
-  --muted:#9ca3af;      /* gray-400 */
-  --border:#1f2937;     /* gray-800 */
+  /* === CẬP NHẬT PALETTE === */
+  /* Chuyển sang tông màu "Slate" nhất quán và tăng tương phản */
+  --bg: #0f172a;        /* slate-900 (Nền chính) */
+  --bg-card: #1e293b;    /* slate-800 (Nền card - SÁNG HƠN) */
+  --text: #e2e8f0;      /* slate-200 (Chữ chính) */
+  --muted: #94a3b8;     /* slate-400 (Chữ phụ) */
+  --border: #334155;    /* slate-700 (Viền - SÁNG HƠN) */
 
+  /* Giữ nguyên các màu nhấn */
   --primary:#6366f1;    /* indigo-500 */
   --accent:#10b981;     /* emerald-500 */
   --danger:#ef4444;     /* red-500 */
   --warn:#f59e0b;       /* amber-500 */
 }
 
-html, body, #root{ height:100%; background:var(--bg); color:var(--text); }
+html, body, #root{ 
+  height:100%; 
+  background:var(--bg); 
+  color:var(--text); 
+  /* Thêm: Font chữ mượt mà hơn */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 a{ color:var(--primary); }
 
-.card{ background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+/* === THÊM: CONTAINER CHÍNH === */
+/* Thêm khoảng đệm cho toàn bộ trang */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* === CẬP NHẬT HEADER === */
+header {
+  /* Thêm đường viền dưới để tách biệt header */
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Cải thiện giao diện cho link điều hướng */
+header nav a {
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+header nav a:hover {
+  background-color: var(--bg-card);
+  color: var(--text);
+}
+header nav a.active {
+  background-color: var(--primary);
+  color: #fff; /* Luôn là màu trắng trên nền primary */
+}
+
+/* === CẬP NHẬT CARD === */
+.card{ 
+  background: var(--bg-card); 
+  border: 1px solid var(--border); 
+  border-radius: 12px; 
+  padding: 16px; 
+  /* Thêm: Khoảng cách giữa các card */
+  margin-bottom: 16px; 
+  /* Thêm: Đổ bóng nhẹ để card "nổi" lên */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
 h1,h2,h3{ color:var(--text); margin:0 0 8px; }
+
+/* === THÊM: BỐ CỤC GRID (CHO STATS) === */
+/* Định nghĩa cho lưới thống kê (Overview) */
+.grid {
+  display: grid;
+  /* Hiển thị 4 cột, tự động xuống hàng */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px; /* Khoảng cách với thành phần bên dưới */
+}
+
+/* Bỏ margin-bottom cho card NẰM TRONG grid (để 'gap' xử lý) */
+.grid .card {
+  margin-bottom: 0;
+}
+
+/* === CÁC STYLE KHÁC GIỮ NGUYÊN === */
 
 .table{ width:100%; border-collapse:collapse; }
 .table th, .table td{ padding:8px 12px; border-bottom:1px solid var(--border); }
@@ -64,7 +137,7 @@ button:active { transform: translateY(1px); }
   /* Cột throughput: gradient primary → accent */
   --chart-bar-1: var(--primary);
   --chart-bar-2: var(--accent);
-  /* viền cột: trộn sáng hơn một chút (có fallback nếu browser không hỗ trợ) */
+  /* viền cột: trộn sáng hơn một chút (có fallback nếu browser không hỗg tr) */
   --chart-bar-stroke: color-mix(in srgb, var(--primary), white 40%);
 }
 
