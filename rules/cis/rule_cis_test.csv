@@ -50,65 +50,65 @@ $ apt-get -s dist-upgrade | grep -E ""^[0-9]+ upgraded, 0 newly installed, 0 to 
 1.3.1.3,Automated,Ensure all AppArmor profiles are in enforce or complain mode,"$ apparmor_status | grep profiles
 $ apparmor_status | grep processes"
 1.3.1.4,Automated,Ensure all AppArmor profiles are enforcing,"$ apparmor_status | grep ""profiles are in complain mode"""
-1.4.1,Automated,Ensure bootloader password is set,"$ grep -P ""^\sset\s+superusers="" /boot/grub/grub.cfg<br>$ grep -P ""^\spassword_pbkdf2\s+\S+\s+grub.pbkdf2.sha512."" /boot/grub/grub.cfg"
-1.4.2,Automated,Ensure access to bootloader config is configured,"$ stat -Lc ""Access: (%#a) Uid: (%u) Gid: (%g)"" /boot/grub/grub.cfg"
-1.5.1,Automated,Ensure address space layout randomization is enabled,"$ sysctl kernel.randomize_va_space
+1.4.2.1,Automated,Ensure bootloader password is set,"$ grep -P ""^\sset\s+superusers="" /boot/grub/grub.cfg<br>$ grep -P ""^\spassword_pbkdf2\s+\S+\s+grub.pbkdf2.sha512."" /boot/grub/grub.cfg"
+1.4.2.2,Automated,Ensure access to bootloader config is configured,"$ stat -Lc ""Access: (%#a) Uid: (%u) Gid: (%g)"" /boot/grub/grub.cfg"
+1.5.2.1,Automated,Ensure address space layout randomization is enabled,"$ sysctl kernel.randomize_va_space
 $ grep -R ""^\skernel.randomize_va_space\s=\s2\b"" /etc/sysctl.conf /etc/sysctl.d/.conf /etc/ufw/ufw.conf 2>/dev/null"
-1.5.2,Automated,Ensure ptrace_scope is restricted,"$ sysctl kernel.yama.ptrace_scope
+1.5.2.2,Automated,Ensure ptrace_scope is restricted,"$ sysctl kernel.yama.ptrace_scope
 $ grep -R ""^\skernel.yama.ptrace_scope\s=\s*[123]\b"" /etc/sysctl.conf /etc/sysctl.d/*.conf 2>/dev/null"
-1.5.3,Automated,Ensure core dumps are restricted,"$ grep -Ps '^\h**\h+hard\h+core\h+0\b' /etc/security/limits.conf /etc/security/limits.d/* 2>/dev/null
+1.5.2.3,Automated,Ensure core dumps are restricted,"$ grep -Ps '^\h**\h+hard\h+core\h+0\b' /etc/security/limits.conf /etc/security/limits.d/* 2>/dev/null
 $ sysctl fs.suid_dumpable
 $ grep -R ""^\sfs.suid_dumpable\s=\s0\b"" /etc/sysctl.conf /etc/sysctl.d/.conf 2>/dev/null
 $ grep -P ""^\sStorage\s=\snone\b"" /etc/systemd/coredump.conf 2>/dev/null<br>$ grep -P ""^\sProcessSizeMax\s*=\s*0\b"" /etc/systemd/coredump.conf 2>/dev/null"
-1.5.4,Automated,Ensure prelink is not installed,"$ dpkg -s prelink 2>/dev/null | grep -q ""Status: install ok installed"" && echo ""FAIL: prelink installed"" || echo ""PASS: prelink not installed"""
-1.5.5,Automated,Ensure Automatic Error Reporting is not enabled (apport),"$ dpkg-query -s apport 2>/dev/null | grep -qi ""Status: install ok installed"" && grep -q '^enabled=0' /etc/default/apport
+1.5.2.4,Automated,Ensure prelink is not installed,"$ dpkg -s prelink 2>/dev/null | grep -q ""Status: install ok installed"" && echo ""FAIL: prelink installed"" || echo ""PASS: prelink not installed"""
+1.5.2.5,Automated,Ensure Automatic Error Reporting is not enabled (apport),"$ dpkg-query -s apport 2>/dev/null | grep -qi ""Status: install ok installed"" && grep -q '^enabled=0' /etc/default/apport
 $ systemctl is-enabled --quiet apport && echo ""ENABLED"" || echo ""DISABLED""
 $ systemctl is-active --quiet apport && echo ""ACTIVE"" || echo ""INACTIVE"""
-1.6.1,Automated,Ensure message of the day is configured properly,"$ cat /etc/motd
+1.6.2.1,Automated,Ensure message of the day is configured properly,"$ cat /etc/motd
 $ grep -P '(\v|\r|\m|\s)' /etc/motd && echo ""FAIL: OS details present"" || echo ""OK"""
-1.6.2,Automated,Ensure local login warning banner is configured properly,"$ cat /etc/issue
+1.6.2.2,Automated,Ensure local login warning banner is configured properly,"$ cat /etc/issue
 $ grep -P '(\v|\r|\m|\s)' /etc/issue && echo ""FAIL: OS details present"" || echo ""OK"""
-1.6.3,Automated,Ensure remote login warning banner is configured properly,"$ cat /etc/issue.net
+1.6.2.3,Automated,Ensure remote login warning banner is configured properly,"$ cat /etc/issue.net
 $ grep -P '(\v|\r|\m|\s)' /etc/issue.net && echo ""FAIL: OS details present"" || echo ""OK"""
-1.6.4,Automated,Ensure access to /etc/motd is configured,"$ stat -Lc ""Access: (%#a) Uid: (%u) Gid: (%g)"" /etc/motd"
-1.6.5,Automated,Ensure access to /etc/issue is configured,"$ stat -Lc ""Access: (%#a) Uid: (%u) Gid: (%g)"" /etc/issue"
-1.6.6,Automated,Ensure access to /etc/issue.net is configured,"$ stat -Lc ""Access: (%#a) Uid: (%u) Gid: (%g)"" /etc/issue.net"
-1.7.1,Automated,Ensure GDM is removed,"$ dpkg -s gdm3 2>/dev/null | grep -q ""install ok installed"" && echo ""FAIL: gdm3 installed"" || echo ""PASS: gdm3 not installed""
+1.6.2.4,Automated,Ensure access to /etc/motd is configured,"$ stat -Lc ""Access: (%#a) Uid: (%u) Gid: (%g)"" /etc/motd"
+1.6.2.5,Automated,Ensure access to /etc/issue is configured,"$ stat -Lc ""Access: (%#a) Uid: (%u) Gid: (%g)"" /etc/issue"
+1.6.2.6,Automated,Ensure access to /etc/issue.net is configured,"$ stat -Lc ""Access: (%#a) Uid: (%u) Gid: (%g)"" /etc/issue.net"
+1.7.2.1,Automated,Ensure GDM is removed,"$ dpkg -s gdm3 2>/dev/null | grep -q ""install ok installed"" && echo ""FAIL: gdm3 installed"" || echo ""PASS: gdm3 not installed""
 $ systemctl list-unit-files | grep -i gdm"
-1.7.2,Automated,Ensure GDM login banner is configured,"$ gsettings get org.gnome.login-screen banner-message-enable
+1.7.2.2,Automated,Ensure GDM login banner is configured,"$ gsettings get org.gnome.login-screen banner-message-enable
 $ gsettings get org.gnome.login-screen banner-message-text
 $ grep -R ""^\sbanner-message-enable=true"" /etc/dconf/db/gdm.d<br>$ grep -R ""^\sbanner-message-text="" /etc/dconf/db/gdm.d"
-1.7.3,Automated,Ensure GDM disable-user-list option is enabled,"$ gsettings get org.gnome.login-screen disable-user-list
+1.7.2.3,Automated,Ensure GDM disable-user-list option is enabled,"$ gsettings get org.gnome.login-screen disable-user-list
 $ grep -R ""^\s*disable-user-list=true"" /etc/dconf/db/gdm.d"
-1.7.4,Automated,Ensure GDM screen locks when the user is idle,"$ gsettings get org.gnome.desktop.screensaver lock-delay
+1.7.2.4,Automated,Ensure GDM screen locks when the user is idle,"$ gsettings get org.gnome.desktop.screensaver lock-delay
 $ gsettings get org.gnome.desktop.session idle-delay"
-1.7.5,Automated,Ensure GDM screen locks cannot be overridden,"$ grep -Psril ""^\s*/org/gnome/desktop/session/idle-delay\b"" /etc/dconf/db/local.d/locks
+1.7.2.5,Automated,Ensure GDM screen locks cannot be overridden,"$ grep -Psril ""^\s*/org/gnome/desktop/session/idle-delay\b"" /etc/dconf/db/local.d/locks
 $ grep -Psril ""^\s*/org/gnome/desktop/screensaver/lock-delay\b"" /etc/dconf/db/local.d/locks"
-1.7.6,Automated,Ensure GDM automatic mounting of removable media is disabled,"$ gsettings get org.gnome.desktop.media-handling automount
+1.7.2.6,Automated,Ensure GDM automatic mounting of removable media is disabled,"$ gsettings get org.gnome.desktop.media-handling automount
 $ gsettings get org.gnome.desktop.media-handling automount-open
 $ grep -R ""^\sautomount\s=\sfalse\b"" /etc/dconf/db/local.d/<br>$ grep -R ""^\sautomount-open\s*=\s*false\b"" /etc/dconf/db/local.d/"
-1.7.7,Automated,Ensure GDM disabling automatic mounting is not overridden,"$ grep -Psril ""^\sautomount\s=\sfalse\b"" /etc/dconf/db/local.d/locks<br>$ grep -Psril ""^\sautomount-open\s*=\s*false\b"" /etc/dconf/db/local.d/locks"
-1.7.8,Automated,Ensure GDM autorun-never is enabled,"$ gsettings get org.gnome.desktop.media-handling autorun-never
+1.7.2.7,Automated,Ensure GDM disabling automatic mounting is not overridden,"$ grep -Psril ""^\sautomount\s=\sfalse\b"" /etc/dconf/db/local.d/locks<br>$ grep -Psril ""^\sautomount-open\s*=\s*false\b"" /etc/dconf/db/local.d/locks"
+1.7.2.8,Automated,Ensure GDM autorun-never is enabled,"$ gsettings get org.gnome.desktop.media-handling autorun-never
 $ grep -R ""^\sautorun-never\s=\s*true\b"" /etc/dconf/db/local.d/"
-1.7.9,Automated,Ensure GDM autorun-never is not overridden,"$ grep -Psril ""^\sautorun-never\s=\s*true\b"" /etc/dconf/db/local.d/locks"
+1.7.2.9,Automated,Ensure GDM autorun-never is not overridden,"$ grep -Psril ""^\sautorun-never\s=\s*true\b"" /etc/dconf/db/local.d/locks"
 1.7.10,Automated,Ensure XDMCP is not enabled,"$ grep -Pi ""^\sEnable\s=\s*true"" /etc/gdm3/custom.conf"
-2.1.1,Automated,Ensure autofs services are not in use,"$ dpkg -s autofs 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND autofs"" || echo ""NOT INSTALLED""
+2.1.2.1,Automated,Ensure autofs services are not in use,"$ dpkg -s autofs 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND autofs"" || echo ""NOT INSTALLED""
 $ systemctl is-enabled autofs 2>/dev/null || echo ""autofs not enabled""
 $ systemctl is-active autofs 2>/dev/null || echo ""autofs not active"""
-2.1.2,Automated,Ensure avahi daemon services are not in use,"$ dpkg -s avahi-daemon 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND avahi-daemon"" || echo ""NOT INSTALLED""
+2.1.2.2,Automated,Ensure avahi daemon services are not in use,"$ dpkg -s avahi-daemon 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND avahi-daemon"" || echo ""NOT INSTALLED""
 $ systemctl is-enabled avahi-daemon 2>/dev/null || echo ""avahi-daemon not enabled""
 $ ss -ulpn | grep -w ':5353' || echo ""no mDNS on 5353/udp"""
-2.1.3,Automated,Ensure dhcp server services are not in use,$ dpkg -l | egrep -q 'isc-dhcp-server
-2.1.4,Automated,Ensure dns server services are not in use,$ dpkg -l | egrep -q '^ii\s+(bind9
-2.1.5,Automated,Ensure dnsmasq services are not in use,"$ dpkg -s dnsmasq 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND dnsmasq"" || echo ""NOT INSTALLED""
+2.1.2.3,Automated,Ensure dhcp server services are not in use,$ dpkg -l | egrep -q 'isc-dhcp-server
+2.1.2.4,Automated,Ensure dns server services are not in use,$ dpkg -l | egrep -q '^ii\s+(bind9
+2.1.2.5,Automated,Ensure dnsmasq services are not in use,"$ dpkg -s dnsmasq 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND dnsmasq"" || echo ""NOT INSTALLED""
 $ systemctl is-enabled dnsmasq 2>/dev/null || echo ""dnsmasq not enabled""
 $ ss -tulpn | grep -w ':53' || echo ""no :53 listeners"""
-2.1.6,Automated,Ensure ftp server services are not in use,$ dpkg -l | egrep -q '^ii\s+(vsftpd
-2.1.7,Automated,Ensure ldap server services are not in use,"$ dpkg -s slapd 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND slapd"" || echo ""NOT INSTALLED""
+2.1.2.6,Automated,Ensure ftp server services are not in use,$ dpkg -l | egrep -q '^ii\s+(vsftpd
+2.1.2.7,Automated,Ensure ldap server services are not in use,"$ dpkg -s slapd 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND slapd"" || echo ""NOT INSTALLED""
 $ systemctl is-enabled slapd 2>/dev/null || echo ""slapd not enabled""
 $ ss -tulpn | egrep -w ':389"
-2.1.8,Automated,Ensure message access server services are not in use,$ dpkg -l | egrep -q '^ii\s+(dovecot-imapd
-2.1.9,Automated,Ensure network file system services are not in use,"$ dpkg -s nfs-kernel-server 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND nfs-kernel-server"" || echo ""NOT INSTALLED""
+2.1.2.8,Automated,Ensure message access server services are not in use,$ dpkg -l | egrep -q '^ii\s+(dovecot-imapd
+2.1.2.9,Automated,Ensure network file system services are not in use,"$ dpkg -s nfs-kernel-server 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND nfs-kernel-server"" || echo ""NOT INSTALLED""
 $ systemctl is-enabled nfs-server 2>/dev/null || echo ""nfs-server not enabled""
 $ ss -tulpn | grep -w ':2049' || echo ""no NFS :2049"""
 2.1.10,Automated,Ensure nis server services are not in use,$ dpkg -l | egrep -q '^ii\s+(nis
@@ -138,76 +138,76 @@ $ systemctl list-unit-files --type=service --state=enabled
 $ systemctl --all --type=socket --state=LISTEN
 $ firewall-cmd --list-all 2>/dev/null || ufw status verbose 2>/dev/null || echo ""firewall tool not in use""
 $ # So khớp danh sách dịch vụ lắng nghe với danh mục được phê duyệt của tổ chức"
-2.2.1,Automated,Ensure NIS Client is not installed,"$ dpkg-query -s nis &>/dev/null && echo ""nis is installed"""
-2.2.2,Automated,Ensure rsh client is not installed,"$ dpkg-query -s rsh-client &>/dev/null && echo ""rsh-client is installed"""
-2.2.3,Automated,Ensure talk client is not installed,"$ dpkg-query -s talk &>/dev/null && echo ""talk is installed"""
-2.2.4,Automated,Ensure telnet client is not installed,"$ dpkg-query -l | grep -E 'telnet|inetutils-telnet' &>/dev/null && echo ""telnet is installed"""
-2.2.5,Automated,Ensure ldap client is not installed,"$ dpkg-query -s ldap-utils &>/dev/null && echo ""ldap-utils is installed"""
-2.2.6,Automated,Ensure ftp client is not installed,"$ dpkg-query -l | grep -E 'ftp|tnftp' &>/dev/null && echo ""ftp is installed"""
-2.3.1,Automated,Ensure time synchronization is in use,"$ systemctl is-enabled chrony 2>/dev/null || true
+2.2.2.1,Automated,Ensure NIS Client is not installed,"$ dpkg-query -s nis &>/dev/null && echo ""nis is installed"""
+2.2.2.2,Automated,Ensure rsh client is not installed,"$ dpkg-query -s rsh-client &>/dev/null && echo ""rsh-client is installed"""
+2.2.2.3,Automated,Ensure talk client is not installed,"$ dpkg-query -s talk &>/dev/null && echo ""talk is installed"""
+2.2.2.4,Automated,Ensure telnet client is not installed,"$ dpkg-query -l | grep -E 'telnet|inetutils-telnet' &>/dev/null && echo ""telnet is installed"""
+2.2.2.5,Automated,Ensure ldap client is not installed,"$ dpkg-query -s ldap-utils &>/dev/null && echo ""ldap-utils is installed"""
+2.2.2.6,Automated,Ensure ftp client is not installed,"$ dpkg-query -l | grep -E 'ftp|tnftp' &>/dev/null && echo ""ftp is installed"""
+2.3.2.1,Automated,Ensure time synchronization is in use,"$ systemctl is-enabled chrony 2>/dev/null || true
 $ systemctl is-enabled systemd-timesyncd 2>/dev/null || true
 $ systemctl is-enabled ntp 2>/dev/null || true
 $ timedatectl show -p NTP -p NTPSynchronized -p Timezone -p CanNTP"
-2.3.2,Automated,Ensure chrony is installed and enabled (if used),"$ dpkg -s chrony 2>/dev/null | grep -E ""^Status:"
-2.3.3,Automated,Ensure chrony is correctly configured,"$ grep -E ""^\s*(server|pool)\s+"" /etc/chrony/chrony.conf
+2.3.2.2,Automated,Ensure chrony is installed and enabled (if used),"$ dpkg -s chrony 2>/dev/null | grep -E ""^Status:"
+2.3.2.3,Automated,Ensure chrony is correctly configured,"$ grep -E ""^\s*(server|pool)\s+"" /etc/chrony/chrony.conf
 $ chronyc sources -v 2>/dev/null
 $ grep -E ""^\s*makestep\s+"" /etc/chrony/chrony.conf || echo ""missing makestep (review policy)"""
-2.3.4,Automated,Ensure systemd-timesyncd is correctly configured (if used),"$ systemctl is-enabled systemd-timesyncd 2>/dev/null
+2.3.2.4,Automated,Ensure systemd-timesyncd is correctly configured (if used),"$ systemctl is-enabled systemd-timesyncd 2>/dev/null
 $ grep -E ""^\sNTP=\S+"" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/.conf 2>/dev/null
 $ timedatectl timesync-status 2>/dev/null || timedatectl show -p NTPSynchronized -p ServerName 2>/dev/null"
-2.3.5,Automated,Ensure only one time synchronization service is active,"$ printf ""chrony: ""; systemctl is-active chrony 2>/dev/null || echo inactive
+2.3.2.5,Automated,Ensure only one time synchronization service is active,"$ printf ""chrony: ""; systemctl is-active chrony 2>/dev/null || echo inactive
 $ printf ""timesyncd: ""; systemctl is-active systemd-timesyncd 2>/dev/null || echo inactive
 $ printf ""ntp: ""; systemctl is-active ntp 2>/dev/null || echo inactive"
-2.3.6,Manual,Ensure time sources are organization-approved,"$ grep -E ""^\s*(server|pool)\s+"" /etc/chrony/chrony.conf 2>/dev/null || grep -E ""^\s*NTP=\S+"" /etc/systemd/timesyncd.conf 2>/dev/null
+2.3.2.6,Manual,Ensure time sources are organization-approved,"$ grep -E ""^\s*(server|pool)\s+"" /etc/chrony/chrony.conf 2>/dev/null || grep -E ""^\s*NTP=\S+"" /etc/systemd/timesyncd.conf 2>/dev/null
 $ # Đối chiếu danh sách NTP với danh mục nguồn thời gian được phê duyệt của tổ chức"
-2.3.7,Automated,Ensure legacy ntp daemon is not installed (unless explicitly approved),"$ dpkg -s ntp 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND ntp"" || echo ""ntp not installed""
+2.3.2.7,Automated,Ensure legacy ntp daemon is not installed (unless explicitly approved),"$ dpkg -s ntp 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND ntp"" || echo ""ntp not installed""
 $ systemctl is-enabled ntp 2>/dev/null || echo ""ntp not enabled"""
-2.4.1,Automated,Ensure Bluetooth service is not in use,"$ systemctl is-enabled bluetooth 2>/dev/null || echo ""bluetooth not enabled""
+2.4.2.1,Automated,Ensure Bluetooth service is not in use,"$ systemctl is-enabled bluetooth 2>/dev/null || echo ""bluetooth not enabled""
 $ systemctl is-active bluetooth 2>/dev/null || echo ""bluetooth not active""
 $ rfkill list bluetooth 2>/dev/null"
-2.4.2,Automated,Ensure BlueZ packages are not installed (servers),"$ dpkg -s bluez 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND bluez"" || echo ""bluez not installed"""
-2.4.3,Automated,Ensure ModemManager is not installed,"$ dpkg -s modemmanager 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND ModemManager"" || echo ""not installed""
+2.4.2.2,Automated,Ensure BlueZ packages are not installed (servers),"$ dpkg -s bluez 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND bluez"" || echo ""bluez not installed"""
+2.4.2.3,Automated,Ensure ModemManager is not installed,"$ dpkg -s modemmanager 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND ModemManager"" || echo ""not installed""
 $ systemctl is-enabled ModemManager 2>/dev/null || echo ""not enabled"""
-2.4.4,Automated,Ensure pcscd (smart-card daemon) services are not in use (unless required),"$ dpkg -s pcscd 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND pcscd"" || echo ""pcscd not installed""
+2.4.2.4,Automated,Ensure pcscd (smart-card daemon) services are not in use (unless required),"$ dpkg -s pcscd 2>/dev/null | grep -q ""install ok installed"" && echo ""FOUND pcscd"" || echo ""pcscd not installed""
 $ systemctl is-enabled pcscd 2>/dev/null || echo ""pcscd not enabled""
 $ systemctl is-active pcscd 2>/dev/null || echo ""pcscd not active"""
-2.4.5,Automated,Ensure removable-media automounting is disabled on servers,"$ gsettings get org.gnome.desktop.media-handling automount 2>/dev/null || echo ""no gsettings (server)""
+2.4.2.5,Automated,Ensure removable-media automounting is disabled on servers,"$ gsettings get org.gnome.desktop.media-handling automount 2>/dev/null || echo ""no gsettings (server)""
 $ gsettings get org.gnome.desktop.media-handling automount-open 2>/dev/null || true
 $ grep -R ""^\sautomount\s=\s*false\b"" /etc/dconf/db/local.d 2>/dev/null || echo ""missing dconf hardening (if GDM/desktop present)"""
-2.4.6,Manual,Ensure only approved peripheral services are present,"$ systemctl list-unit-files --state=enabled --type=service
+2.4.2.6,Manual,Ensure only approved peripheral services are present,"$ systemctl list-unit-files --state=enabled --type=service
 $ ss -tulpn
 $ # Đối chiếu danh sách dịch vụ/peripheral với danh mục được phê duyệt của tổ chức"
-3.1.1,Automated,Ensure IPv4 forwarding is disabled,"$ sysctl net.ipv4.ip_forward
+3.1.2.1,Automated,Ensure IPv4 forwarding is disabled,"$ sysctl net.ipv4.ip_forward
 $ grep -R ""^\snet.ipv4.ip_forward\s=\s0\b"" /etc/sysctl.conf /etc/sysctl.d/.conf 2>/dev/null"
-3.1.2,Automated,Ensure packet redirect sending is disabled (IPv4),"$ sysctl net.ipv4.conf.all.send_redirects net.ipv4.conf.default.send_redirects
+3.1.2.2,Automated,Ensure packet redirect sending is disabled (IPv4),"$ sysctl net.ipv4.conf.all.send_redirects net.ipv4.conf.default.send_redirects
 $ grep -R ""^\snet.ipv4.conf.all.send_redirects\s=\s0\b"" /etc/sysctl.conf /etc/sysctl.d/.conf 2>/dev/null
 $ grep -R ""^\snet.ipv4.conf.default.send_redirects\s=\s0\b"" /etc/sysctl.conf /etc/sysctl.d/.conf 2>/dev/null"
-3.2.1,Automated,Ensure source-routed packets are not accepted (IPv4),"$ sysctl net.ipv4.conf.all.accept_source_route net.ipv4.conf.default.accept_source_route
+3.2.2.1,Automated,Ensure source-routed packets are not accepted (IPv4),"$ sysctl net.ipv4.conf.all.accept_source_route net.ipv4.conf.default.accept_source_route
 $ grep -R ""^\snet.ipv4.conf.(all|default).accept_source_route\s=\s0\b"" /etc/sysctl.conf /etc/sysctl.d/.conf 2>/dev/null"
-3.2.2,Automated,Ensure ICMP redirects are not accepted (IPv4),"$ sysctl net.ipv4.conf.all.accept_redirects net.ipv4.conf.default.accept_redirects
+3.2.2.2,Automated,Ensure ICMP redirects are not accepted (IPv4),"$ sysctl net.ipv4.conf.all.accept_redirects net.ipv4.conf.default.accept_redirects
 $ grep -R ""^\snet.ipv4.conf.(all|default).accept_redirects\s=\s0\b"" /etc/sysctl.conf /etc/sysctl.d/.conf 2>/dev/null"
-3.2.3,Automated,Ensure secure ICMP redirects are not accepted (IPv4),"$ sysctl net.ipv4.conf.all.secure_redirects net.ipv4.conf.default.secure_redirects
+3.2.2.3,Automated,Ensure secure ICMP redirects are not accepted (IPv4),"$ sysctl net.ipv4.conf.all.secure_redirects net.ipv4.conf.default.secure_redirects
 $ grep -R ""^\snet.ipv4.conf.(all|default).secure_redirects\s=\s0\b"" /etc/sysctl.conf /etc/sysctl.d/.conf 2>/dev/null"
-3.2.4,Automated,Ensure suspicious packets are logged (log_martians),"$ sysctl net.ipv4.conf.all.log_martians net.ipv4.conf.default.log_martians
+3.2.2.4,Automated,Ensure suspicious packets are logged (log_martians),"$ sysctl net.ipv4.conf.all.log_martians net.ipv4.conf.default.log_martians
 $ grep -R ""^\snet.ipv4.conf.(all|default).log_martians\s=\s1\b"" /etc/sysctl.conf /etc/sysctl.d/.conf 2>/dev/null"
-3.2.5,Automated,Ensure broadcast ICMP requests are ignored,"$ sysctl net.ipv4.icmp_echo_ignore_broadcasts
+3.2.2.5,Automated,Ensure broadcast ICMP requests are ignored,"$ sysctl net.ipv4.icmp_echo_ignore_broadcasts
 $ grep -R ""^\snet.ipv4.icmp_echo_ignore_broadcasts\s=\s1\b"" /etc/sysctl.conf /etc/sysctl.d/.conf 2>/dev/null"
-3.2.6,Automated,Ensure bogus ICMP responses are ignored,"$ sysctl net.ipv4.icmp_ignore_bogus_error_responses
+3.2.2.6,Automated,Ensure bogus ICMP responses are ignored,"$ sysctl net.ipv4.icmp_ignore_bogus_error_responses
 $ grep -R ""^\snet.ipv4.icmp_ignore_bogus_error_responses\s=\s1\b"" /etc/sysctl.conf /etc/sysctl.d/.conf 2>/dev/null"
-3.2.7,Automated,Ensure Reverse Path Filtering is enabled,"$ sysctl net.ipv4.conf.all.rp_filter net.ipv4.conf.default.rp_filter
+3.2.2.7,Automated,Ensure Reverse Path Filtering is enabled,"$ sysctl net.ipv4.conf.all.rp_filter net.ipv4.conf.default.rp_filter
 $ grep -R ""^\snet.ipv4.conf.(all|default).rp_filter\s=\s*[12]\b"" /etc/sysctl.conf /etc/sysctl.d/*.conf 2>/dev/null"
-3.2.8,Automated,Ensure TCP SYN Cookies are enabled,"$ sysctl net.ipv4.tcp_syncookies
+3.2.2.8,Automated,Ensure TCP SYN Cookies are enabled,"$ sysctl net.ipv4.tcp_syncookies
 $ grep -R ""^\snet.ipv4.tcp_syncookies\s=\s1\b"" /etc/sysctl.conf /etc/sysctl.d/.conf 2>/dev/null"
-3.2.9,Automated,Ensure IPv6 router advertisements are not accepted,"$ sysctl net.ipv6.conf.all.accept_ra net.ipv6.conf.default.accept_ra
+3.2.2.9,Automated,Ensure IPv6 router advertisements are not accepted,"$ sysctl net.ipv6.conf.all.accept_ra net.ipv6.conf.default.accept_ra
 $ grep -R ""^\snet.ipv6.conf.(all|default).accept_ra\s=\s0\b"" /etc/sysctl.conf /etc/sysctl.d/.conf 2>/dev/null"
 3.2.10,Automated,Ensure IPv6 redirects are not accepted,"$ sysctl net.ipv6.conf.all.accept_redirects net.ipv6.conf.default.accept_redirects
 $ grep -R ""^\snet.ipv6.conf.(all|default).accept_redirects\s=\s0\b"" /etc/sysctl.conf /etc/sysctl.d/.conf 2>/dev/null"
 3.2.11,Manual,Ensure IPv6 is disabled if not required,"$ grep -R ""^\sGRUB_CMDLINE_LINUX=.ipv6.disable=1"" /etc/default/grub 2>/dev/null || echo ""no ipv6.disable=1 in GRUB""<br>$ grep -R ""^\sblacklist\sipv6\b"" /etc/modprobe.d 2>/dev/null || echo ""no modprobe blacklist""
 $ sysctl net.ipv6.conf.all.disable_ipv6 net.ipv6.conf.default.disable_ipv6"
-3.3.1,Automated,Ensure dccp is disabled,"$ egrep -R ""^\s*install\s+dccp\s+/(bin/true"
-3.3.2,Automated,Ensure sctp is disabled,"$ egrep -R ""^\s*install\s+sctp\s+/(bin/true"
-3.3.3,Automated,Ensure rds is disabled,"$ egrep -R ""^\s*install\s+rds\s+/(bin/true"
-3.3.4,Automated,Ensure tipc is disabled,"$ egrep -R ""^\s*install\s+tipc\s+/(bin/true"
+3.3.2.1,Automated,Ensure dccp is disabled,"$ egrep -R ""^\s*install\s+dccp\s+/(bin/true"
+3.3.2.2,Automated,Ensure sctp is disabled,"$ egrep -R ""^\s*install\s+sctp\s+/(bin/true"
+3.3.2.3,Automated,Ensure rds is disabled,"$ egrep -R ""^\s*install\s+rds\s+/(bin/true"
+3.3.2.4,Automated,Ensure tipc is disabled,"$ egrep -R ""^\s*install\s+tipc\s+/(bin/true"
 3.4.1.1,Automated,Ensure nftables is installed,"$ dpkg -s nftables 2>/dev/null | grep -E ""Status:"
 3.4.1.2,Automated,Ensure nftables service is enabled and active,"$ systemctl is-enabled nftables 2>/dev/null
 $ systemctl is-active nftables 2>/dev/null"
@@ -220,26 +220,26 @@ $ # Đối chiếu danh sách port mở với danh mục đã phê duyệt"
 3.4.1.6,Automated,Ensure outbound connections are restricted (nếu yêu cầu),"$ nft list ruleset | awk '/chain output/,/}/' | grep -E ""policy (drop|reject)"" || echo ""output not restricted (policy allow)"""
 3.4.1.7,Automated,Ensure nftables ruleset is persistent,"$ systemctl status nftables 2>/dev/null | grep -i ""loading nftables ruleset""
 $ test -s /etc/nftables.conf && echo ""ruleset file present"""
-3.5.1,Automated,Ensure UFW is installed,"$ dpkg -s ufw 2>/dev/null | grep -E ""Status:"
-3.5.2,Automated,Ensure UFW default deny incoming,"$ ufw status verbose 2>/dev/null | grep -i ""Default: deny (incoming)"""
-3.5.3,Automated,Ensure UFW default allow outgoing (hoặc theo chính sách DN),"$ ufw status verbose 2>/dev/null | grep -i ""Default: .* (outgoing)"""
-3.5.4,Manual,Ensure only approved ports/services are allowed,"$ ufw status numbered 2>/dev/null
+3.5.2.1,Automated,Ensure UFW is installed,"$ dpkg -s ufw 2>/dev/null | grep -E ""Status:"
+3.5.2.2,Automated,Ensure UFW default deny incoming,"$ ufw status verbose 2>/dev/null | grep -i ""Default: deny (incoming)"""
+3.5.2.3,Automated,Ensure UFW default allow outgoing (hoặc theo chính sách DN),"$ ufw status verbose 2>/dev/null | grep -i ""Default: .* (outgoing)"""
+3.5.2.4,Manual,Ensure only approved ports/services are allowed,"$ ufw status numbered 2>/dev/null
 $ ss -tulpn
 $ # Đối chiếu rule UFW với danh mục port được phê duyệt"
-3.5.5,Automated,Ensure UFW is enabled,"$ ufw status 2>/dev/null | grep -qi ""^Status: active"""
-3.5.6,Automated,Ensure UFW logging is enabled (level ≥ low),"$ ufw status verbose 2>/dev/null | grep -i ""^Logging:"""
-4.1.1,Automated,Ensure auditd is installed,"$ dpkg -s auditd audispd-plugins 2>/dev/null | grep -E ""^Status:"
-4.1.2,Automated,Ensure auditd service is enabled and running,"$ systemctl is-enabled auditd 2>/dev/null
+3.5.2.5,Automated,Ensure UFW is enabled,"$ ufw status 2>/dev/null | grep -qi ""^Status: active"""
+3.5.2.6,Automated,Ensure UFW logging is enabled (level ≥ low),"$ ufw status verbose 2>/dev/null | grep -i ""^Logging:"""
+4.1.2.1,Automated,Ensure auditd is installed,"$ dpkg -s auditd audispd-plugins 2>/dev/null | grep -E ""^Status:"
+4.1.2.2,Automated,Ensure auditd service is enabled and running,"$ systemctl is-enabled auditd 2>/dev/null
 $ systemctl is-active auditd 2>/dev/null"
-4.1.3,Automated,Ensure auditing is enabled at boot (early boot),"$ grep -E '^\s*GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -E 'audit=1' || echo ""MISSING audit=1""
+4.1.2.3,Automated,Ensure auditing is enabled at boot (early boot),"$ grep -E '^\s*GRUB_CMDLINE_LINUX=' /etc/default/grub | grep -E 'audit=1' || echo ""MISSING audit=1""
 $ grep -E 'audit=1' /proc/cmdline || echo ""Kernel not booted with audit=1""
 $ grep -E 'audit_backlog_limit=' /etc/default/grub || echo ""Consider audit_backlog_limit"""
-4.1.4,Automated,Ensure audit log storage size is configured,$ grep -E '^\smax_log_file\s=\s*[0-9]+' /etc/audit/auditd.conf
-4.1.5,Automated,Ensure audit logs are not auto-deleted,$ grep -E '^\smax_log_file_action\s=\s*keep_logs\b' /etc/audit/auditd.conf
-4.1.6,Automated,Ensure system reacts when audit logs are full,$ grep -E '^\sspace_left_action\s=\s*(email
-4.1.7,Automated,Ensure audit configuration is immutable,"$ grep -R -- '^\s*-e\s2\b' /etc/audit/rules.d/ /etc/audit/audit.rules 2>/dev/null || echo ""MISSING -e 2""<br>$ auditctl -s 2>/dev/null | grep -E '^enabled\s=\s*2' || echo ""Not immutable (runtime)"""
-4.1.8,Automated,Ensure time change events are collected,$ auditctl -l | grep -E '(adjtimex
-4.1.9,Automated,Ensure identity changes are collected,$ grep -R -- '-w /etc/(passwd|group|shadow|gshadow) -p wa -k identity' /etc/audit/rules.d 2>/dev/null
+4.1.2.4,Automated,Ensure audit log storage size is configured,$ grep -E '^\smax_log_file\s=\s*[0-9]+' /etc/audit/auditd.conf
+4.1.2.5,Automated,Ensure audit logs are not auto-deleted,$ grep -E '^\smax_log_file_action\s=\s*keep_logs\b' /etc/audit/auditd.conf
+4.1.2.6,Automated,Ensure system reacts when audit logs are full,$ grep -E '^\sspace_left_action\s=\s*(email
+4.1.2.7,Automated,Ensure audit configuration is immutable,"$ grep -R -- '^\s*-e\s2\b' /etc/audit/rules.d/ /etc/audit/audit.rules 2>/dev/null || echo ""MISSING -e 2""<br>$ auditctl -s 2>/dev/null | grep -E '^enabled\s=\s*2' || echo ""Not immutable (runtime)"""
+4.1.2.8,Automated,Ensure time change events are collected,$ auditctl -l | grep -E '(adjtimex
+4.1.2.9,Automated,Ensure identity changes are collected,$ grep -R -- '-w /etc/(passwd|group|shadow|gshadow) -p wa -k identity' /etc/audit/rules.d 2>/dev/null
 4.1.10,Automated,Ensure login/logout events are collected,$ grep -R -- '-w /var/log/(faillog|lastlog|tallylog) -p wa -k logins' /etc/audit/rules.d 2>/dev/null
 4.1.11,Automated,Ensure session initiation info is collected,$ auditctl -l | grep -E '^-w /var/run/utmp
 4.1.12,Automated,Ensure MAC policy changes are collected,$ auditctl -l | egrep -q '(sethostname
@@ -250,37 +250,37 @@ $ grep -E 'audit_backlog_limit=' /etc/default/grub || echo ""Consider audit_back
 4.1.17,Automated,Ensure access to audit logs/config is collected,"$ grep -R -- '-w /var/log/audit/ -p wa -k auditlog' /etc/audit/rules.d 2>/dev/null
 $ grep -R -- '-w /etc/audit/ -p wa -k auditconfig' /etc/audit/rules.d 2>/dev/null"
 4.1.18,Automated,Ensure successful/unsuccessful file access is collected (optional per policy),$ auditctl -l | egrep -q '(open
-4.2.1,Automated,Ensure rsyslog is installed,"$ dpkg -s rsyslog 2>/dev/null | grep -E ""^Status:"
-4.2.2,Automated,Ensure rsyslog service is enabled,"$ systemctl is-enabled rsyslog 2>/dev/null
+4.2.2.1,Automated,Ensure rsyslog is installed,"$ dpkg -s rsyslog 2>/dev/null | grep -E ""^Status:"
+4.2.2.2,Automated,Ensure rsyslog service is enabled,"$ systemctl is-enabled rsyslog 2>/dev/null
 $ systemctl is-active rsyslog 2>/dev/null"
-4.2.3,Automated,Ensure rsyslog default file perms are strict,"$ grep -R ""^\s*$FileCreateMode\s+0?640\b"" /etc/rsyslog.conf /etc/rsyslog.d/*.conf 2>/dev/null || echo ""Check DefaultRuleset or templates"""
-4.2.4,Manual,Ensure remote logging is configured (if required),$ grep -R -E '(@@??.+?.+?.+?:[0-9]+
-4.2.5,Automated,Ensure rsyslog is not a log server (unless approved),"$ grep -R -E '^\s*module(load=""imtcp"""
-4.2.6,Automated,Ensure journald has persistent storage,"$ grep -E '^\sStorage\s=\spersistent\b' /etc/systemd/journald.conf /etc/systemd/journald.conf.d/.conf 2>/dev/null
+4.2.2.3,Automated,Ensure rsyslog default file perms are strict,"$ grep -R ""^\s*$FileCreateMode\s+0?640\b"" /etc/rsyslog.conf /etc/rsyslog.d/*.conf 2>/dev/null || echo ""Check DefaultRuleset or templates"""
+4.2.2.4,Manual,Ensure remote logging is configured (if required),$ grep -R -E '(@@??.+?.+?.+?:[0-9]+
+4.2.2.5,Automated,Ensure rsyslog is not a log server (unless approved),"$ grep -R -E '^\s*module(load=""imtcp"""
+4.2.2.6,Automated,Ensure journald has persistent storage,"$ grep -E '^\sStorage\s=\spersistent\b' /etc/systemd/journald.conf /etc/systemd/journald.conf.d/.conf 2>/dev/null
 $ test -d /var/log/journal && echo ""journal dir exists"" || echo ""missing /var/log/journal"""
-4.2.7,Automated,Ensure journald → rsyslog forwarding enabled (if rsyslog used),"$ grep -E '^\sForwardToSyslog\s=\syes\b' /etc/systemd/journald.conf /etc/systemd/journald.conf.d/.conf 2>/dev/null || echo ""ForwardToSyslog not set to yes""
+4.2.2.7,Automated,Ensure journald → rsyslog forwarding enabled (if rsyslog used),"$ grep -E '^\sForwardToSyslog\s=\syes\b' /etc/systemd/journald.conf /etc/systemd/journald.conf.d/.conf 2>/dev/null || echo ""ForwardToSyslog not set to yes""
 $ systemctl restart systemd-journald 2>/dev/null || true"
-4.2.8,Automated,Ensure journald compression & sealing are enabled,$ grep -E '^\sCompress\s=\syes\b' /etc/systemd/journald.conf 2>/dev/null<br>$ grep -E '^\sSeal\s*=\s*yes\b' /etc/systemd/journald.conf 2>/dev/null
-4.2.9,Automated,Ensure log files have proper ownership/permissions,$ find /var/log -type f -exec stat -Lc '%n %a %U %G' {} ; | awk '$2 > 640
-4.3.1,Automated,Ensure logrotate is installed,"$ dpkg -s logrotate 2>/dev/null | grep -E ""^Status:"
-4.3.2,Automated,Ensure logrotate is active (timer/cron),$ systemctl is-enabled logrotate.timer 2>/dev/null || ls -l /etc/cron.daily/logrotate 2>/dev/null
-4.3.3,Manual,Ensure rotation policies meet org requirements,$ grep -E '^\s*(weekly
-4.4.1,Automated,Ensure audit log directory ownership/perm are strict,"$ stat -Lc '%n %a %U %G' /var/log/audit 2>/dev/null || echo ""/var/log/audit missing""
+4.2.2.8,Automated,Ensure journald compression & sealing are enabled,$ grep -E '^\sCompress\s=\syes\b' /etc/systemd/journald.conf 2>/dev/null<br>$ grep -E '^\sSeal\s*=\s*yes\b' /etc/systemd/journald.conf 2>/dev/null
+4.2.2.9,Automated,Ensure log files have proper ownership/permissions,$ find /var/log -type f -exec stat -Lc '%n %a %U %G' {} ; | awk '$2 > 640
+4.3.2.1,Automated,Ensure logrotate is installed,"$ dpkg -s logrotate 2>/dev/null | grep -E ""^Status:"
+4.3.2.2,Automated,Ensure logrotate is active (timer/cron),$ systemctl is-enabled logrotate.timer 2>/dev/null || ls -l /etc/cron.daily/logrotate 2>/dev/null
+4.3.2.3,Manual,Ensure rotation policies meet org requirements,$ grep -E '^\s*(weekly
+4.4.2.1,Automated,Ensure audit log directory ownership/perm are strict,"$ stat -Lc '%n %a %U %G' /var/log/audit 2>/dev/null || echo ""/var/log/audit missing""
 $ find /var/log/audit -type f -exec stat -Lc '%n %a %U %G' {} ; | awk '$2 > 640"
-4.4.2,Automated,Ensure rsyslog config files are protected,$ find /etc/rsyslog.* -type f -exec stat -Lc '%n %a %U %G' {} ; 2>/dev/null | awk '$2 > 640
-4.4.3,Automated,Ensure journald config files are protected,$ find /etc/systemd/journald.conf* /etc/systemd/journald.conf.d -type f -exec stat -Lc '%n %a %U %G' {} ; 2>/dev/null | awk '$2 > 640
-5.1.1,Automated,Ensure permissions on /etc/ssh/sshd_config are configured,"$ stat -Lc '%a %U %G %n' /etc/ssh/sshd_config
+4.4.2.2,Automated,Ensure rsyslog config files are protected,$ find /etc/rsyslog.* -type f -exec stat -Lc '%n %a %U %G' {} ; 2>/dev/null | awk '$2 > 640
+4.4.2.3,Automated,Ensure journald config files are protected,$ find /etc/systemd/journald.conf* /etc/systemd/journald.conf.d -type f -exec stat -Lc '%n %a %U %G' {} ; 2>/dev/null | awk '$2 > 640
+5.1.2.1,Automated,Ensure permissions on /etc/ssh/sshd_config are configured,"$ stat -Lc '%a %U %G %n' /etc/ssh/sshd_config
 $ find /etc/ssh/sshd_config.d -type f -name '*.conf' -exec stat -Lc '%a %U %G %n' {} ;"
-5.1.2,Automated,Ensure permissions on SSH private host key files are configured,$ find /etc/ssh -xdev -type f -name 'ssh_host_*_key' -exec stat -Lc '%a %U %G %n' {} ;
-5.1.3,Automated,Ensure permissions on SSH public host key files are configured,$ find /etc/ssh -xdev -type f -name 'ssh_host_*_key.pub' -exec stat -Lc '%a %U %G %n' {} ;
-5.1.4,Automated,Ensure sshd access is configured,"$ grep -Pi '^\s*(AllowUsers|AllowGroups|DenyUsers|DenyGroups)\b' /etc/ssh/sshd_config /etc/ssh/sshd_config.d/*.conf 2>/dev/null
+5.1.2.2,Automated,Ensure permissions on SSH private host key files are configured,$ find /etc/ssh -xdev -type f -name 'ssh_host_*_key' -exec stat -Lc '%a %U %G %n' {} ;
+5.1.2.3,Automated,Ensure permissions on SSH public host key files are configured,$ find /etc/ssh -xdev -type f -name 'ssh_host_*_key.pub' -exec stat -Lc '%a %U %G %n' {} ;
+5.1.2.4,Automated,Ensure sshd access is configured,"$ grep -Pi '^\s*(AllowUsers|AllowGroups|DenyUsers|DenyGroups)\b' /etc/ssh/sshd_config /etc/ssh/sshd_config.d/*.conf 2>/dev/null
 $ sshd -T | grep -Ei '^(allowusers"
-5.1.5,Automated,Ensure sshd Banner is configured,"$ sshd -T | grep -i '^banner '
+5.1.2.5,Automated,Ensure sshd Banner is configured,"$ sshd -T | grep -i '^banner '
 $ test -s /etc/issue.net && echo '/etc/issue.net present'"
-5.1.6,Automated,Ensure sshd Ciphers are configured,$ sshd -T | awk '/^ciphers /{print}'
-5.1.7,Automated,Ensure ClientAliveInterval & ClientAliveCountMax are configured,$ sshd -T | egrep '^(clientaliveinterval
-5.1.8,Automated,Ensure DisableForwarding is enabled,$ sshd -T | grep -i '^disableforwarding '
-5.1.9,Automated,Ensure GSSAPIAuthentication is disabled,$ sshd -T | grep -i '^gssapiauthentication '
+5.1.2.6,Automated,Ensure sshd Ciphers are configured,$ sshd -T | awk '/^ciphers /{print}'
+5.1.2.7,Automated,Ensure ClientAliveInterval & ClientAliveCountMax are configured,$ sshd -T | egrep '^(clientaliveinterval
+5.1.2.8,Automated,Ensure DisableForwarding is enabled,$ sshd -T | grep -i '^disableforwarding '
+5.1.2.9,Automated,Ensure GSSAPIAuthentication is disabled,$ sshd -T | grep -i '^gssapiauthentication '
 5.1.10,Automated,Ensure HostbasedAuthentication is disabled,$ sshd -T | grep -i '^hostbasedauthentication '
 5.1.11,Automated,Ensure IgnoreRhosts is enabled,$ sshd -T | grep -i '^ignorerhosts '
 5.1.12,Automated,Ensure KexAlgorithms are configured,$ sshd -T | grep -i '^kexalgorithms '
@@ -294,32 +294,32 @@ $ test -s /etc/issue.net && echo '/etc/issue.net present'"
 5.1.20,Automated,Ensure PermitRootLogin is disabled,$ sshd -T | grep -i '^permitrootlogin '
 5.1.21,Automated,Ensure PermitUserEnvironment is disabled,$ sshd -T | grep -i '^permituserenvironment '
 5.1.22,Automated,Ensure UsePAM is enabled,$ sshd -T | grep -i '^usepam '
-5.2.1,Automated,Ensure sudo is installed,$ dpkg -s sudo 2>/dev/null | grep -E '^Status:
-5.2.2,Automated,Ensure sudo commands use pty,"$ grep -R ""^\s*Defaults\s+use_pty\b"" /etc/sudoers /etc/sudoers.d 2>/dev/null"
-5.2.3,Automated,Ensure sudo log file exists,"$ grep -R ""^\sDefaults\s+logfile="" /etc/sudoers /etc/sudoers.d 2>/dev/null<br>$ awk -F= '/^\sDefaults\s+logfile=/{print $2}' /etc/sudoers /etc/sudoers.d/* 2>/dev/null | sed ""s/['"" ]//g"" | xargs -r -I{} stat -Lc '%a %U %G %n' {}"
-5.2.4,Automated,Ensure users must provide password for privilege escalation,"$ grep -R '\bNOPASSWD\b' /etc/sudoers /etc/sudoers.d 2>/dev/null
+5.2.2.1,Automated,Ensure sudo is installed,$ dpkg -s sudo 2>/dev/null | grep -E '^Status:
+5.2.2.2,Automated,Ensure sudo commands use pty,"$ grep -R ""^\s*Defaults\s+use_pty\b"" /etc/sudoers /etc/sudoers.d 2>/dev/null"
+5.2.2.3,Automated,Ensure sudo log file exists,"$ grep -R ""^\sDefaults\s+logfile="" /etc/sudoers /etc/sudoers.d 2>/dev/null<br>$ awk -F= '/^\sDefaults\s+logfile=/{print $2}' /etc/sudoers /etc/sudoers.d/* 2>/dev/null | sed ""s/['"" ]//g"" | xargs -r -I{} stat -Lc '%a %U %G %n' {}"
+5.2.2.4,Automated,Ensure users must provide password for privilege escalation,"$ grep -R '\bNOPASSWD\b' /etc/sudoers /etc/sudoers.d 2>/dev/null
 $ grep -R ""^\sDefaults\s!authenticate\b"" /etc/sudoers /etc/sudoers.d 2>/dev/null"
-5.2.5,Automated,Ensure re-authentication is not disabled globally,"$ grep -R ""^\sDefaults\s!authenticate\b"" /etc/sudoers /etc/sudoers.d 2>/dev/null"
-5.2.6,Automated,Ensure sudo authentication timeout is configured correctly,"$ grep -R ""^\s*Defaults\s+timestamp_timeout="" /etc/sudoers /etc/sudoers.d 2>/dev/null"
-5.3.1,Automated,Ensure password creation requirements are configured (pwquality),$ grep -P '^\spassword\s+requisite\s+pam_pwquality.so' /etc/pam.d/common-password<br>$ grep -E '^\sminlen\s*=\s*(1[4-9]
-5.3.2,Automated,Ensure lockout for failed password attempts is configured (faillock),"$ grep -P '^\sauth\s+.pam_faillock.so' /etc/pam.d/common-auth<br>$ grep -E '^\sdeny\s=\s*[1-9]\d*\b' /etc/security/faillock.conf 2>/dev/null
+5.2.2.5,Automated,Ensure re-authentication is not disabled globally,"$ grep -R ""^\sDefaults\s!authenticate\b"" /etc/sudoers /etc/sudoers.d 2>/dev/null"
+5.2.2.6,Automated,Ensure sudo authentication timeout is configured correctly,"$ grep -R ""^\s*Defaults\s+timestamp_timeout="" /etc/sudoers /etc/sudoers.d 2>/dev/null"
+5.3.2.1,Automated,Ensure password creation requirements are configured (pwquality),$ grep -P '^\spassword\s+requisite\s+pam_pwquality.so' /etc/pam.d/common-password<br>$ grep -E '^\sminlen\s*=\s*(1[4-9]
+5.3.2.2,Automated,Ensure lockout for failed password attempts is configured (faillock),"$ grep -P '^\sauth\s+.pam_faillock.so' /etc/pam.d/common-auth<br>$ grep -E '^\sdeny\s=\s*[1-9]\d*\b' /etc/security/faillock.conf 2>/dev/null
 $ grep -E '^\sunlock_time\s=\s*(900"
-5.3.3,Automated,Ensure password reuse is limited (pwhistory),$ grep -P '^\spassword\s+required\s+pam_pwhistory.so' /etc/pam.d/common-password<br>$ grep -R '^\sremember\s*=\s*[5-9]\d*\b' /etc/security/pwhistory.conf /etc/pam.d/common-password* 2>/dev/null
-5.3.4,Automated,Ensure strong password hashing algorithm is used,$ grep -P '^\s*password\s+.pam_unix.so.(yescrypt
-5.3.5,Automated,Ensure PAM reads existing password (try_first_pass / use_authtok),$ grep -P '^\s*password\s+requisite\s+pam_pwquality.so.try_first_pass' /etc/pam.d/common-password<br>$ grep -P '^\spassword\s+.pam_unix.so.(use_authtok
-5.4.1,Automated,Ensure password expiration (PASS_MAX_DAYS) is configured,"$ grep -E '^\s*PASS_MAX_DAYS\s+\d+\b' /etc/login.defs
+5.3.2.3,Automated,Ensure password reuse is limited (pwhistory),$ grep -P '^\spassword\s+required\s+pam_pwhistory.so' /etc/pam.d/common-password<br>$ grep -R '^\sremember\s*=\s*[5-9]\d*\b' /etc/security/pwhistory.conf /etc/pam.d/common-password* 2>/dev/null
+5.3.2.4,Automated,Ensure strong password hashing algorithm is used,$ grep -P '^\s*password\s+.pam_unix.so.(yescrypt
+5.3.2.5,Automated,Ensure PAM reads existing password (try_first_pass / use_authtok),$ grep -P '^\s*password\s+requisite\s+pam_pwquality.so.try_first_pass' /etc/pam.d/common-password<br>$ grep -P '^\spassword\s+.pam_unix.so.(use_authtok
+5.4.2.1,Automated,Ensure password expiration (PASS_MAX_DAYS) is configured,"$ grep -E '^\s*PASS_MAX_DAYS\s+\d+\b' /etc/login.defs
 $ awk -F: '($2 !~ /^(!"
-5.4.2,Automated,Ensure minimum days between password changes (PASS_MIN_DAYS) is configured,"$ grep -E '^\s*PASS_MIN_DAYS\s+\d+\b' /etc/login.defs
+5.4.2.2,Automated,Ensure minimum days between password changes (PASS_MIN_DAYS) is configured,"$ grep -E '^\s*PASS_MIN_DAYS\s+\d+\b' /etc/login.defs
 $ awk -F: '($2 !~ /^(!"
-5.4.3,Automated,Ensure password expiration warning days (PASS_WARN_AGE) is configured,"$ grep -E '^\s*PASS_WARN_AGE\s+\d+\b' /etc/login.defs
+5.4.2.3,Automated,Ensure password expiration warning days (PASS_WARN_AGE) is configured,"$ grep -E '^\s*PASS_WARN_AGE\s+\d+\b' /etc/login.defs
 $ awk -F: '($2 !~ /^(!"
-5.4.4,Automated,Ensure inactive password lock is configured,"$ useradd -D | grep -E '^INACTIVE='| sed 's/^/DEFAULT: /'
+5.4.2.4,Automated,Ensure inactive password lock is configured,"$ useradd -D | grep -E '^INACTIVE='| sed 's/^/DEFAULT: /'
 $ awk -F: '($2 !~ /^(!"
-5.4.5,Automated,Ensure system accounts are non-login (except needed),"$ awk -F: '($3<1000 && $1!=""root""){print $1"":""$7}' /etc/passwd | egrep -v '/usr/sbin/nologin"
-5.4.6,Automated,Ensure default user umask is configured (027 or 077),$ grep -E '^\s*UMASK\s+0(27
-5.4.7,Automated,Ensure home directories are owned by the user,$ awk -F: '($3>=1000 && $7 !~ /(nologin
-5.4.8,Automated,Ensure home directories are not group/world-writable,$ awk -F: '($3>=1000 && $7 !~ /(nologin
-5.4.9,Automated,Ensure dot files are not world-writable,$ awk -F: '($3>=1000 && $7 !~ /(nologin
+5.4.2.5,Automated,Ensure system accounts are non-login (except needed),"$ awk -F: '($3<1000 && $1!=""root""){print $1"":""$7}' /etc/passwd | egrep -v '/usr/sbin/nologin"
+5.4.2.6,Automated,Ensure default user umask is configured (027 or 077),$ grep -E '^\s*UMASK\s+0(27
+5.4.2.7,Automated,Ensure home directories are owned by the user,$ awk -F: '($3>=1000 && $7 !~ /(nologin
+5.4.2.8,Automated,Ensure home directories are not group/world-writable,$ awk -F: '($3>=1000 && $7 !~ /(nologin
+5.4.2.9,Automated,Ensure dot files are not world-writable,$ awk -F: '($3>=1000 && $7 !~ /(nologin
 5.4.10,Automated,"Ensure no .forward, .netrc, .rhosts files exist (or are restricted)",$ for f in .forward .netrc .rhosts; do awk -F: '($3>=1000 && $7 !~ /(nologin
 5.4.11,Automated,Ensure root is the only UID 0 account,$ awk -F: '($3==0){print $1}' /etc/passwd
 6.1.1.1,Automated,Ensure journald service is enabled and active,"$ systemctl is-enabled systemd-journald.service 2>/dev/null
@@ -384,16 +384,16 @@ $ grep -R -- '^-w /etc/pam.d -p wa -k identity' /etc/audit/rules.d 2>/dev/null |
 6.2.3.11,Automated,Ensure session initiation info is collected,"$ grep -R -- '^-w /var/run/utmp -p wa -k session' /etc/audit/rules.d 2>/dev/null
 $ grep -R -- '^-w /var/log/wtmp -p wa -k logins' /etc/audit/rules.d 2>/dev/null
 $ grep -R -- '^-w /var/log/btmp -p wa -k logins' /etc/audit/rules.d 2>/dev/null"
-6.3.1,Automated,Ensure AIDE is installed,$ dpkg -s aide 2>/dev/null | grep -E '^Status:
-6.3.2,Automated,Ensure AIDE integrity checks run regularly,$ systemctl is-enabled aidecheck.timer 2>/dev/null || ls -l /etc/cron.(daily|weekly)/aide 2>/dev/null
-6.3.3,Manual,Ensure AIDE DB initialized & config present,"$ test -f /var/lib/aide/aide.db* && echo ""AIDE DB present"" || echo ""MISSING AIDE DB""
+6.3.2.1,Automated,Ensure AIDE is installed,$ dpkg -s aide 2>/dev/null | grep -E '^Status:
+6.3.2.2,Automated,Ensure AIDE integrity checks run regularly,$ systemctl is-enabled aidecheck.timer 2>/dev/null || ls -l /etc/cron.(daily|weekly)/aide 2>/dev/null
+6.3.2.3,Manual,Ensure AIDE DB initialized & config present,"$ test -f /var/lib/aide/aide.db* && echo ""AIDE DB present"" || echo ""MISSING AIDE DB""
 $ ls -l /etc/aide/aide.conf /etc/aide/aide.conf.d 2>/dev/null"
-6.3.4,Automated,Ensure permissions on /etc/passwd are configured,"$ stat -Lc '%a %U %G %n' /etc/passwd | awk '$1!=""644"" || $2!=""root"" || $3!=""root""{print ""WEAK:"",$0}'; echo ""Expected: 644 root root"""
-6.3.5,Automated,Ensure permissions on /etc/shadow are configured,"$ stat -Lc '%a %U %G %n' /etc/shadow | awk '$1>640 || $2!=""root"" || $3!=""shadow""{print ""WEAK:"",$0}'; echo ""Expected: 640 root shadow"""
-6.3.6,Automated,Ensure permissions on /etc/group are configured,"$ stat -Lc '%a %U %G %n' /etc/group | awk '$1!=""644"" || $2!=""root"" || $3!=""root""{print ""WEAK:"",$0}'; echo ""Expected: 644 root root"""
-6.3.7,Automated,Ensure permissions on /etc/gshadow are configured,"$ stat -Lc '%a %U %G %n' /etc/gshadow | awk '$1>640 || $2!=""root"" || $3!=""shadow""{print ""WEAK:"",$0}'; echo ""Expected: 640 root shadow"""
-6.3.8,Automated,Ensure permissions on backup files are configured,"$ for f in /etc/passwd- /etc/group- /etc/shadow- /etc/gshadow-; do stat -Lc '%a %U %G %n' ""$f"" 2>/dev/null; done | awk '$4~/passwd-"
-6.3.9,Automated,Ensure no world-writable files exist,$ find / \( -path /proc -o -path /sys -o -path /run \) -prune -o -type f -perm -0002 -print
+6.3.2.4,Automated,Ensure permissions on /etc/passwd are configured,"$ stat -Lc '%a %U %G %n' /etc/passwd | awk '$1!=""644"" || $2!=""root"" || $3!=""root""{print ""WEAK:"",$0}'; echo ""Expected: 644 root root"""
+6.3.2.5,Automated,Ensure permissions on /etc/shadow are configured,"$ stat -Lc '%a %U %G %n' /etc/shadow | awk '$1>640 || $2!=""root"" || $3!=""shadow""{print ""WEAK:"",$0}'; echo ""Expected: 640 root shadow"""
+6.3.2.6,Automated,Ensure permissions on /etc/group are configured,"$ stat -Lc '%a %U %G %n' /etc/group | awk '$1!=""644"" || $2!=""root"" || $3!=""root""{print ""WEAK:"",$0}'; echo ""Expected: 644 root root"""
+6.3.2.7,Automated,Ensure permissions on /etc/gshadow are configured,"$ stat -Lc '%a %U %G %n' /etc/gshadow | awk '$1>640 || $2!=""root"" || $3!=""shadow""{print ""WEAK:"",$0}'; echo ""Expected: 640 root shadow"""
+6.3.2.8,Automated,Ensure permissions on backup files are configured,"$ for f in /etc/passwd- /etc/group- /etc/shadow- /etc/gshadow-; do stat -Lc '%a %U %G %n' ""$f"" 2>/dev/null; done | awk '$4~/passwd-"
+6.3.2.9,Automated,Ensure no world-writable files exist,$ find / \( -path /proc -o -path /sys -o -path /run \) -prune -o -type f -perm -0002 -print
 6.3.10,Automated,Ensure no unowned/ungrouped files exist,"$ find / -xdev -nouser -print
 $ find / -xdev -nogroup -print"
 6.3.11,Manual,Ensure SUID/SGID files are reviewed and approved,$ find / -xdev \( -perm -4000 -o -perm -2000 \) -type f -print | sort

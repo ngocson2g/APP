@@ -56,7 +56,15 @@ class Settings:
     retry_on_timeout: bool
     exec_cwd: str | None = None          # CWD cho subprocess; None -> dùng "/"
     clean_env: bool = True               # bật môi trường sạch tối thiểu cho subprocess
-    
+
+@dataclass(frozen=True)
+class RC_result:
+    """
+    Mô hình lưu trữ kết quả RC từ file stigs.
+    """
+    id_rule: str
+    RC: list[int]
+      
 # ---------- NEW: LSP helper ----------
 def as_rule(rule_like: Any) -> Rule:
     """

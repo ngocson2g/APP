@@ -4,7 +4,6 @@ from typing import Any, List, Tuple
 
 from security_app.models import CmdResult, Rule
 from security_app.core.command_extractor import extract_all_commands
-from security_app.policy.safety import deny_reason
 from security_app.policy.safety import deny_reason, RULE_DENY_ASSESSMENT_STATUS
 # ❌ BỎ import gây vòng lặp:
 # from security_app.core.estimator import _read_history, _estimate_cmd_seconds

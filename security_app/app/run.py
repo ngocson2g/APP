@@ -8,6 +8,7 @@ from security_app.config import DEFAULT_LOGS_DIR, TOP_FAIL_LIMIT
 from security_app.core.estimator import estimate_plan
 from security_app.core.runner import run_all_rules
 from security_app.parsers.dispatch import parse_file
+from security_app.parsers.rc_parser import parse_rc_stigs
 from security_app.reporting.estimate_terminal import print_estimate
 from security_app.reporting.exporters import (dump_stats_json,
                                               write_stats_csv_bundle)
@@ -42,6 +43,7 @@ def run_once(
     save_report: bool = False,
     out_dir: Optional[str] = None,
     list_all_rules: bool = False,
+    
 ) -> dict[str, Any]:
     
     #1. Chuẩn bị 
@@ -52,6 +54,8 @@ def run_once(
 
     base = default_settings()
     rules = parse_file(input)
+    
+    rules_RC = parse_rc_stigs("data/stigs/result_RC_stigs.csv")
 
     #2. Ước lượng trước (nếu cần in) + để suy ra timeout động
     est_pre = estimate_plan(
