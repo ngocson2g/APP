@@ -10,8 +10,6 @@ from security_app.policy.risk import compute_risk
 from security_app.policy.safety import assert_cmd_length_safe, deny_reason
 from security_app.settings import Settings
 
-from security_app.policy.rc_loader import check_rc_pass
-
 _SAFE_ENV_BASE = {
     "PATH": "/usr/sbin:/usr/bin:/sbin:/bin",
     "LANG": "C.UTF-8",
@@ -21,9 +19,6 @@ _SAFE_ENV_BASE = {
 }
 _BAD_ENV_PREFIXES = ("LD_", "DYLD_", "PYTHON", "GEM_", "BUNDLE_", "NODE_", "RUBY", "PERL", "JAVA_TOOL_OPTIONS")
 _BAD_ENV_KEYS = {"SSH_AUTH_SOCK","HTTP_PROXY","HTTPS_PROXY","NO_PROXY","FTP_PROXY","ALL_PROXY","TMPDIR","TMP","TEMP"}
-
-import re
-
 
 def _build_clean_env(parent: Mapping[str, str] | None) -> dict[str, str]:
     return dict(_SAFE_ENV_BASE)
@@ -37,25 +32,20 @@ def _run_once(cmd: str, timeout: float | None, settings: Settings) -> subprocess
         cwd=cwd, env=env, close_fds=True, start_new_session=True
     )
 
-def _to_result(cmd: str, rc: int | None, stdout: str, stderr: str, started_all: float, rule_id: str) -> CmdResult:
-
-    # === LOGIC MỚI ===
-    ok = check_rc_pass(rule_id, rc)
-    # ==================
-
+def _to_result(cmd: str, rc: int | None, stdout: str, stderr: str, started_all: float) -> CmdResult:
     return CmdResult(cmd=cmd, returncode=rc, stdout=stdout or "", stderr=stderr or "",
-                     duration_sec=round(time.time() - started_all, 4), ok=ok)
+                     duration_sec=round(time.time() - started_all, 4), ok=(rc == 0))
 
-def run_command(cmd: str, settings: Settings, check_text: str | None, rule_id: str) -> CmdResult:
+def run_command(cmd: str, settings: Settings) -> CmdResult:
     risk = compute_risk(cmd)
     try:
         assert_cmd_length_safe(cmd)
     except Exception as e:
-        return _to_result(cmd, None, "", f"DENIED length-check: {e} | RISK={risk.level}({risk.score}) {','.join(risk.factors)}", time.time(), rule_id=rule_id)
+        return _to_result(cmd, None, "", f"DENIED length-check: {e} | RISK={risk.level}({risk.score}) {','.join(risk.factors)}", time.time())
 
     reason = deny_reason(cmd)
     if reason:
-        return _to_result(cmd, None, "", f"{reason} | RISK={risk.level}({risk.score}) {','.join(risk.factors)}", time.time(), rule_id=rule_id)
+        return _to_result(cmd, None, "", f"{reason} | RISK={risk.level}({risk.score}) {','.join(risk.factors)}", time.time())
 
     max_attempts = 1 + max(0, int(settings.retry_attempts))
     timeout = float(settings.shell_timeout) if settings.shell_timeout else None
@@ -68,27 +58,20 @@ def run_command(cmd: str, settings: Settings, check_text: str | None, rule_id: s
         attempts += 1
         try:
             res = _run_once(cmd, timeout, settings)
-            is_pass = check_rc_pass(rule_id, res.returncode)
-            # Chỉ return (ngừng retry) nếu pass HOẶC đã hết lượt thử
-            if is_pass or attempts >= max_attempts:
-                return _to_result(cmd, res.returncode, res.stdout, res.stderr, started_all, rule_id=rule_id)
-
-            # (backoff)
+            if res.returncode == 0 or attempts >= max_attempts:
+                return _to_result(cmd, res.returncode, res.stdout, res.stderr, started_all)
+            # backoff mũ + jitter
             sleep_s = min(2.0, base_delay * (2 ** (attempts - 1))) + random.uniform(0.0, 0.2)
             time.sleep(sleep_s)
-            
         except subprocess.TimeoutExpired as te:
             if (not settings.retry_on_timeout) or attempts >= max_attempts:
-                # Truyền rule_id
-                return _to_result(cmd, None, te.stdout or "", f"TIMEOUT after {timeout}s", started_all, rule_id=rule_id)
+                return _to_result(cmd, None, te.stdout or "", f"TIMEOUT after {timeout}s", started_all)
             sleep_s = min(2.5, base_delay * (2 ** (attempts - 1))) + random.uniform(0.0, 0.3)
             time.sleep(sleep_s)
         except Exception as e:
             if attempts >= max_attempts:
-                # Truyền rule_id
-                return _to_result(cmd, None, "", str(e), started_all, rule_id=rule_id)
+                return _to_result(cmd, None, "", str(e), started_all)
             sleep_s = min(1.5, base_delay * (2 ** (attempts - 1))) + random.uniform(0.0, 0.2)
             time.sleep(sleep_s)
 
-    # Fallback (vẫn truyền rule_id)
-    return _to_result(cmd, None, "", "Unknown error", started_all, rule_id=rule_id)
+    return _to_result(cmd, None, "", "Unknown error", started_all)

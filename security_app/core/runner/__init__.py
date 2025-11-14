@@ -84,17 +84,10 @@ def _count_timeouts(results: list[CmdResult]) -> int:
 
 # ---------- Worker payload ----------
 def _workers_chunk(payload: tuple[int, Rule, list[str], Settings, CommandRunner]) -> tuple[int, list[CmdResult]]:
-    """Worker xử lý 1 chunk (n lệnh) bằng runner được tiêm vào.""" 
-    idx, rule, allowed_cmds, settings, run_fn = payload
-
-    # === LẤY THÔNG TIN RULE ===
-    check_text = getattr(rule, "check", "") or ""
-    # Lấy rule_id từ object Rule
-    rule_id = rule.id or ""
-    # =======================================
-
-    # run_fn giờ là: (cmd, settings, check_text, rule_id) -> CmdResult
-    results: list[CmdResult] = [run_fn(cmd, settings, check_text, rule_id) for cmd in allowed_cmds]
+    """Worker xử lý 1 chunk (n lệnh) bằng runner được tiêm vào."""
+    idx, _rule, allowed_cmds, settings, run_fn = payload
+    # run_fn là hàm top-level picklable: (cmd, settings) -> CmdResult
+    results: list[CmdResult] = [run_fn(cmd, settings) for cmd in allowed_cmds]
     return idx, results
 
 
