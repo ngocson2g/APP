@@ -96,38 +96,51 @@ def parse_xml(file_path: str) -> list[Rule]:
     ns = {"xccdf": ns_url}
 
     rules: list[Rule] = []
-    for rule in root.findall(".//xccdf:Rule", ns):
-        # id & tiêu đề
-        rid = _first_attr(rule, XML_ATTR_CANDIDATES["id"])
-        title_attr = _first_attr(rule, XML_ATTR_CANDIDATES["title"])
-        title_elem = _first_elem_text(rule, XML_ELEM_CANDIDATES["title"], ns)
-        title_name = _first_attr(rule, XML_ATTR_CANDIDATES["name"])
-        title = title_attr or title_elem or title_name or ""
+    
+    # THAY ĐỔI BẮT ĐẦU: Lặp qua <Group> thay vì <Rule>
+    # 1. Tìm tất cả các <Group> trong tài liệu
+    for group in root.findall(".//xccdf:Group", ns):
+        
+        # 2. Lấy ID từ <Group> (Đây là ID bạn muốn, ví dụ: "V-270645")
+        rid = _first_attr(group, XML_ATTR_CANDIDATES["id"])
 
-        # mô tả / fix / severity (đều optional)
-        desc = _first_elem_text(rule, XML_ELEM_CANDIDATES["description"], ns) or ""
-        fix = _first_xpath_text(rule, XML_FIX_XPATHS, ns) or ""
-        sev = (_first_attr(rule, XML_ATTR_CANDIDATES["severity"]) or "").strip().lower() or "unknown"
+        # 3. Tìm tất cả các <Rule> con trực tiếp của <Group> này
+        for rule in group.findall("./xccdf:Rule", ns):
+            
+            # --- Toàn bộ logic trích xuất <Rule> giữ nguyên ---
+            # 'rid' bây giờ đã là ID của Group
+            title_attr = _first_attr(rule, XML_ATTR_CANDIDATES["title"])
+            title_elem = _first_elem_text(rule, XML_ELEM_CANDIDATES["title"], ns)
+            title_name = _first_attr(rule, XML_ATTR_CANDIDATES["name"])
+            title = title_attr or title_elem or title_name or ""
 
-        # check: ưu tiên check-content (text), fallback sang check-content-ref (text/name/href)
-        check = _first_xpath_text(rule, XML_CHECK_XPATHS_TEXT, ns)
-        if not check:
-            check = _first_xpath_attr_or_text(rule, XML_CHECK_XPATHS_REF, ns)
+            # mô tả / fix / severity (đều optional)
+            desc = _first_elem_text(rule, XML_ELEM_CANDIDATES["description"], ns) or ""
+            fix = _first_xpath_text(rule, XML_FIX_XPATHS, ns) or ""
+            sev = (_first_attr(rule, XML_ATTR_CANDIDATES["severity"]) or "").strip().lower() or "unknown"
 
-        # Validate theo hợp đồng tối thiểu
-        missing = [k for k in REQ_FIELDS if (k == "id" and not rid) or (k == "check" and not check)]
-        if missing:
-            raise Exception(f"Missing required field(s) {missing} in XML rule ID={rid or '(unknown)'}")
+            # check: ưu tiên check-content (text), fallback sang check-content-ref (text/name/href)
+            check = _first_xpath_text(rule, XML_CHECK_XPATHS_TEXT, ns)
+            if not check:
+                check = _first_xpath_attr_or_text(rule, XML_CHECK_XPATHS_REF, ns)
 
-        rules.append(
-            Rule(
-                id=rid,
-                title=title,
-                description=desc,
-                check=check,
-                fix=fix,
-                severity=sev,
+            # Validate theo hợp đồng tối thiểu
+            missing = [k for k in REQ_FIELDS if (k == "id" and not rid) or (k == "check" and not check)]
+            if missing:
+                # Lấy ID của Rule để thông báo lỗi rõ ràng hơn
+                rule_id_fallback = _first_attr(rule, XML_ATTR_CANDIDATES["id"])
+                raise Exception(f"Missing required field(s) {missing} in XML group ID={rid or '(unknown)'} (Rule ID={rule_id_fallback})")
+
+            rules.append(
+                Rule(
+                    id=rid,  # 4. Sử dụng ID của Group
+                    title=title,
+                    description=desc,
+                    check=check,
+                    fix=fix,
+                    severity=sev,
+                )
             )
-        )
+    # THAY ĐỔI KẾT THÚC
 
     return rules
