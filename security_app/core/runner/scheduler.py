@@ -5,6 +5,7 @@ from typing import Any, List, Tuple
 from security_app.models import CmdResult, Rule
 from security_app.core.command_extractor import extract_all_commands
 from security_app.policy.safety import deny_reason
+from security_app.policy.safety import deny_reason, RULE_DENY_ASSESSMENT_STATUS
 # ❌ BỎ import gây vòng lặp:
 # from security_app.core.estimator import _read_history, _estimate_cmd_seconds
 
@@ -44,12 +45,22 @@ def build_scheduled_tasks(
         allowed: List[str] = []
         denied: List[CmdResult] = []
 
-        for c in cmds_all:
-            r = deny_reason(c)
-            if r:
-                denied.append(_mk_denied(c, r))
-            else:
-                allowed.append(c)
+        rule_status = (rule.assessment_status or "").lower().strip()
+
+        if rule_status in RULE_DENY_ASSESSMENT_STATUS: 
+            # Nếu status bị cấm (vd: "manual"), deny tất cả commands
+            reason = f"DENIED: Assessment Status is '{rule_status}'"
+            for c in cmds_all:
+                denied.append(_mk_denied(c, reason))
+        else:
+            # Nếu status hợp lệ, chạy logic deny-list lệnh như cũ
+            for c in cmds_all:
+                r = deny_reason(c)
+                if r:
+                    denied.append(_mk_denied(c, r))
+                else:
+                    allowed.append(c)
+                         
 
         agg[idx] = {"rule": rule, "denied": denied, "ran": []}
 

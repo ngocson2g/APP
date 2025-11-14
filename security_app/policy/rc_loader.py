@@ -59,7 +59,7 @@ def load_rc_map_from_csv(file_path: str) -> Dict[str, Set[str]]:
 
 # --- Global cache cho RC map ---
 # Tải một lần duy nhất khi ứng dụng khởi động
-_RC_MAP_PATH = os.getenv("SECAPP_RC_MAP_PATH", "data/result_RC.csv")
+_RC_MAP_PATH = os.getenv("SECAPP_RC_MAP_PATH", "data/result_RC_stigs.csv")
 _RC_MAP_CACHE: Dict[str, Set[str]] | None = None
 
 def get_rc_map() -> Dict[str, Set[str]]:
