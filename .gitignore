@@ -34,7 +34,7 @@ ENV/
 # Bất kỳ file .log rơi vãi
 *.log
 out/
-tests/
+
 waves.json
 
 # ---------- Config / secrets ----------
