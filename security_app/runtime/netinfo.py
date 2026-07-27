@@ -15,8 +15,9 @@ def primary_ipv4() -> str:
         s.close()
         if ip and ip != "127.0.0.1":
             return ip
-    except Exception:
-        pass
+    except OSError as e:
+        from security_app.utils.log import internal_logger
+        internal_logger.debug(f"Socket connection failed: {e}")
     # Fallback khi không có route mặc định / offline
     try:
         out = subprocess.check_output(
@@ -24,6 +25,7 @@ def primary_ipv4() -> str:
         ).strip()
         if out and out.split()[0] != "127.0.0.1":
             return out.split()[0]
-    except Exception:
-        pass
+    except (OSError, subprocess.CalledProcessError) as e:
+        from security_app.utils.log import internal_logger
+        internal_logger.debug(f"Fallback hostname command failed: {e}")
     return "unknown"

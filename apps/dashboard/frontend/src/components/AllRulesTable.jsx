@@ -81,7 +81,6 @@ export default function AllRulesTable({ items = [], onSelect = () => {} }) {
         <table className="table">
           {/* --- CẬP NHẬT: Giao diện Thead --- */}
           <thead>
-            {/* Hàng tiêu đề */}
             <tr>
               <th style={{width:48}}>#</th>
               <th style={{width:96}}>Rule ID</th>
@@ -90,11 +89,10 @@ export default function AllRulesTable({ items = [], onSelect = () => {} }) {
               <th style={{width:96}}>Cmd OK</th>
               <th style={{width:96}}>Cmd Fail</th>
               <th style={{width:96}}>Status</th>
-              <th style={{width: 70}}>View</th> {/* Thêm width cố định */}
+              <th style={{width: 70}}>View</th>
             </tr>
-            {/* THÊM MỚI: Hàng lọc */}
             <tr>
-              <th></th> {/* Cột # */}
+              <th></th>
               <th>
                 <input
                   type="text"
@@ -125,8 +123,8 @@ export default function AllRulesTable({ items = [], onSelect = () => {} }) {
                   onClick={(e) => e.stopPropagation()}
                 />
               </th>
-              <th></th> {/* Cột Cmd OK */}
-              <th></th> {/* Cột Cmd Fail */}
+              <th></th>
+              <th></th>
               <th>
                 <input
                   type="text"
@@ -137,13 +135,13 @@ export default function AllRulesTable({ items = [], onSelect = () => {} }) {
                   onClick={(e) => e.stopPropagation()}
                 />
               </th>
-              <th></th> {/* Cột View */}
+              <th></th>
             </tr>
           </thead>
           {/* --- Hết phần cập nhật Thead --- */}
           <tbody>
             {data.map((r, i) => (
-              <tr key={r.rule_index ?? i}> {/* Dùng key ổn định hơn */}
+              <tr key={r.rule_index ?? i}>
                 <td>{i+1}</td>
                 <td><code>{r.id || '—'}</code></td>
                 <td><span className={`badge ${r.severity||'unknown'}`}>{r.severity||'unknown'}</span></td>

@@ -22,6 +22,7 @@ def chown_path(path: str, recursive: bool = False) -> None:
                 for f in files: os.chown(os.path.join(root, f), uid, gid)
         else:
             os.chown(path, uid, gid)
-    except Exception:
+    except OSError as e:
         # im lặng bỏ qua (không để việc đổi quyền làm gãy luồng chính)
-        pass
+        from security_app.utils.log import internal_logger
+        internal_logger.warning(f"Failed to change ownership of {path}: {e}")

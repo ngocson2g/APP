@@ -82,11 +82,11 @@ def _parse_dt(s: str|None) -> float|None:
             s = s.replace("T", " ")
             return datetime.strptime(s, "%Y-%m-%d %H:%M:%S").timestamp()
         return datetime.strptime(s, "%Y-%m-%d").timestamp()
-    except Exception:
+    except ValueError:
         # fallback: epoch/float
         try:
             return float(s)
-        except Exception:
+        except ValueError:
             return None
 
 def _match_keywords(rec: dict[str, Any], keywords: list[str], scope: str) -> bool:

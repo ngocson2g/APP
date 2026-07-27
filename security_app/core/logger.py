@@ -102,12 +102,13 @@ class RunLogger:
                     continue
                 try:
                     shutil.rmtree(p)
-                except Exception:
-                    # im lặng bỏ qua nếu không xoá được (quyền, đang mở, v.v.)
-                    pass
-        except Exception:
+                except OSError as e:
+                    from security_app.utils.log import internal_logger
+                    internal_logger.warning(f"Failed to delete old log dir {p}: {e}")
+        except Exception as e:
             # an toàn: không để rotation làm gãy chương trình chính
-            pass
+            from security_app.utils.log import internal_logger
+            internal_logger.error(f"Error during log rotation: {e}")
 
     
     def log_rule_result(self, rule_index: int, rule: Rule, cmd_results: list[CmdResult]):

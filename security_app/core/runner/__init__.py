@@ -267,7 +267,7 @@ def run_all_rules(
             try:
                 # quantiles n=20 → p95 ~ q[18] (5% upper tail)
                 p95 = statistics.quantiles(durations_wave, n=20)[18]
-            except Exception:
+            except statistics.StatisticsError:
                 p95 = max(durations_wave)
         else:
             p50 = p95 = 0.0
@@ -285,8 +285,12 @@ def run_all_rules(
             if t_dyn:
                 # FIX: Settings là frozen dataclass → tạo bản mới thay vì mutate
                 settings = _dc_replace(settings, shell_timeout=float(t_dyn))
-        except Exception:
-            pass
+        except ValueError as e:
+            from security_app.utils.log import internal_logger
+            internal_logger.warning(f"Invalid p95 value for timeout calculation: {e}")
+        except TypeError as e:
+            from security_app.utils.log import internal_logger
+            internal_logger.warning(f"Type error in timeout calculation: {e}")
 
         # ---- AIMD: điều chỉnh cap_cpu/io và wave_scale cho WAVE KẾ TIẾP ----
         congested = (timeout_rate > AIMD_TIMEOUT_RATE) or (

@@ -92,6 +92,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to output the final summary report as a single JSON file."
     )
     run_group.add_argument(
+        "--html-out", 
+        default=None,
+        help="Path to output the final summary report as a single standalone HTML file."
+    )
+    run_group.add_argument(
         "--csv-out-dir", 
         default=None,
         help="Directory to output the final summary report as a bundle of CSV files."

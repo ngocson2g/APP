@@ -10,6 +10,7 @@ from security_app.core.runner import run_all_rules
 from security_app.parsers.dispatch import parse_file
 from security_app.reporting.estimate_terminal import print_estimate
 from security_app.reporting.exporters import dump_stats_json, write_stats_csv_bundle
+from security_app.reporting.html_exporter import dump_stats_html
 from security_app.reporting.stats import compute_stats
 from security_app.reporting.terminal import print_report
 from security_app.runtime.sudo import ensure_root
@@ -36,6 +37,7 @@ def run_once(
     estimate: bool = False,
     plan_only: bool = False,
     json_out: str | None = None,
+    html_out: str | None = None,
     csv_out_dir: str | None = None,
     save_report: bool = False,
     out_dir: str | None = None,
@@ -85,16 +87,31 @@ def run_once(
     est = est_pre
 
     #4. thực thi
-    run_results = run_all_rules(
-        rules, log_base_dir=logs_dir, workers=workers, use_processes=proc, settings=settings
-    )
-    
-    #5. Báo cáo
-    stats = compute_stats(run_results)
+    if input.lower().endswith(".xml"):
+        from security_app.core.oscap_runner import run_oscap, OscapNotInstalledError
+        try:
+            stats = run_oscap(input, rules)
+        except OscapNotInstalledError as e:
+            print(f"\n[ERROR] {e}")
+            import sys
+            sys.exit(1)
+        except Exception as e:
+            print(f"\n[ERROR] OpenSCAP execution failed: {e}")
+            import sys
+            sys.exit(1)
+    else:
+        run_results = run_all_rules(
+            rules, log_base_dir=logs_dir, workers=workers, use_processes=proc, settings=settings
+        )
+        #5. Báo cáo
+        stats = compute_stats(run_results)
+
     print_report(stats, limit_top=top, list_all_rules=list_all_rules)
 
     if json_out:
         dump_stats_json(stats, json_out)
+    if html_out:
+        dump_stats_html(stats, html_out)
     if csv_out_dir:
         write_stats_csv_bundle(stats, out_dir=csv_out_dir)
 

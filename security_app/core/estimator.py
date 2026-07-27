@@ -88,8 +88,9 @@ def _read_history(logs_base: str, max_files: int = 4000) -> dict[str, tuple[floa
                                 last_cmd = None
                                 picked += 1
                                 if picked >= max_files: break
-            except Exception:
-                pass
+            except (OSError, ValueError) as e:
+                from security_app.utils.log import internal_logger
+                internal_logger.warning(f"Failed to read/parse {f}: {e}")
 
     out: dict[str, tuple[float, float, int]] = {}
     for b, ds in durations.items():
@@ -98,7 +99,7 @@ def _read_history(logs_base: str, max_files: int = 4000) -> dict[str, tuple[floa
         mean = sum(ds)/len(ds)
         try:
             p95 = statistics.quantiles(ds, n=20)[18]
-        except Exception:
+        except statistics.StatisticsError:
             p95 = max(ds)
         out[b] = (mean, p95, len(ds))
     return out
