@@ -2,20 +2,18 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Optional
+from typing import Any
 
 from security_app.config import DEFAULT_LOGS_DIR, TOP_FAIL_LIMIT
 from security_app.core.estimator import estimate_plan
 from security_app.core.runner import run_all_rules
 from security_app.parsers.dispatch import parse_file
 from security_app.reporting.estimate_terminal import print_estimate
-from security_app.reporting.exporters import (dump_stats_json,
-                                              write_stats_csv_bundle)
+from security_app.reporting.exporters import dump_stats_json, write_stats_csv_bundle
 from security_app.reporting.stats import compute_stats
 from security_app.reporting.terminal import print_report
 from security_app.runtime.sudo import ensure_root
-from security_app.settings import (default_settings, require_sudo_by_default,
-                                   with_overrides)
+from security_app.settings import default_settings, require_sudo_by_default, with_overrides
 
 
 def _autotimeout_from_est(p95: float | None) -> float | None:
@@ -31,16 +29,16 @@ def run_once(
     input: str,
     logs_dir: str = DEFAULT_LOGS_DIR,
     top: int = TOP_FAIL_LIMIT,
-    workers: Optional[int] = None,
+    workers: int | None = None,
     proc: bool = False,
-    timeout: Optional[float] = None,
-    retries: Optional[int] = None,
+    timeout: float | None = None,
+    retries: int | None = None,
     estimate: bool = False,
     plan_only: bool = False,
-    json_out: Optional[str] = None,
-    csv_out_dir: Optional[str] = None,
+    json_out: str | None = None,
+    csv_out_dir: str | None = None,
     save_report: bool = False,
-    out_dir: Optional[str] = None,
+    out_dir: str | None = None,
     list_all_rules: bool = False,
     
 ) -> dict[str, Any]:

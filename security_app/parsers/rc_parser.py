@@ -2,15 +2,16 @@
 from __future__ import annotations
 
 import csv
-from typing import List, Dict
 from collections import defaultdict
+
 from security_app.models import RC_result
+
 
 def _normalize_columns(cols: list[str]) -> list[str]:
     """Helper to normalize column names for robust lookup."""
     return [str(c).strip().lower().replace("-", "_").replace(" ", "_") if c else "" for c in cols]
 
-def _split_rc_values(rc_str: str) -> List[str]:
+def _split_rc_values(rc_str: str) -> list[str]:
     """
     Tách chuỗi RC thành các ký tự riêng biệt.
     Ví dụ: "0, 0, 1" -> ['0', '0', '1']
@@ -25,14 +26,14 @@ def _split_rc_values(rc_str: str) -> List[str]:
     # Loại bỏ phần tử rỗng
     return [part for part in parts if part]
 
-def parse_rc_stigs(path: str) -> List[RC_result]:
+def parse_rc_stigs(path: str) -> list[RC_result]:
     """
     Parses the result_RC_stigs.csv file.
     Assumes columns like 'id_rule' and 'RC'.
     Tách các giá trị RC thành các ký tự riêng biệt.
     """
     try:
-        f = open(path, mode="r", encoding="utf-8-sig")
+        f = open(path, encoding="utf-8-sig")
     except FileNotFoundError:
         print(f"Warning: RC file not found at {path}, skipping.")
         return []
@@ -69,7 +70,7 @@ def parse_rc_stigs(path: str) -> List[RC_result]:
         next(dict_reader, None)  # Bỏ qua header
         
         # Gom nhóm theo id_rule và kết hợp tất cả RC values
-        grouped_rcs: Dict[str, List[str]] = defaultdict(list)
+        grouped_rcs: dict[str, list[str]] = defaultdict(list)
         
         for row in dict_reader:
             rule_id = row.get(id_col)
@@ -83,7 +84,7 @@ def parse_rc_stigs(path: str) -> List[RC_result]:
                 grouped_rcs[rule_id].extend(split_rcs)
                 
     # Convert dict to list of RC_result models
-    results: List[RC_result] = []
+    results: list[RC_result] = []
     for rule_id, rcs in grouped_rcs.items():
         results.append(RC_result(
             id_rule=rule_id, 

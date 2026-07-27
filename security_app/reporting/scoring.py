@@ -8,10 +8,10 @@ Công thức:
 """
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
 # Trọng số: critical ảnh hưởng gấp 10x so với low
-SEVERITY_WEIGHTS: Dict[str, int] = {
+SEVERITY_WEIGHTS: dict[str, int] = {
     "critical": 10,
     "high": 5,
     "medium": 2,
@@ -20,7 +20,7 @@ SEVERITY_WEIGHTS: Dict[str, int] = {
 }
 
 
-def compute_compliance_score(stats: Dict[str, Any]) -> float:
+def compute_compliance_score(stats: dict[str, Any]) -> float:
     """
     Trả về điểm compliance 0.0–100.0, có trọng số severity.
 

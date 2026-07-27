@@ -11,9 +11,10 @@ import shutil
 import security_app.config as cfg
 from security_app.models import CmdResult, Rule, RuleLogRecord
 from security_app.policy.secrets import mask_secrets
-from security_app.utils.text import _safe_name
 from security_app.runtime.netinfo import primary_ipv4
 from security_app.runtime.ownership import chown_path
+from security_app.utils.text import _safe_name
+
 
 def _format_rule_log(rec: RuleLogRecord) -> str:
     """Định dạng bản ghi log theo đúng format hiện có (để backend parse được)."""

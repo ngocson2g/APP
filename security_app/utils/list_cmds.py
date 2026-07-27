@@ -1,6 +1,7 @@
 from security_app.core.command_extractor import extract_all_commands
 from security_app.models import Rule, Rule_cmd
 
+
 def list_cmds(rules: list[Rule], marker: str = "$ ") -> list[Rule_cmd]:
     rule_cmds: list[Rule_cmd] = []   
     

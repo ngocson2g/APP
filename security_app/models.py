@@ -6,8 +6,9 @@ Data models cho ứng dụng
 - RuleLogRecord: Record log cho rule
 - Settings: Cấu hình runtime
 """
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Mapping
+from typing import Any
 
 
 @dataclass(frozen=True)

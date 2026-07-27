@@ -4,8 +4,10 @@ from __future__ import annotations
 import json
 import os
 import time
-from typing import Any, Dict
+from typing import Any
+
 from security_app.runtime.ownership import chown_path
+
 
 class WaveMetricsSink:
     """
@@ -17,7 +19,7 @@ class WaveMetricsSink:
         self.run_id = os.path.basename(self.run_dir)
         os.makedirs(self.run_dir, exist_ok=True)
         now = time.time()
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "run_id": self.run_id,
             "started_at": now,
             "total_cmds": int(total_cmds),

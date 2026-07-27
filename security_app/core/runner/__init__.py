@@ -7,15 +7,14 @@ Main runner module - Điều phối song song: LPT + waves + phân làn CPU-ish/
 """
 from __future__ import annotations
 
-from dataclasses import replace as _dc_replace
-
+import contextlib
 import os
 import re
 import statistics
 import sys
 import time
-from concurrent.futures import (ProcessPoolExecutor, ThreadPoolExecutor,
-                                as_completed)
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
+from dataclasses import replace as _dc_replace
 from typing import Any, Tuple
 
 from security_app.config import DEFAULT_LOGS_DIR
@@ -66,10 +65,7 @@ def _is_cpuish_cmd(cmd: str) -> bool:
     tok = _first_token(s)
     if tok in _CPUISH_TOKENS:
         return True
-    for rx in _CPUISH_PATTERNS:
-        if rx.search(s):
-            return True
-    return False
+    return any(rx.search(s) for rx in _CPUISH_PATTERNS)
 
 def _classify_chunk(chunk_cmds: list[str]) -> str:
     """Trả về 'cpu' nếu bất kỳ lệnh nào trong chunk là CPU-ish, ngược lại 'io'."""
@@ -193,8 +189,8 @@ def run_all_rules(
         )))
         
         # Phân làn
-        cpu_wave: list[Tuple[int, Rule, list[str], float]] = []
-        io_wave:  list[Tuple[int, Rule, list[str], float]] = []
+        cpu_wave: list[tuple[int, Rule, list[str], float]] = []
+        io_wave:  list[tuple[int, Rule, list[str], float]] = []
         for item in wave_tasks:
             idx, rule, chunk, est = item
             (cpu_wave if _classify_chunk(chunk) == "cpu" else io_wave).append(item)
@@ -246,10 +242,8 @@ def run_all_rules(
 
                 # Thu duration cho p50/p95
                 for x in (ran_part or []):
-                    try:
+                    with contextlib.suppress(Exception):
                         durations_wave.append(float(getattr(x, "duration_sec", 0.0) or 0.0))
-                    except Exception:
-                        pass
 
                 # Nếu rule đã xong → merge & log
                 if pending[idx] == 0:

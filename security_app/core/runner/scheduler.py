@@ -1,10 +1,12 @@
 # security_app/core/runner/scheduler.py
 from __future__ import annotations
-from typing import Any, List, Tuple
 
-from security_app.models import CmdResult, Rule
+from typing import Any
+
 from security_app.core.command_extractor import extract_all_commands
-from security_app.policy.safety import deny_reason, RULE_DENY_ASSESSMENT_STATUS
+from security_app.models import CmdResult, Rule
+from security_app.policy.safety import RULE_DENY_ASSESSMENT_STATUS, deny_reason
+
 # ❌ BỎ import gây vòng lặp:
 # from security_app.core.estimator import _read_history, _estimate_cmd_seconds
 
@@ -22,9 +24,9 @@ def _get_estimators():
     return _est._read_history, _est._estimate_cmd_seconds
 
 def build_scheduled_tasks(
-    rules: List[Rule],
+    rules: list[Rule],
     logs_base_dir: str,
-) -> Tuple[List[Tuple[int, Rule, List[str], float]], dict[int, dict[str, Any]], dict[int, int]]:
+) -> tuple[list[tuple[int, Rule, list[str], float]], dict[int, dict[str, Any]], dict[int, int]]:
     """
     Trả về:
       - tasks: list[(idx, rule, chunk_cmds, est_sec)]
@@ -35,14 +37,14 @@ def build_scheduled_tasks(
     _read_history, _estimate_cmd_seconds = _get_estimators()
 
     hist = _read_history(logs_base_dir)
-    tasks: List[Tuple[int, Rule, List[str], float]] = []
+    tasks: list[tuple[int, Rule, list[str], float]] = []
     agg: dict[int, dict[str, Any]] = {}
     pending: dict[int, int] = {}
 
     for idx, rule in enumerate(rules):
         cmds_all = extract_all_commands(getattr(rule, "check", "") or "")
-        allowed: List[str] = []
-        denied: List[CmdResult] = []
+        allowed: list[str] = []
+        denied: list[CmdResult] = []
 
         rule_status = (rule.assessment_status or "").lower().strip()
 

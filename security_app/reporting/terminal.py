@@ -1,9 +1,10 @@
 #security_app/reporting/terminal.py
+import re
+
 from security_app.config import TOP_FAIL_LIMIT
-from security_app.models import Rule, as_rule
+from security_app.models import as_rule
 from security_app.reporting.scoring import compute_compliance_score, score_grade
 from security_app.utils.text import _bar, _table, _term_width
-import re
 
 
 def print_report(stats, limit_top=TOP_FAIL_LIMIT, list_all_rules: bool = False):

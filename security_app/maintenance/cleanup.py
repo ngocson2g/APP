@@ -1,12 +1,14 @@
 # security_app/maintenance/cleanup.py
 from __future__ import annotations
 
+import contextlib
 import os
 import shutil
 import tarfile
+from collections.abc import Iterable
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any
 
 # ----------------------------
 # Helpers
@@ -18,7 +20,7 @@ def _is_run_dir(p: Path) -> bool:
     except FileNotFoundError:
         return False
 
-def _sorted_by_mtime_desc(paths: Iterable[Path]) -> List[Path]:
+def _sorted_by_mtime_desc(paths: Iterable[Path]) -> list[Path]:
     def _mtime(path: Path) -> float:
         try:
             return path.stat().st_mtime
@@ -40,10 +42,8 @@ def _folder_size(p: Path) -> int:
     for root, _, files in os.walk(p, followlinks=False):
         for f in files:
             fp = Path(root) / f
-            try:
+            with contextlib.suppress(FileNotFoundError):
                 total += fp.stat().st_size
-            except FileNotFoundError:
-                pass
     return total
 
 # ----------------------------
@@ -53,10 +53,10 @@ def _folder_size(p: Path) -> int:
 def prune_runs(
     logs_dir: Path,
     keep_latest: int = 50,
-    older_than_days: Optional[int] = None,
-    compress_older_days: Optional[int] = None,
+    older_than_days: int | None = None,
+    compress_older_days: int | None = None,
     dry_run: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Dọn dẹp thư mục run trong logs_dir:
     - Giữ lại N run mới nhất (keep_latest).
@@ -72,8 +72,8 @@ def prune_runs(
     delete_cut = now - timedelta(days=older_than_days) if older_than_days is not None else None
     compress_cut = now - timedelta(days=compress_older_days) if compress_older_days is not None else None
 
-    to_delete: List[Path] = []
-    to_compress: List[Path] = []
+    to_delete: list[Path] = []
+    to_compress: list[Path] = []
 
     for i, p in enumerate(ordered):
         try:
@@ -117,15 +117,13 @@ def prune_runs(
             if p.is_dir():
                 shutil.rmtree(p, ignore_errors=True)
             else:
-                try:
+                with contextlib.suppress(FileNotFoundError):
                     p.unlink()
-                except FileNotFoundError:
-                    pass
             report["deleted"].append(f"{p.name} ({size})")
 
     return report
 
-def prune_tmp(tmp_dir: Path = Path("/tmp"), prefix: str = "security_app_", older_than_hours: int = 12, dry_run: bool = True) -> Dict[str, Any]:
+def prune_tmp(tmp_dir: Path = Path("/tmp"), prefix: str = "security_app_", older_than_hours: int = 12, dry_run: bool = True) -> dict[str, Any]:
     """
     Xoá các file/thư mục tạm trong tmp_dir khớp prefix và cũ hơn X giờ.
     """
@@ -145,15 +143,13 @@ def prune_tmp(tmp_dir: Path = Path("/tmp"), prefix: str = "security_app_", older
                 if p.is_dir():
                     shutil.rmtree(p, ignore_errors=True)
                 else:
-                    try:
+                    with contextlib.suppress(FileNotFoundError):
                         p.unlink()
-                    except FileNotFoundError:
-                        pass
                 removed.append(str(p))
 
     return {"tmp_removed": removed}
 
-def prune_reports(report_root: Path, keep_days: int = 30, dry_run: bool = True) -> Dict[str, Any]:
+def prune_reports(report_root: Path, keep_days: int = 30, dry_run: bool = True) -> dict[str, Any]:
     """
     Dọn dẹp reportAPP:
     - Xoá thư mục báo cáo cũ hơn keep_days.
@@ -165,7 +161,7 @@ def prune_reports(report_root: Path, keep_days: int = 30, dry_run: bool = True) 
 
     now = datetime.now()
     cut = now - timedelta(days=keep_days)
-    deleted: List[str] = []
+    deleted: list[str] = []
 
     runs = _sorted_by_mtime_desc([p for p in report_root.iterdir() if p.is_dir()])
 
@@ -185,7 +181,7 @@ def prune_reports(report_root: Path, keep_days: int = 30, dry_run: bool = True) 
     latest_link = report_root / "latest"
     latest_target = None
 
-    def _pick_latest() -> Optional[Path]:
+    def _pick_latest() -> Path | None:
         remaining = _sorted_by_mtime_desc([q for q in report_root.iterdir() if q.is_dir()])
         return remaining[0] if remaining else None
 
@@ -196,10 +192,8 @@ def prune_reports(report_root: Path, keep_days: int = 30, dry_run: bool = True) 
                 pick = _pick_latest()
                 if pick:
                     if not dry_run:
-                        try:
+                        with contextlib.suppress(FileNotFoundError):
                             latest_link.unlink()
-                        except FileNotFoundError:
-                            pass
                         latest_link.symlink_to(pick.name)
                     latest_target = pick.name
         except FileNotFoundError:
@@ -208,10 +202,8 @@ def prune_reports(report_root: Path, keep_days: int = 30, dry_run: bool = True) 
         pick = _pick_latest()
         if pick:
             if not dry_run:
-                try:
+                with contextlib.suppress(FileNotFoundError):
                     latest_link.unlink()
-                except FileNotFoundError:
-                    pass
                 latest_link.symlink_to(pick.name)
             latest_target = pick.name
 
@@ -219,16 +211,16 @@ def prune_reports(report_root: Path, keep_days: int = 30, dry_run: bool = True) 
 
 def run_cleanup(
     logs_dir: Path,
-    report_dir: Optional[Path] = None,
+    report_dir: Path | None = None,
     keep_runs: int = 50,
-    runs_older_than_days: Optional[int] = None,
-    compress_runs_older_than_days: Optional[int] = None,
+    runs_older_than_days: int | None = None,
+    compress_runs_older_than_days: int | None = None,
     keep_reports_days: int = 30,
     tmp_prefix: str = "security_app_",
     tmp_older_than_hours: int = 12,
     dry_run: bool = True,
-) -> Dict[str, Any]:
-    report: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    report: dict[str, Any] = {}
     report["runs"] = prune_runs(
         logs_dir=Path(logs_dir),
         keep_latest=keep_runs,

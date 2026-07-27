@@ -1,6 +1,9 @@
 # security_app/runtime/ownership.py
 from __future__ import annotations
-import os, os.path
+
+import os
+import os.path
+
 
 def original_user_ids() -> tuple[int, int]:
     """Lấy UID/GID của user thật nếu chạy dưới sudo; fallback về UID/GID hiện tại."""

@@ -4,7 +4,6 @@ from collections import defaultdict
 from security_app.models import Rule, as_rule  # NEW
 
 
-
 def compute_stats(run_results):
     # NEW: ép về Rule một lần cho toàn pipeline reporting
     normalized = []

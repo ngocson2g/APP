@@ -1,12 +1,10 @@
 # security_app/reporting/estimate_terminal.py
 from __future__ import annotations
 
-from typing import Dict
-
 from security_app.utils.text import _table
 
 
-def print_estimate(est: Dict[str, object]) -> None:
+def print_estimate(est: dict[str, object]) -> None:
     """
     Render ước lượng pre-run ra terminal, đồng bộ phong cách với reporting/terminal.print_report
     (dùng cùng _table, đơn sắc, gọn gàng).

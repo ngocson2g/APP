@@ -1,6 +1,9 @@
 # security_app/runtime/netinfo.py
 from __future__ import annotations
-import socket, subprocess
+
+import socket
+import subprocess
+
 
 def primary_ipv4() -> str:
     """Lấy IPv4 chính (không loopback). Không cần internet, không gửi gói ra ngoài."""

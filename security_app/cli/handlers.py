@@ -5,7 +5,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from security_app import config as CFG
 from security_app.app.run import run_once
@@ -38,7 +38,7 @@ def handle_run(args) -> int:
 
     run_kwargs_keys = ["input","logs_dir","top","workers","proc","timeout","retries",
                        "estimate","plan_only","json_out","csv_out_dir","save_report","out_dir","list_all_rules"]
-    run_kwargs: Dict[str, Any] = {k: getattr(args, k) for k in run_kwargs_keys}
+    run_kwargs: dict[str, Any] = {k: getattr(args, k) for k in run_kwargs_keys}
     run_once(**run_kwargs)
 
     if getattr(args, "plan_only", False):

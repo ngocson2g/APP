@@ -21,7 +21,7 @@ def _pick_first(row, aliases):
 
 def parse_csv(path: str):
     rules: list[Rule] = []
-    with open(path, mode="r", encoding="utf-8-sig") as f:
+    with open(path, encoding="utf-8-sig") as f:
         # Đọc 1 dòng đầu tiên để lấy header
         reader = csv.reader(f)
         try:
