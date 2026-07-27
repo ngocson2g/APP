@@ -7,6 +7,8 @@ Main runner module - Điều phối song song: LPT + waves + phân làn CPU-ish/
 """
 from __future__ import annotations
 
+from dataclasses import replace as _dc_replace
+
 import os
 import re
 import statistics
@@ -87,7 +89,9 @@ def _workers_chunk(payload: tuple[int, Rule, list[str], Settings, CommandRunner]
     """Worker xử lý 1 chunk (n lệnh) bằng runner được tiêm vào."""
     idx, _rule, allowed_cmds, settings, run_fn = payload
     # run_fn là hàm top-level picklable: (cmd, settings) -> CmdResult
-    results: list[CmdResult] = [run_fn(cmd, settings) for cmd in allowed_cmds]
+    rule_id = _rule.id
+    
+    results: list[CmdResult] = [run_fn(cmd, settings, rule_id) for cmd in allowed_cmds]
     return idx, results
 
 
@@ -229,7 +233,7 @@ def run_all_rules(
                     # Không nổ wave: wrap exception thành CmdResult để log
                     ran_part = [CmdResult(cmd="(worker error)", returncode=None, stdout="", stderr=str(e), duration_sec=0.0)]
 
-                # Lưu vào aggregator
+                # Lưu vào aggregator  agg:   {idx: {"rule": Rule, "denied": [CmdResult], "ran": []}}
                 state = agg[idx]
                 state["ran"].extend(ran_part)
                 pending[idx] = max(0, pending[idx] - 1)
@@ -285,7 +289,8 @@ def run_all_rules(
                 if t_dyn > 60.0: 
                     t_dyn = 60.0
             if t_dyn:
-                settings.shell_timeout = float(t_dyn)
+                # FIX: Settings là frozen dataclass → tạo bản mới thay vì mutate
+                settings = _dc_replace(settings, shell_timeout=float(t_dyn))
         except Exception:
             pass
 

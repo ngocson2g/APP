@@ -9,16 +9,20 @@ import sys
 from typing import Any
 
 from security_app.models import as_rule
+from security_app.reporting.scoring import compute_compliance_score, score_grade
 
 
 def _summary_from_stats(stats: dict[str, Any]) -> dict[str, Any]:
     t = stats.get("totals", {})
-    # Giữ schema “gần” với API backend / frontend đang dùng
+    c_score = compute_compliance_score(stats)
+    # Giữ schema "gần" với API backend / frontend đang dùng
     return {
         "total_rules":     t.get("total_rules", 0),
         "all_ok":          t.get("rules_all_ok", 0),
         "with_failures":   t.get("rules_with_fail", 0),
         "pass_rate":       round(float(t.get("pass_rate", 0.0)), 2),
+        "compliance_score": c_score,
+        "compliance_grade": score_grade(c_score),
         "total_commands":  t.get("total_cmds", 0),
         "commands_ok":     t.get("total_ok", 0),
         "commands_failed": t.get("total_fail", 0),

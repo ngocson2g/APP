@@ -4,9 +4,10 @@ import json
 import os
 from io import BytesIO
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Depends, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.security import APIKeyHeader
 
 from .reader.config import LIMITS_SERIES
 
@@ -24,11 +25,25 @@ try:
 except ImportError:
     from exporter import build_excel, build_pdf, save_copy_if_configured
 
+# --- API Key authentication (opt-in: chỉ bật khi đặt SECAPP_API_KEY) ---
+_API_KEY = os.getenv("SECAPP_API_KEY", "")
+_api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+async def _verify_api_key(key: str | None = Security(_api_key_header)):
+    """Xác thực API key. Nếu SECAPP_API_KEY chưa đặt → bỏ qua (backward compat)."""
+    if not _API_KEY:
+        return  # auth tắt
+    if key != _API_KEY:
+        raise HTTPException(status_code=403, detail="Invalid or missing API key")
+
 # --- CORS config: đọc từ ENV ---
 origins = os.getenv("ALLOWED_ORIGINS", "")
 allow_origins = [o.strip() for o in origins.split(",") if o.strip()]
 
-app = FastAPI(title="security_app dashboard API")
+app = FastAPI(
+    title="security_app dashboard API",
+    dependencies=[Depends(_verify_api_key)],
+)
 
 app.add_middleware(
     CORSMiddleware,

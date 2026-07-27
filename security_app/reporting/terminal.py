@@ -1,6 +1,7 @@
 #security_app/reporting/terminal.py
 from security_app.config import TOP_FAIL_LIMIT
 from security_app.models import Rule, as_rule
+from security_app.reporting.scoring import compute_compliance_score, score_grade
 from security_app.utils.text import _bar, _table, _term_width
 import re
 
@@ -13,12 +14,15 @@ def print_report(stats, limit_top=TOP_FAIL_LIMIT, list_all_rules: bool = False):
 
     # ----- Totals -----
     t = stats["totals"]
+    c_score = compute_compliance_score(stats)
+    c_grade = score_grade(c_score)
     kv = [
         ("Total rules", t["total_rules"]),
         ("    All OK", t["rules_all_ok"]),
         ("    With failures", t["rules_with_fail"]),
         ("    With denied", t.get("total_rules_denied", 0)),
         ("Pass rate", f"{t['pass_rate']:.2f}%"),
+        ("Compliance score", f"{c_score:.1f}/100  ({c_grade})"),
         ("Total commands", t["total_cmds"]),
         ("    Commands OK", t["total_ok"]),
         ("    Commands failed", t["total_fail"]),
