@@ -19,7 +19,7 @@ def _format_rule_log(rec: RuleLogRecord) -> str:
     """Định dạng bản ghi log theo đúng format hiện có (để backend parse được)."""
     lines: list[str] = []
     lines.append(f"Rule #{rec.index}")
-    lines.append(f"ID     : {rec.rule_id}")
+    lines.append(f"ID     : {rec.rule_id}") 
     lines.append(f"Title  : {rec.title}")
     lines.append(f"Severity: {rec.severity}")
     lines.append("---- Check ----")

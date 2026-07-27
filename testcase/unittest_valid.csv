@@ -1,5 +1,0 @@
-id,title,severity,check,fix
-RULE-001,Kiem tra SSH da duoc bat,high,"$ sudo systemctl is-active ssh","$ sudo systemctl start ssh"
-RULE-002,File /etc/passwd phai co quyen 644,medium,"$ stat -c %a /etc/passwd","$ sudo chmod 644 /etc/passwd"
-RULE-003,Khong duoc phep su dung telnet,critical,"$ dpkg -s telnetd","$ sudo apt-get purge telnetd"
-RULE-004,Kiem tra UFW,low,"$ sudo ufw status","Cau hinh UFW."

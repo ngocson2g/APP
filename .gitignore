@@ -35,6 +35,7 @@ ENV/
 *.log
 out/
 tests/
+waves.json
 
 # ---------- Config / secrets ----------
 .env

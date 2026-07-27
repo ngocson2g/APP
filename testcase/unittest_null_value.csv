@@ -1,3 +1,0 @@
-id,title,severity,check,fix
-RULE-001,Kiem tra SSH,high,"$ sudo systemctl is-active ssh","$ sudo systemctl start ssh"
-RULE-002,Kiem tra file passwd,medium,"$ stat -c %a /etc/passwd",

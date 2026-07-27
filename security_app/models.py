@@ -24,6 +24,13 @@ class Rule:
     assessment_status: str = ""   # NEW: metadata để deny theo trạng thái
 
 @dataclass
+class Rule_cmd:
+    """
+    """
+    id_rule : str
+    cmd: list[str]
+    
+@dataclass
 class CmdResult:
     """
     Kết quả thực thi 1 lệnh shell.
@@ -63,7 +70,7 @@ class RC_result:
     Mô hình lưu trữ kết quả RC từ file stigs.
     """
     id_rule: str
-    RC: list[int]
+    RC: list[str]
       
 # ---------- NEW: LSP helper ----------
 def as_rule(rule_like: Any) -> Rule:

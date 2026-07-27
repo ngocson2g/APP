@@ -32,20 +32,20 @@ def _run_once(cmd: str, timeout: float | None, settings: Settings) -> subprocess
         cwd=cwd, env=env, close_fds=True, start_new_session=True
     )
 
-def _to_result(cmd: str, rc: int | None, stdout: str, stderr: str, started_all: float) -> CmdResult:
+def _to_result(cmd: str, rc: int | None, stdout: str, stderr: str, started_all: float, rule_id : str) -> CmdResult:
     return CmdResult(cmd=cmd, returncode=rc, stdout=stdout or "", stderr=stderr or "",
                      duration_sec=round(time.time() - started_all, 4), ok=(rc == 0))
 
-def run_command(cmd: str, settings: Settings) -> CmdResult:
+def run_command(cmd: str, settings: Settings, rule_id : str) -> CmdResult:
     risk = compute_risk(cmd)
     try:
         assert_cmd_length_safe(cmd)
     except Exception as e:
-        return _to_result(cmd, None, "", f"DENIED length-check: {e} | RISK={risk.level}({risk.score}) {','.join(risk.factors)}", time.time())
+        return _to_result(cmd, None, "", f"DENIED length-check: {e} | RISK={risk.level}({risk.score}) {','.join(risk.factors)}", time.time(), rule_id = rule_id)
 
     reason = deny_reason(cmd)
     if reason:
-        return _to_result(cmd, None, "", f"{reason} | RISK={risk.level}({risk.score}) {','.join(risk.factors)}", time.time())
+        return _to_result(cmd, None, "", f"{reason} | RISK={risk.level}({risk.score}) {','.join(risk.factors)}", time.time(), rule_id = rule_id)
 
     max_attempts = 1 + max(0, int(settings.retry_attempts))
     timeout = float(settings.shell_timeout) if settings.shell_timeout else None
@@ -59,19 +59,19 @@ def run_command(cmd: str, settings: Settings) -> CmdResult:
         try:
             res = _run_once(cmd, timeout, settings)
             if res.returncode == 0 or attempts >= max_attempts:
-                return _to_result(cmd, res.returncode, res.stdout, res.stderr, started_all)
+                return _to_result(cmd, res.returncode, res.stdout, res.stderr, started_all, rule_id = rule_id)
             # backoff mũ + jitter
             sleep_s = min(2.0, base_delay * (2 ** (attempts - 1))) + random.uniform(0.0, 0.2)
             time.sleep(sleep_s)
         except subprocess.TimeoutExpired as te:
             if (not settings.retry_on_timeout) or attempts >= max_attempts:
-                return _to_result(cmd, None, te.stdout or "", f"TIMEOUT after {timeout}s", started_all)
+                return _to_result(cmd, None, te.stdout or "", f"TIMEOUT after {timeout}s", started_all, rule_id = rule_id)
             sleep_s = min(2.5, base_delay * (2 ** (attempts - 1))) + random.uniform(0.0, 0.3)
             time.sleep(sleep_s)
         except Exception as e:
             if attempts >= max_attempts:
-                return _to_result(cmd, None, "", str(e), started_all)
+                return _to_result(cmd, None, "", str(e), started_all, rule_id = rule_id)
             sleep_s = min(1.5, base_delay * (2 ** (attempts - 1))) + random.uniform(0.0, 0.2)
             time.sleep(sleep_s)
 
-    return _to_result(cmd, None, "", "Unknown error", started_all)
+    return _to_result(cmd, None, "", "Unknown error", started_all, rule_id = rule_id)

@@ -1,2 +1,0 @@
-id,title,severity,check,author
-RULE-001,Kiem tra SSH,high,"$ sudo systemctl start ssh",Admin
