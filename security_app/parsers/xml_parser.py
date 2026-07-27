@@ -88,11 +88,14 @@ def parse_xml(file_path: str) -> list[Rule]:
     tree = ET.parse(file_path)
     root = tree.getroot()
 
-    # Tự phát hiện namespace XCCDF (1.1/1.2)
-    if root.tag.startswith("{"):
-        ns_url = root.tag.split("}")[0][1:]
-    else:
-        ns_url = "http://checklists.nist.gov/xccdf/1.2"  # default an toàn
+    # SCAP datastreams often have root tag as data-stream-collection, not xccdf.
+    # So we should try to use a known XCCDF namespace. Most modern ones are 1.2.
+    ns_url = "http://checklists.nist.gov/xccdf/1.2"
+    
+    # Simple fallback to detect xccdf 1.1 if it's explicitly in the root tag
+    if root.tag.startswith("{") and "xccdf/1.1" in root.tag:
+        ns_url = "http://checklists.nist.gov/xccdf/1.1"
+        
     ns = {"xccdf": ns_url}
 
     rules: list[Rule] = []
@@ -129,7 +132,8 @@ def parse_xml(file_path: str) -> list[Rule]:
             if missing:
                 # Lấy ID của Rule để thông báo lỗi rõ ràng hơn
                 rule_id_fallback = _first_attr(rule, XML_ATTR_CANDIDATES["id"])
-                raise Exception(f"Missing required field(s) {missing} in XML group ID={rid or '(unknown)'} (Rule ID={rule_id_fallback})")
+                # Bỏ qua các Rule (hoặc Group) không có đủ dữ liệu (vd: rule trừu tượng trong SCAP)
+                continue
 
             rules.append(
                 Rule(
